@@ -1,0 +1,13 @@
+dataset: treebench
+
+# HuggingFace dataset identifier
+hf_repo: HaochenWang/TreeBench
+
+# Default split to use for experiments
+split: test
+
+# Set to a positive integer to cap the number of examples loaded
+max_samples: null
+
+# Optional local cache directory for HuggingFace datasets
+cache_dir: null

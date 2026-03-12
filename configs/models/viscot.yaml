@@ -1,0 +1,11 @@
+model: viscot
+
+# HuggingFace model ID or path to a local checkpoint
+model_path: deepcs233/VisCoT-7b-336
+
+# Conversation template key used by LLaVA
+conv_mode: llava_v1
+
+# Default decoding parameters
+temperature: 0.2
+max_new_tokens: 512

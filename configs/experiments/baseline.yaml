@@ -1,0 +1,20 @@
+name: baseline
+
+seed: 42
+
+# Pointers to dataset and model configs
+dataset:
+  _target_: treebench
+  split: test
+  max_samples: null
+
+model:
+  _target_: viscot
+  temperature: 0.0
+  max_new_tokens: 512
+
+# Method: single-pass (no TTS)
+method: baseline
+
+# Output
+output_dir: results/${name}/
