@@ -164,3 +164,7 @@ This is an active research project. See `docs/contributing.md` for conventions o
 ## License
 
 MIT
+
+
+
+python experiments/run_comparison.py --n 20 --resume --save-output results/comparison/run2.json

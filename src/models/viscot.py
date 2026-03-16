@@ -177,7 +177,7 @@ class VisualCoTModel(BaseVisualCoTModel):
             return DEFAULT_IMAGE_TOKEN
 
         def _gen(conv, images: List[Image.Image], max_tok: int) -> str:
-            dtype = torch.float16 if self._device != "cpu" else torch.float32
+            dtype = next(self._model.parameters()).dtype if self._device != "cpu" else torch.float32
             img_tensor = process_images(images, self._image_processor, self._model.config)
             if isinstance(img_tensor, list):
                 img_tensor = torch.stack(img_tensor)

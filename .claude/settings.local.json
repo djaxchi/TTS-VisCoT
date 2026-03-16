@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:arxiv.org)",
+      "Bash(python -m pytest tests/test_models.py::TestDeepEyesV2Model -v)",
+      "Bash(python -m pytest --tb=short -q)",
+      "Bash(python -m pytest -q)",
+      "Bash(findstr /i \"passed failed error\")",
+      "Bash(python experiments/run_deepeyes_v2.py --image test_image.jpg --query \"What colors do you see in this image? What shapes are present?\" --temperature 0.0)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:visual-agent.github.io)",
+      "Bash(cd:*)",
+      "Bash(python:*)"
+    ]
+  }
+}

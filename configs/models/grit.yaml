@@ -1,0 +1,5 @@
+type: grit
+model_id: yfan1997/GRIT-20-Qwen2.5-VL-3B
+load_in_8bit: true
+temperature: 0.0
+max_new_tokens: 512

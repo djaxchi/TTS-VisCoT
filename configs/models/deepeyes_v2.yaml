@@ -1,0 +1,23 @@
+# DeepEyesV2 model configuration
+# Qwen2.5-VL-7B fine-tuned via SFT + GRPO RL for agentic visual reasoning.
+#
+# Checkpoints:
+#   RL-tuned (recommended): honglyhly/DeepEyesV2_7B_1031
+#   SFT only:               honglyhly/DeepEyesV2_7B_SFT_1031
+
+model: deepeyes_v2
+
+# HuggingFace model ID or local checkpoint path.
+model_id: honglyhly/DeepEyesV2_7B_1031
+
+# Maximum agentic loop turns before giving up (paper uses 10).
+# Reduced to 5 to cap KV-cache growth and prevent OOM on 16 GB VRAM setups.
+max_turns: 5
+
+# Load model in 8-bit (bitsandbytes) to fit on 16 GB VRAM.
+load_in_8bit: true
+
+# Default decoding parameters.
+# 512 tokens per turn is enough for CoT steps; 1024 caused OOM across 10 turns.
+temperature: 0.2
+max_new_tokens: 512

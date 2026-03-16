@@ -32,7 +32,7 @@ TTS-VisCoT/
 │   ├── data/        Dataset loaders + augmentation strategies
 │   ├── eval/        Metrics, benchmark runner, visualisations
 │   ├── methods/     baseline.py and tts/ (sampling + scaling)
-│   ├── models/      BaseVisualCoTModel + VisualCoTModel (HuggingFace)
+│   ├── models/      BaseVisualCoTModel + VisualCoTModel + DeepEyesV2Model (HuggingFace)
 │   ├── utils/       logging, I/O helpers
 │   └── voting/      Aggregation systems (majority, weighted, best_of_n)
 └── tests/           Mirrors src/ structure; one test file per module
@@ -49,6 +49,7 @@ TTS-VisCoT/
 | `src/voting/majority.py` | `tests/test_voting.py` → `TestMajorityVote` |
 | `src/eval/metrics.py` | `tests/test_eval.py` → `TestComputeMetrics` |
 | `src/data/augmentation/geometric.py` | `tests/test_data.py` → `TestGeometricAugmentation` |
+| `src/models/deepeyes_v2.py` | `tests/test_models.py` → `TestDeepEyesV2Model` |
 
 ### 2. Write the test before touching the source file
 
@@ -116,6 +117,109 @@ Step 7 — Update the __init__.py registry if the component is factory-built.
 2. Create `src/data/augmentation/my_aug.py` inheriting `BaseAugmentation`.
 3. Register it in `src/data/augmentation/__init__.py::_AUGMENTATION_REGISTRY`.
 
+## Adding a new model
+
+1. Write `tests/test_models.py::TestMyModel` — cover `generate` contract (return type,
+   required keys, n-chain count), lazy loading, and any model-specific helpers.
+2. Create `src/models/my_model.py` inheriting `BaseVisualCoTModel`.
+3. Implement `_load()` (idempotent, lazy), `_run_chain()`, and `generate()`.
+4. Export the class from `src/models/__init__.py`.
+5. Add a YAML config in `configs/models/my_model.yaml`.
+
+### Model chain dict contract
+
+Every model's `generate()` must return a list of dicts with **at minimum** these keys:
+
+| Key | Type | Notes |
+|---|---|---|
+| `"bbox_raw"` | `str \| None` | Raw bbox string (VisCoT) or `None` (agentic models) |
+| `"coords"` | `list[float]` | Parsed `[x1, y1, x2, y2]` or `[]` if not applicable |
+| `"answer"` | `str` | Final answer (may be `""` if max turns exhausted) |
+
+Agentic models (like DeepEyesV2) additionally return:
+
+| Key | Type | Notes |
+|---|---|---|
+| `"cot_steps"` | `list[str]` | One entry per agentic turn (raw model output) |
+| `"tool_results"` | `list[str]` | Captured stdout / error for each code execution |
+
+---
+
+## Agentic tool-calling CoT models (DeepEyesV2 pattern)
+
+DeepEyesV2 implements a **multi-turn agentic loop** where the model can call a
+Python code-execution tool to inspect the image programmatically before answering.
+
+### Architecture
+
+```
+generate(image, query, n=N)
+  └── for _ in range(n):
+        _run_chain(image, query, temperature, max_new_tokens)
+          └── loop up to max_turns:
+                _call_model(messages) → response
+                  ├── <answer>...</answer> found  → terminate, return answer
+                  ├── <code>...</code> found       → _execute_code(), append tool result to messages
+                  └── neither                      → treat full response as answer, terminate
+```
+
+### Key constants (deepeyes_v2.py)
+
+- `DEFAULT_MODEL_ID = "honglyhly/DeepEyesV2_7B_1031"` — RL-tuned checkpoint (SFT + GRPO).
+- `DEFAULT_MAX_TURNS = 10` — safety ceiling on the agentic loop.
+- `SYSTEM_PROMPT` — instructs the model on tool syntax (`<code>`, `<answer>` tags).
+
+### Code execution sandbox (`_execute_code`)
+
+- Runs in an isolated `exec` namespace; **never** shares state between chains.
+- Pre-populated with `image_1` (NumPy H×W×3 uint8 RGB), `np`, `math`, `collections`.
+- Captures stdout via `contextlib.redirect_stdout`; returns error summary on exception.
+- Do **not** allow imports of `matplotlib`, file writes, or network calls inside the sandbox.
+
+### Parser helpers (module-level, public for testability)
+
+| Function | Purpose |
+|---|---|
+| `_parse_answer(text)` | Extract first `<answer>...</answer>`, strip whitespace, or `None` |
+| `_extract_code_block(text)` | Extract first `<code>...</code>` (preserves indentation), or `None` |
+| `_execute_code(code, namespace)` | Run code, return stdout or `"ExcType: msg"` |
+
+These are **module-level functions**, not methods, so tests can call them without
+instantiating or loading the model.
+
+### Testing an agentic model — checklist
+
+When writing `tests/test_models.py::TestDeepEyesV2Model` (or any future agentic model):
+
+1. **Contract tests** — `generate` returns list of n dicts; all required keys present.
+2. **Lazy-loading guard** — patch `_load` and verify it is called before `_run_chain`.
+3. **Parser unit tests** — `_parse_answer` / `_extract_code_block` cover happy-path,
+   missing tag, whitespace, and multiline content.
+4. **Executor tests** — `_execute_code` covers: stdout capture, namespace access
+   (`image_1`), exception summary, empty output.
+5. **Termination tests** — mock `_call_model` to return:
+   - A response with `<answer>` → verify chain terminates immediately.
+   - `max_turns` responses without `<answer>` → verify `answer == ""`.
+6. **Never call real HF weights** in unit tests — stub `_model` and `_processor`
+   attributes directly on the instance or via `unittest.mock.patch.object`.
+
+### Running DeepEyesV2 interactively
+
+```bash
+python experiments/run_deepeyes_v2.py \
+    --image path/to/image.jpg \
+    --query "What colour is the car on the left?" \
+    [--model-id honglyhly/DeepEyesV2_7B_1031] \
+    [--max-turns 10] \
+    [--temperature 0.2] \
+    [--save-output results/my_run/output.json]
+```
+
+Requires ≥16 GB VRAM; `load_in_8bit: true` (default) fits in 16 GB.
+Use `load_in_8bit: false` only if you have 40+ GB VRAM.
+
+---
+
 ## Adding a new voting system
 
 1. Write `tests/test_voting.py::TestMyVoting` using the shared `CHAINS_*` fixtures.
@@ -170,3 +274,9 @@ Coverage target: **≥ 90 %** on `src/` before any experiment is considered vali
 - Do not add `print()` statements to production code — use `get_logger()`.
 - Do not hard-code model names, paths, or hyperparameters — use configs.
 - Do not commit large binary files (images, checkpoints) — use remote storage.
+- Do not share execution namespaces between agentic chains — each `_run_chain` call
+  must build a fresh `exec_ns` to prevent cross-chain state pollution.
+- Do not allow the code sandbox to import `matplotlib`, perform file I/O, or make
+  network requests — the sandbox is for numerical inspection only.
+- Do not raise an exception when `max_turns` is exhausted — return `answer = ""`
+  and let the caller (TTS method + voting) handle the empty prediction gracefully.

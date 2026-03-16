@@ -150,3 +150,130 @@ class TestPrintMetricsSummary:
         print_metrics_summary(accuracy_metrics=acc)
         out = capsys.readouterr().out
         assert "0.8000" in out
+
+
+# ---------------------------------------------------------------------------
+# TestVqaNormalize
+# ---------------------------------------------------------------------------
+
+
+class TestVqaNormalize:
+    def test_vqa_normalize_lowercases(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("BANANA") == "banana"
+
+    def test_vqa_normalize_strips_leading_trailing_whitespace(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("  cat  ") == "cat"
+
+    def test_vqa_normalize_removes_articles_a(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("a cat") == "cat"
+
+    def test_vqa_normalize_removes_articles_an(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("an apple") == "apple"
+
+    def test_vqa_normalize_removes_articles_the(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("the dog") == "dog"
+
+    def test_vqa_normalize_removes_punctuation(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("yes.") == "yes"
+        assert vqa_normalize("no!") == "no"
+        assert vqa_normalize("3,000") == "3000"
+
+    def test_vqa_normalize_collapses_whitespace(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("two  cats") == "two cats"
+
+    def test_vqa_normalize_empty_string_returns_empty(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize("") == ""
+
+    def test_vqa_normalize_does_not_remove_mid_word_article(self):
+        from src.eval.vqa_eval import vqa_normalize
+
+        # "theater" should not become "ter"
+        result = vqa_normalize("theater")
+        assert result == "theater"
+
+    @pytest.mark.parametrize("raw,expected", [
+        ("A cat", "cat"),
+        ("The big dog", "big dog"),
+        ("An orange", "orange"),
+        ("yes", "yes"),
+        ("2", "2"),
+    ])
+    def test_vqa_normalize_parametrized(self, raw, expected):
+        from src.eval.vqa_eval import vqa_normalize
+
+        assert vqa_normalize(raw) == expected
+
+
+# ---------------------------------------------------------------------------
+# TestEvaluateVqa
+# ---------------------------------------------------------------------------
+
+
+class TestEvaluateVqa:
+    def test_evaluate_vqa_exact_match_returns_true(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("cat", ["cat"]) is True
+
+    def test_evaluate_vqa_case_insensitive_match(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("CAT", ["cat"]) is True
+
+    def test_evaluate_vqa_article_stripped_match(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("a cat", ["cat"]) is True
+
+    def test_evaluate_vqa_no_match_returns_false(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("dog", ["cat"]) is False
+
+    def test_evaluate_vqa_matches_any_reference(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("yes", ["no", "yes", "true"]) is True
+
+    def test_evaluate_vqa_empty_references_returns_false(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("cat", []) is False
+
+    def test_evaluate_vqa_empty_prediction_returns_false(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("", ["cat"]) is False
+
+    def test_evaluate_vqa_punctuation_stripped_match(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("yes.", ["yes"]) is True
+
+    def test_evaluate_vqa_numeric_string_match(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        assert evaluate_vqa("3", ["3", "three"]) is True
+
+    def test_evaluate_vqa_count_tokens_match(self):
+        from src.eval.vqa_eval import evaluate_vqa
+
+        # VQA counting: "two" vs reference list containing "2" — no match expected
+        # (we only normalize surface form, not number words)
+        assert evaluate_vqa("two", ["2"]) is False

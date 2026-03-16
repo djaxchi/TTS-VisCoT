@@ -1,0 +1,50 @@
+# Model comparison experiment: fast sweep without DeepEyesV2-RL
+# Tasks: VQA, Counting, OCR  |  50 questions each
+# Metrics: accuracy (VQA-style), total output tokens, wall-clock time
+
+seed: 42
+
+# ── Datasets ────────────────────────────────────────────────────────────────
+datasets:
+  vqa:
+    hf_path: lmms-lab/GQA
+    config: val_balanced_instructions   # questions + imageIds
+    images_config: val_balanced_images  # raw images keyed by imageId
+    n_samples: 50
+    filter: non_counting  # exclude "how many" questions
+  counting:
+    hf_path: lmms-lab/GQA
+    config: val_balanced_instructions
+    images_config: val_balanced_images
+    n_samples: 50
+    filter: counting  # only "how many" questions
+  ocr:
+    hf_path: lmms-lab/textvqa
+    split: validation
+    n_samples: 50
+
+# ── Models ──────────────────────────────────────────────────────────────────
+models:
+  viscot_7b:
+    label: "VisCoT (7B)"
+    type: viscot
+    model_path: deepcs233/VisCoT-7b-336
+    temperature: 0.0
+    max_new_tokens: 512
+  qwen_7b_no_cot:
+    label: "Qwen2.5-VL (7B, no CoT)"
+    type: direct_vlm
+    model_id: Qwen/Qwen2.5-VL-7B-Instruct
+    load_in_8bit: true
+    temperature: 0.0
+    max_new_tokens: 256
+  grit_3b:
+    label: "GRIT (3B)"
+    type: grit
+    model_id: yfan1997/GRIT-20-Qwen2.5-VL-3B
+    load_in_8bit: true
+    temperature: 0.0
+    max_new_tokens: 512
+
+# ── Output ──────────────────────────────────────────────────────────────────
+output_dir: results/comparison

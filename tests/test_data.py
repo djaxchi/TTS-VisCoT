@@ -203,3 +203,127 @@ class TestTreeBenchDataset:
     def test_dataset_registry_unknown_raises_key_error(self):
         with pytest.raises(KeyError):
             get_dataset("no_such_dataset")
+
+
+# ---------------------------------------------------------------------------
+# TestFetchVqa2Images
+# ---------------------------------------------------------------------------
+
+
+class TestFetchVqa2Images:
+    """_fetch_vqa2_images returns the right images keyed by image_id."""
+
+    def _make_hf_row(self, image_id: str) -> dict:
+        return {"image_id": image_id, "image": Image.new("RGB", (32, 32), color=(1, 2, 3))}
+
+    def test_returns_matching_image_by_id(self) -> None:
+        from unittest.mock import patch
+
+        from src.data.datasets.viscot_benchmark import _fetch_vqa2_images
+
+        rows = [self._make_hf_row("111"), self._make_hf_row("222")]
+        with patch("datasets.load_dataset", return_value=iter(rows)):
+            result = _fetch_vqa2_images(["111"])
+        assert "111" in result
+        assert "222" not in result
+
+    def test_returns_empty_dict_when_no_ids_match(self) -> None:
+        from unittest.mock import patch
+
+        from src.data.datasets.viscot_benchmark import _fetch_vqa2_images
+
+        rows = [self._make_hf_row("999")]
+        with patch("datasets.load_dataset", return_value=iter(rows)):
+            result = _fetch_vqa2_images(["111"])
+        assert result == {}
+
+    def test_returned_image_is_pil(self) -> None:
+        from unittest.mock import patch
+
+        from src.data.datasets.viscot_benchmark import _fetch_vqa2_images
+
+        rows = [self._make_hf_row("42")]
+        with patch("datasets.load_dataset", return_value=iter(rows)):
+            result = _fetch_vqa2_images(["42"])
+        assert isinstance(result["42"], Image.Image)
+
+    def test_stops_streaming_once_all_found(self) -> None:
+        """Must not exhaust the full dataset when all IDs are already found."""
+        from unittest.mock import patch
+
+        from src.data.datasets.viscot_benchmark import _fetch_vqa2_images
+
+        sentinel_reached = []
+
+        def _rows():
+            yield self._make_hf_row("1")
+            sentinel_reached.append(True)
+            yield self._make_hf_row("2")  # should never be reached
+
+        with patch("datasets.load_dataset", return_value=_rows()):
+            _fetch_vqa2_images(["1"])
+        assert not sentinel_reached
+
+
+# ---------------------------------------------------------------------------
+# TestIsObjectCountingQuestion
+# ---------------------------------------------------------------------------
+
+
+class TestIsObjectCountingQuestion:
+    """Unit tests for the counting-question filter used in prepare_counting_data.py."""
+
+    def _f(self, question: str, answer: str) -> bool:
+        from scripts.prepare_counting_data import is_object_counting_question
+        return is_object_counting_question(question, answer)
+
+    # --- should accept ---
+    @pytest.mark.parametrize("q,a", [
+        ("how many dogs are in the image?", "3"),
+        ("how many people are standing?", "5"),
+        ("How many chairs are there?", "2"),
+        ("how many birds can you see?", "1"),
+        ("how many cars are parked?", "0"),
+        ("how many cats are on the table?", "12"),
+    ])
+    def test_accepts_object_counting_question(self, q: str, a: str) -> None:
+        assert self._f(q, a) is True
+
+    # --- should reject: OCR / text-reading ---
+    @pytest.mark.parametrize("q,a", [
+        ("how many ml of liquid are in the glass?", "700"),
+        ("how many minutes does it take?", "10"),
+        ("how many months of repayments?", "72"),
+        ("how many calories per serving?", "160"),
+        ("how many miles?", "5"),
+        ("how many days a week is the place open?", "7"),
+        ("how many years has it been?", "30"),
+        ("how many ml?", "250"),
+    ])
+    def test_rejects_ocr_number_reading_question(self, q: str, a: str) -> None:
+        assert self._f(q, a) is False
+
+    # --- should reject: non-integer or implausible count ---
+    @pytest.mark.parametrize("q,a", [
+        ("how many copies were sold?", "2 million"),
+        ("how many people are mentioned?", "5000"),
+        ("how many blogs are there total?", "70 million"),
+        ("how many hours?", "1099"),
+        ("how many maps?", "1507"),
+        ("how many ml?", "350"),
+    ])
+    def test_rejects_implausible_count_answer(self, q: str, a: str) -> None:
+        assert self._f(q, a) is False
+
+    # --- should reject: no "how many" ---
+    def test_rejects_question_without_how_many(self) -> None:
+        assert self._f("What colour is the car?", "3") is False
+
+    # --- edge: answer as word number ---
+    @pytest.mark.parametrize("q,a", [
+        ("how many dogs are there?", "one"),
+        ("how many cats?", "two"),
+        ("how many birds?", "three"),
+    ])
+    def test_accepts_word_number_answer(self, q: str, a: str) -> None:
+        assert self._f(q, a) is True

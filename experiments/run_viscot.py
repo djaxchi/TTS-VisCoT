@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import logging
 import re
 import sys
 from io import BytesIO
@@ -40,6 +41,7 @@ from pathlib import Path
 import requests
 import torch
 from PIL import Image, ImageDraw, ImageFont
+from transformers import TextStreamer
 
 # ---------------------------------------------------------------------------
 # Guard: llava package from the Visual-CoT repo
@@ -98,7 +100,8 @@ DIVIDER = "=" * 64
 def load_image(source: str) -> Image.Image:
     """Load a PIL Image from a local path or an HTTP(S) URL."""
     if source.startswith("http://") or source.startswith("https://"):
-        response = requests.get(source, timeout=30)
+        headers = {"User-Agent": "TTS-VisCoT/1.0 (research project; python-requests)"}
+        response = requests.get(source, timeout=30, headers=headers)
         response.raise_for_status()
         return Image.open(BytesIO(response.content)).convert("RGB")
     return Image.open(source).convert("RGB")
@@ -178,17 +181,20 @@ def generate(
     images: list[Image.Image],
     temperature: float,
     max_new_tokens: int,
+    stream: bool = False,
 ) -> str:
     """Run one generation step and return the decoded output string."""
     prompt = conv.get_prompt()
 
     device = _get_device()
-    dtype = torch.float16 if device != "cpu" else torch.float32
+    dtype = torch.bfloat16 if device != "cpu" else torch.float32
 
     # Build image tensor — process_images handles both single and multiple images
     image_tensor = process_images(images, image_processor, model.config)
     if isinstance(image_tensor, list):
         image_tensor = torch.stack(image_tensor)
+    if image_tensor.ndim == 5:
+        image_tensor = image_tensor.squeeze(0)
     image_tensor = image_tensor.to(dtype=dtype, device=device)
 
     input_ids = (
@@ -205,6 +211,8 @@ def generate(
         else conv.sep2
     )
 
+    streamer = TextStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True) if stream else None
+
     with torch.inference_mode():
         output_ids = model.generate(
             input_ids,
@@ -213,6 +221,7 @@ def generate(
             temperature=temperature,
             max_new_tokens=max_new_tokens,
             use_cache=True,
+            streamer=streamer,
         )
 
     n_input = input_ids.shape[1]
@@ -249,6 +258,8 @@ def run_viscot(args: argparse.Namespace) -> dict:
     print("(First run will download ~14 GB of weights — this takes a while.)\n")
 
     disable_torch_init()
+    # Suppress the noisy "max_new_tokens and max_length both set" warning
+    logging.getLogger("transformers.generation.utils").setLevel(logging.ERROR)
     model_name = get_model_name_from_path(args.model_path)
     # VisCoT weights use the LLaVA architecture; the builder routes on the name
     # containing "llava", so we ensure that here.
@@ -283,11 +294,15 @@ def run_viscot(args: argparse.Namespace) -> dict:
     conv1.append_message(conv1.roles[1], None)
 
     print(f"User:  {args.query}{BBOX_SUFFIX}")
+    if args.stream:
+        print("Model: ", end="", flush=True)
     bbox_output = generate(
         model, tokenizer, image_processor, conv1,
-        images=[image], temperature=args.temperature, max_new_tokens=64
+        images=[image], temperature=args.temperature, max_new_tokens=64,
+        stream=args.stream,
     )
-    print(f"Model: {bbox_output}")
+    if not args.stream:
+        print(f"Model: {bbox_output}")
 
     coords = parse_bbox(bbox_output)
     if coords:
@@ -298,9 +313,10 @@ def run_viscot(args: argparse.Namespace) -> dict:
               "Using the full image for Turn 2.")
         coords = [0.0, 0.0, 1.0, 1.0]
 
-    # Optionally save the annotated image
+    # Always show the annotated image with bounding box
+    ann = annotate_image(image, coords)
+    ann.show(title="VisCoT — Bounding Box Prediction")
     if args.save_annotated:
-        ann = annotate_image(image, coords)
         out_path = Path(args.save_annotated)
         ann.save(out_path)
         print(f"Annotated image saved to: {out_path}")
@@ -329,12 +345,16 @@ def run_viscot(args: argparse.Namespace) -> dict:
 
     print(f"User:  Please answer the question based on the original image "
           f"and local detail image.\n       {args.query}")
+    if args.stream:
+        print("Model: ", end="", flush=True)
     final_answer = generate(
         model, tokenizer, image_processor, conv2,
         images=[image, cropped], temperature=args.temperature,
         max_new_tokens=args.max_new_tokens,
+        stream=args.stream,
     )
-    print(f"Model: {final_answer}")
+    if not args.stream:
+        print(f"Model: {final_answer}")
 
     # ── Summary ───────────────────────────────────────────────────────────────
     print(f"\n{DIVIDER}")
@@ -390,6 +410,10 @@ def main() -> None:
         "--save-annotated", metavar="PATH", default=None,
         help="If set, save a copy of the input image with the predicted "
              "bounding box drawn on it to this path.",
+    )
+    parser.add_argument(
+        "--stream", action="store_true", default=False,
+        help="Stream tokens to stdout in real time as they are generated.",
     )
     args = parser.parse_args()
 
