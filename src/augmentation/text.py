@@ -1,4 +1,4 @@
-﻿"""Text variation helpers for TreeBench test-time scaling."""
+"""Text variation helpers for test-time scaling."""
 
 from __future__ import annotations
 
@@ -137,7 +137,7 @@ def generate_question_variants(
     - paraphrase 2 with alternative instruction/answer framing
 
     Args:
-        question: Original TreeBench question.
+        question: Original question.
         choices: Multiple-choice options (A/B/C/D).
         mode: ``"rule"`` or ``"model"`` paraphrasing strategy.
         model_paraphrase_fn: Optional callable used when ``mode="model"``.

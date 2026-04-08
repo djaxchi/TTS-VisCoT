@@ -7,12 +7,12 @@ from typing import Dict, List
 import pytest
 from PIL import Image
 
-from src.augment_image import (
+from src.augmentation.image import (
     ImageVariationConfig,
     generate_image_variant_specs,
     generate_image_variants,
 )
-from src.augment_text import generate_prompt_variants, generate_question_variants
+from src.augmentation.text import generate_prompt_variants, generate_question_variants
 from src.pipeline_tts import (
     build_candidate_inputs,
     export_debug_artifacts,
@@ -62,20 +62,20 @@ class TestNormalizeOpenEndedAnswer:
 
 class TestOpenEndedPromptVariants:
     def test_empty_choices_omits_choices_section(self) -> None:
-        from src.augment_text import generate_prompt_variants
+        from src.augmentation.text import generate_prompt_variants
         variants = generate_prompt_variants(question="What is this bird called?", choices={})
         for v in variants.values():
             assert "Choices:" not in v["prompt"]
             assert "A." not in v["prompt"]
 
     def test_empty_choices_omits_abcd_constraint(self) -> None:
-        from src.augment_text import generate_prompt_variants
+        from src.augmentation.text import generate_prompt_variants
         variants = generate_prompt_variants(question="What is this bird called?", choices={})
         for v in variants.values():
             assert "Answer with A, B, C, or D" not in v["prompt"]
 
     def test_empty_choices_prompt_contains_question(self) -> None:
-        from src.augment_text import generate_prompt_variants
+        from src.augmentation.text import generate_prompt_variants
         q = "What is this bird called?"
         variants = generate_prompt_variants(question=q, choices={})
         for v in variants.values():

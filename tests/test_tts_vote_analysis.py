@@ -1,8 +1,8 @@
-"""Tests for src.eval.tts_trace_metrics (Qwen TTS candidate-trace analytics)."""
+"""Tests for src.eval.tts_vote_analysis (3-vs-5 candidate vote analytics)."""
 
 from __future__ import annotations
 
-from src.eval.tts_trace_metrics import (
+from src.eval.tts_vote_analysis import (
     build_task_rows,
     build_zero_shot_rows,
     compute_transition_counts,

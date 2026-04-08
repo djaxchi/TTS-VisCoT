@@ -1,4 +1,4 @@
-"""Trace analytics for 5-candidate TTS runs with 3-vs-5 vote replay."""
+"""Vote analysis for 5-candidate TTS runs with 3-vs-5 vote replay."""
 
 from __future__ import annotations
 

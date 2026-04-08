@@ -409,7 +409,7 @@ def _baseline_sweep(
         baseline_answer, baseline_answer_normalized, baseline_confidence.
     """
     from src.eval.vqa_eval import evaluate_vqa, vqa_normalize
-    from src.augment_text import generate_question_variants
+    from src.augmentation.text import generate_question_variants
 
     failures: List[Dict[str, Any]] = []
     n_correct = 0
@@ -482,7 +482,7 @@ def _run_tts_on_failures(
     paraphrase_lookup: Optional[Dict[tuple, str]] = None,
 ) -> List[TTSResult]:
     from src.pipeline_tts import DEFAULT_CANDIDATE_RECIPE, build_candidate_inputs
-    from src.augment_image import ImageVariationConfig
+    from src.augmentation.image import ImageVariationConfig
     from src.eval.vqa_eval import evaluate_vqa, vqa_normalize
 
     image_config = ImageVariationConfig(preset="strong")

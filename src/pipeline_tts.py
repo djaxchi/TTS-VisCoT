@@ -10,8 +10,8 @@ from typing import Any, Callable, Dict, List, Sequence
 
 from PIL import Image
 
-from src.augment_image import ImageVariationConfig, generate_image_variant_specs
-from src.augment_text import generate_prompt_variants
+from src.augmentation.image import ImageVariationConfig, generate_image_variant_specs
+from src.augmentation.text import generate_prompt_variants
 from src.utils_normalize import normalize_answer, normalize_open_ended_answer
 from src.voting_tts import VoteStats, compute_vote_stats, weighted_vote
 

@@ -1,13 +1,94 @@
 """Evaluation metrics: accuracy, robustness, and bounding-box quality."""
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
-from src.voting.bbox_consensus import BoundingBoxPrediction, compute_iou, match_boxes
-from src.voting.normalize import normalize_answer
+from src.utils_normalize import normalize_answer as _normalize_raw
+
+
+def _norm(s: str) -> str:
+    """Normalize an answer string, falling back to empty string on no-match."""
+    return _normalize_raw(s) or ""
+
+
+# ---------------------------------------------------------------------------
+# Bounding-box helpers (inlined — not exported as a separate module)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class BoundingBoxPrediction:
+    """An axis-aligned bounding box prediction.
+
+    Attributes:
+        x: Left edge (pixels or normalised [0, 1]).
+        y: Top edge (pixels or normalised [0, 1]).
+        width: Box width in the same unit as ``x``.
+        height: Box height in the same unit as ``y``.
+        confidence: Prediction confidence score (default 1.0).
+        label: Optional class label.
+    """
+
+    x: float
+    y: float
+    width: float
+    height: float
+    confidence: float = 1.0
+    label: Optional[str] = None
+
+
+def compute_iou(box1: BoundingBoxPrediction, box2: BoundingBoxPrediction) -> float:
+    """Compute the Intersection-over-Union between two bounding boxes."""
+    box1_x2 = box1.x + box1.width
+    box1_y2 = box1.y + box1.height
+    box2_x2 = box2.x + box2.width
+    box2_y2 = box2.y + box2.height
+
+    inter_x1 = max(box1.x, box2.x)
+    inter_y1 = max(box1.y, box2.y)
+    inter_x2 = min(box1_x2, box2_x2)
+    inter_y2 = min(box1_y2, box2_y2)
+
+    inter_area = max(0, inter_x2 - inter_x1) * max(0, inter_y2 - inter_y1)
+    union_area = box1.width * box1.height + box2.width * box2.height - inter_area
+    return inter_area / union_area if union_area > 0 else 0.0
+
+
+def match_boxes(
+    pred_boxes: List[BoundingBoxPrediction],
+    gt_boxes: List[BoundingBoxPrediction],
+    iou_threshold: float = 0.5,
+) -> Tuple[List[Tuple[int, int]], List[int], List[int]]:
+    """Greedily match predicted boxes to ground-truth boxes by IoU."""
+    if not pred_boxes or not gt_boxes:
+        return [], list(range(len(pred_boxes))), list(range(len(gt_boxes)))
+
+    iou_matrix = np.zeros((len(pred_boxes), len(gt_boxes)))
+    for i, pb in enumerate(pred_boxes):
+        for j, gb in enumerate(gt_boxes):
+            iou_matrix[i, j] = compute_iou(pb, gb)
+
+    matches: List[Tuple[int, int]] = []
+    matched_preds: set[int] = set()
+    matched_gts: set[int] = set()
+
+    while True:
+        max_iou = iou_matrix.max()
+        if max_iou < iou_threshold:
+            break
+        pred_idx, gt_idx = np.unravel_index(iou_matrix.argmax(), iou_matrix.shape)
+        matches.append((int(pred_idx), int(gt_idx)))
+        matched_preds.add(int(pred_idx))
+        matched_gts.add(int(gt_idx))
+        iou_matrix[pred_idx, :] = 0
+        iou_matrix[:, gt_idx] = 0
+
+    unmatched_preds = [i for i in range(len(pred_boxes)) if i not in matched_preds]
+    unmatched_gts = [i for i in range(len(gt_boxes)) if i not in matched_gts]
+    return matches, unmatched_preds, unmatched_gts
 
 
 # ---------------------------------------------------------------------------
@@ -106,8 +187,8 @@ def compute_accuracy(
         return AccuracyMetrics(accuracy=0.0, correct=0, total=0)
 
     if normalize:
-        predictions = [normalize_answer(p) for p in predictions]
-        ground_truths = [normalize_answer(g) for g in ground_truths]
+        predictions = [_norm(p) for p in predictions]
+        ground_truths = [_norm(g) for g in ground_truths]
 
     correct = sum(p == g for p, g in zip(predictions, ground_truths))
     total = len(predictions)
@@ -159,9 +240,9 @@ def compute_robustness_metrics(
     if len(single_view_predictions) != n or len(multi_view_predictions) != n:
         raise ValueError("All three lists must have the same length.")
 
-    sv = [normalize_answer(p) for p in single_view_predictions]
-    mv = [normalize_answer(p) for p in multi_view_predictions]
-    gt = [normalize_answer(g) for g in ground_truths]
+    sv = [_norm(p) for p in single_view_predictions]
+    mv = [_norm(p) for p in multi_view_predictions]
+    gt = [_norm(g) for g in ground_truths]
 
     sv_acc = sum(p == g for p, g in zip(sv, gt)) / n
     mv_acc = sum(p == g for p, g in zip(mv, gt)) / n

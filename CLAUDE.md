@@ -29,66 +29,57 @@ TTS-VisCoT/
 │   └── experiments/     baseline.yaml, tts.yaml, comparison.yaml
 │
 ├── data/
-│   ├── VGQAV2/          counting_100.jsonl, ocr_100.jsonl, vqa_100.jsonl
-│   └── treebench_samples/  metadata.jsonl (images gitignored)
+│   ├── VGQAV2/                          counting_100.jsonl, ocr_100.jsonl, vqa_100.jsonl
+│   ├── treebench_samples/               metadata.jsonl (images gitignored)
+│   ├── treebench_paraphrase_template.jsonl
+│   └── treebench_paraphrased.jsonl
 │
 ├── experiments/
 │   ├── run_model_benchmark.py    Baseline comparison across all models
-│   ├── run_tts_eval.py           TTS evaluation on VGQAV2
-│   ├── run_test_time_scaling.py  Full TTS scaling sweep
+│   ├── run_test_time_scaling.py  Full TTS scaling sweep (primary experiment)
 │   ├── run_tts_hard.py           TTS on hard question subsets
 │   └── run_tts_treebench.py      TTS on TreeBench
 │
 ├── results/
-│   ├── comparison/       Final benchmark figures + ModelBenchmark.json
-│   └── tts/              TTS.json, TTS_Hard.json + scaling plots
+│   ├── comparison/       ModelBenchmark.json, ModelBenchmark_judged.json + figures
+│   └── tts/              TTS.json, TTS_Hard.json, TTS_TreeBench.json + scaling plots
 │
 ├── scripts/
-│   ├── plot_results.py, plot_tts_scaling.py, plot_tts_hard_candidates.py
-│   ├── plot_presentation.py
-│   ├── build_static_paraphrase_cache.py
-│   └── export_treebench_questions.py
+│   ├── build_static_paraphrase_cache.py   Pre-compute hardcoded paraphrase cache
+│   ├── export_treebench_questions.py       Export TreeBench questions for paraphrasing
+│   ├── run_ablations.sh                    Ablation sweep driver
+│   └── setup_env.sh                        Environment setup
 │
 ├── src/
-│   ├── augment_image.py          Image perturbation specs + generators
-│   ├── augment_text.py           Prompt paraphrase generators
+│   ├── augmentation/
+│   │   ├── image.py              Image perturbation specs + generators
+│   │   └── text.py               Prompt paraphrase generators
 │   ├── pipeline_tts.py           Core TTS pipeline
 │   ├── voting_tts.py             Voting utilities (VoteStats, compute_vote_stats)
 │   ├── utils_normalize.py        Answer normalization
-│   ├── token_aggregation.py      Token-level logit aggregation (experimental)
-│   ├── check_token_support.py    Token probability support check
 │   ├── data/
-│   │   ├── datasets/             base.py, viscot_benchmark.py, treebench.py, treebench_export.py
-│   │   └── augmentation/         base.py, image_aug.py, text_aug.py, views.py
+│   │   └── datasets/             base.py, viscot_benchmark.py, treebench.py, treebench_export.py
 │   ├── eval/
 │   │   ├── metrics.py            AccuracyMetrics, BBoxMetrics, RobustnessMetrics
 │   │   ├── tts_eval.py           make_predict_fn, evaluate_one, compute_summary
+│   │   ├── tts_vote_analysis.py  3-vs-5 vote accuracy analysis
 │   │   ├── voting_replay.py      Replay candidates under different voting strategies
-│   │   ├── token_trace.py        Token-level agreement analytics (experimental)
-│   │   ├── tts_trace_metrics.py  Candidate trace analytics
 │   │   └── vqa_eval.py           VQA string-match evaluation
-│   ├── methods/
-│   │   ├── baseline.py           Single-pass inference
-│   │   └── tts/                  sampling.py, scaling.py, open_ended.py
 │   ├── models/
 │   │   ├── base.py               BaseVisualCoTModel
 │   │   ├── direct_vlm.py         Qwen2.5-VL wrapper
 │   │   ├── grit.py               GRIT wrapper
 │   │   ├── viscot.py             VisCoT wrapper
 │   │   └── deepeyes_v2.py        DeepEyesV2 agentic wrapper
-│   ├── voting/                   majority.py, bbox_consensus.py, normalize.py
 │   └── utils/                    io.py, logging.py
 │
 └── tests/
     ├── test_run_comparison.py      Benchmark checkpoint/resume logic
-    ├── test_run_tts_eval.py        Paraphrase cache + candidate view saving
     ├── test_tts_eval.py            make_predict_fn, evaluate_one, compute_summary
     ├── test_tts_pipeline.py        build_candidate_inputs, voting utilities
+    ├── test_tts_vote_analysis.py   3-vs-5 vote accuracy analysis
     ├── test_voting_replay.py       Voting replay + reliability weights
-    ├── test_treebench_export.py    TreeBench export utility
-    ├── test_token_aggregation.py   Token-level aggregation (experimental)
-    ├── test_token_trace.py         Token trace analytics
-    └── test_tts_trace_metrics.py   Candidate trace metrics
+    └── test_treebench_export.py    TreeBench export utility
 ```
 
 ---
@@ -101,13 +92,10 @@ TTS-VisCoT/
 |---|---|
 | `src/pipeline_tts.py` | `tests/test_tts_pipeline.py` |
 | `src/eval/tts_eval.py` | `tests/test_tts_eval.py` |
+| `src/eval/tts_vote_analysis.py` | `tests/test_tts_vote_analysis.py` |
 | `src/eval/voting_replay.py` | `tests/test_voting_replay.py` |
-| `src/token_aggregation.py` | `tests/test_token_aggregation.py` |
-| `src/eval/token_trace.py` | `tests/test_token_trace.py` |
-| `src/eval/tts_trace_metrics.py` | `tests/test_tts_trace_metrics.py` |
 | `src/data/datasets/treebench_export.py` | `tests/test_treebench_export.py` |
 | `experiments/run_model_benchmark.py` | `tests/test_run_comparison.py` |
-| `experiments/run_tts_eval.py` | `tests/test_run_tts_eval.py` |
 
 ### 2. Write the test before touching the source file
 

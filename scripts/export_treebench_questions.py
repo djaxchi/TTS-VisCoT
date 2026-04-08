@@ -3,21 +3,21 @@
 
 Each exported row has the question text and answer options but leaves
 ``model_paraphrase`` blank.  Fill that field with your external LLM, then
-pass the file to run_tts_eval.py via --paraphrase-source static.
+pass the file to run_tts_treebench.py via --paraphrase-source static.
 
 Usage
 -----
 Export questions (no images needed):
     python scripts/export_treebench_questions.py \\
         --n 100 \\
-        --output results/treebench_paraphrase_template.jsonl
+        --output data/treebench_paraphrase_template.jsonl
 
 After filling in ``model_paraphrase`` in each row, run inference with:
-    python experiments/run_tts_eval.py \\
+    python experiments/run_tts_treebench.py \\
         --paraphrase-source static \\
-        --static-paraphrase-path results/treebench_paraphrase_template.jsonl \\
+        --static-paraphrase-path data/treebench_paraphrase_template.jsonl \\
         --model-type grit \\
-        --save-dir results/tts_eval/grit_run1
+        --save-dir results/tts/treebench_grit
 """
 
 from __future__ import annotations
@@ -109,11 +109,11 @@ def main() -> None:
     print("     Prompt suggestion: 'Rewrite this question with different wording,")
     print("     same meaning, same answer options. Output only the rewritten question.'")
     print("  3. Run inference:")
-    print("       python experiments/run_tts_eval.py \\")
+    print("       python experiments/run_tts_treebench.py \\")
     print("           --paraphrase-source static \\")
     print(f"           --static-paraphrase-path {out_path} \\")
     print("           --model-type grit \\")
-    print("           --save-dir results/tts_eval/grit_run1")
+    print("           --save-dir results/tts/treebench_grit")
 
 
 if __name__ == "__main__":

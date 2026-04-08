@@ -1,4 +1,4 @@
-﻿"""Image variation helpers for TreeBench test-time scaling."""
+"""Image variation helpers for test-time scaling."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from PIL import Image, ImageEnhance, ImageFilter
 
 @dataclass
 class ImageVariationConfig:
-    """Configuration for deterministic TreeBench image variants.
+    """Configuration for deterministic image variants.
 
     Attributes:
         preset: Strength preset name (``conservative``, ``moderate``, ``strong``).
@@ -248,10 +248,3 @@ def generate_image_variants(
         "image_variation_1": specs.get("image_variation_1", specs[first])["image"],
         "image_variation_2": specs.get("image_variation_2", specs[second])["image"],
     }
-
-
-def blur_or_noise_placeholder(image: Image.Image) -> Image.Image:
-    """Placeholder for future blur/noise augmentation (unused by default pipeline)."""
-    return image
-
-

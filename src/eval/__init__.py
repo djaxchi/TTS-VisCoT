@@ -10,7 +10,7 @@ from .metrics import (
     create_summary_table,
     print_metrics_summary,
 )
-from .tts_trace_metrics import (
+from .tts_vote_analysis import (
     build_agreement_bins,
     build_task_rows,
     build_zero_shot_rows,

@@ -420,7 +420,7 @@ def _run_tts_on_samples(
     paraphrase_lookup: Optional[Dict[tuple, str]] = None,
 ) -> List[TTSResult]:
     from src.pipeline_tts import DEFAULT_CANDIDATE_RECIPE, build_candidate_inputs
-    from src.augment_image import ImageVariationConfig
+    from src.augmentation.image import ImageVariationConfig
     from src.eval.vqa_eval import evaluate_vqa, vqa_normalize
 
     image_config = ImageVariationConfig(preset="strong")

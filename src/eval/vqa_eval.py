@@ -2,7 +2,7 @@
 
 This module implements the standard VQA evaluation protocol used by
 datasets like GQA and TextVQA — distinct from the A/B/C/D multiple-choice
-normalisation in :mod:`src.voting.normalize`.
+normalisation in :mod:`src.utils_normalize`.
 
 Reference: VQA v2 evaluation script (https://visualqa.org/evaluation.html)
 """
