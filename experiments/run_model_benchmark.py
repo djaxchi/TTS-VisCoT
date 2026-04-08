@@ -23,6 +23,7 @@ import gc
 import json
 import sys
 import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
@@ -74,6 +75,29 @@ def _count_tokens(model_obj: Any, text: str) -> int:
     return len(text.split())
 
 
+def _tokenize_text_for_storage(model_obj: Any, text: str) -> tuple[List[int], List[str]]:
+    """Tokenize text for trace storage.
+
+    Returns tokenizer IDs and token pieces when a tokenizer is available.
+    Falls back to whitespace token strings with empty token-id list.
+    """
+    proc = getattr(model_obj, "_processor", None)
+    tok = getattr(proc, "tokenizer", None) if proc is not None else None
+    if tok is None:
+        tok = getattr(model_obj, "_tokenizer", None)
+
+    if tok is not None:
+        token_ids = list(tok.encode(text, add_special_tokens=False))
+        token_texts: List[str]
+        try:
+            token_texts = [str(t) for t in tok.convert_ids_to_tokens(token_ids)]
+        except Exception:
+            token_texts = [str(tok.decode([tid], skip_special_tokens=False)) for tid in token_ids]
+        return token_ids, token_texts
+
+    return [], text.split()
+
+
 # ---------------------------------------------------------------------------
 # Per-model inference
 # ---------------------------------------------------------------------------
@@ -88,6 +112,69 @@ class InferenceResult:
     correct: bool
     tokens: int
     elapsed_s: float
+    candidate_answers: List[str] | None = None
+    candidate_answers_normalized: List[str] | None = None
+    candidate_answer_token_ids: List[List[int]] | None = None
+    candidate_answer_tokens: List[List[str]] | None = None
+    voting: Dict[str, Dict[str, Any]] | None = None
+
+
+def _build_tts_queries(
+    question: str,
+    n: int,
+    paraphrase: str | None = None,
+    paraphrase_slots_1based: List[int] | None = None,
+) -> List[str]:
+    """Create deterministic prompt variants for open-ended TTS self-consistency.
+
+    If ``paraphrase`` is provided, it is injected into any 1-based candidate
+    indices listed in ``paraphrase_slots_1based`` that are within range.
+    """
+    if n <= 1:
+        return [question]
+
+    frames = [
+        "Answer concisely using one short phrase.",
+        "Focus only on what is visible in the image.",
+        "Use the most direct factual answer.",
+        "If uncertain, provide the most likely visual answer.",
+        "Keep the answer brief and specific.",
+    ]
+    variants: List[str] = []
+    for i in range(n):
+        frame = frames[i % len(frames)]
+        variants.append(f"{question}\n\nInstruction: {frame}")
+
+    if paraphrase:
+        slots = paraphrase_slots_1based or [1]
+        for idx_1b in slots:
+            idx = idx_1b - 1
+            if 0 <= idx < len(variants):
+                variants[idx] = paraphrase
+    return variants
+
+
+def _majority_vote_open_ended(normalized_answers: List[str]) -> Dict[str, Any]:
+    """Majority vote on normalized open-ended answers with first-seen tie break."""
+    valid = [a for a in normalized_answers if a]
+    if not valid:
+        return {
+            "answer": "",
+            "vote_counts": {},
+            "agreement_rate": 0.0,
+            "valid_votes": 0,
+        }
+
+    vote_counts = Counter(valid)
+    top_count = max(vote_counts.values())
+    tied = {ans for ans, count in vote_counts.items() if count == top_count}
+    winner = next(ans for ans in valid if ans in tied)
+    return {
+        "answer": winner,
+        "vote_counts": dict(vote_counts),
+        "agreement_rate": top_count / len(valid),
+        "valid_votes": len(valid),
+    }
 
 
 def _run_model_on_samples(
@@ -97,8 +184,11 @@ def _run_model_on_samples(
     max_new_tokens: int,
     model_label: str,
     task: str,
+    tts_candidates: int = 1,
+    paraphrase_lookup: Dict[tuple[str, str], str] | None = None,
 ) -> List[InferenceResult]:
     from src.eval.vqa_eval import evaluate_vqa
+    from src.eval.vqa_eval import vqa_normalize
 
     results: List[InferenceResult] = []
     for i, samp in enumerate(samples):
@@ -110,31 +200,94 @@ def _run_model_on_samples(
         )
         t0 = time.perf_counter()
         try:
-            chain = model_obj.predict(
-                samp["image"], q,
-                temperature=temperature,
-                max_new_tokens=max_new_tokens,
-            )
+            if tts_candidates > 1:
+                candidate_answers: List[str] = []
+                candidate_answer_token_ids: List[List[int]] = []
+                candidate_answer_tokens: List[List[str]] = []
+                total_tokens = 0
+                qid = samp.get("question_id", "")
+                paraphrase = (paraphrase_lookup or {}).get((task, str(qid)))
+                slots = [4, 9] if tts_candidates >= 9 else [4]
+                queries = _build_tts_queries(
+                    q,
+                    tts_candidates,
+                    paraphrase=paraphrase,
+                    paraphrase_slots_1based=slots,
+                )
+                for q_variant in queries:
+                    chain = model_obj.predict(
+                        samp["image"],
+                        q_variant,
+                        temperature=temperature,
+                        max_new_tokens=max_new_tokens,
+                    )
+                    ans = chain.get("answer", "") or ""
+                    candidate_answers.append(ans)
+                    tok_ids, tok_texts = _tokenize_text_for_storage(model_obj, ans)
+                    candidate_answer_token_ids.append(tok_ids)
+                    candidate_answer_tokens.append(tok_texts)
+                    cot_steps: List[str] = chain.get("cot_steps", [])
+                    full_text = "\n".join(cot_steps) if cot_steps else ans
+                    total_tokens += _count_tokens(model_obj, full_text)
+            else:
+                chain = model_obj.predict(
+                    samp["image"], q,
+                    temperature=temperature,
+                    max_new_tokens=max_new_tokens,
+                )
         except Exception as exc:  # noqa: BLE001
             print(f"    {RED}SKIP{RESET}  error on {samp['question_id']}: {exc}")
             continue
         elapsed = time.perf_counter() - t0
-        answer: str = chain.get("answer", "") or ""
+        if tts_candidates > 1:
+            candidate_answers_norm = [vqa_normalize(a) for a in candidate_answers]
+            voting: Dict[str, Dict[str, Any]] = {}
+            if tts_candidates >= 3:
+                voting["majority_3"] = _majority_vote_open_ended(candidate_answers_norm[:3])
+            if tts_candidates >= 5:
+                voting["majority_5"] = _majority_vote_open_ended(candidate_answers_norm[:5])
+            if tts_candidates >= 9:
+                voting["majority_9"] = _majority_vote_open_ended(candidate_answers_norm[:9])
 
-        cot_steps: List[str] = chain.get("cot_steps", [])
-        full_text = "\n".join(cot_steps) if cot_steps else answer
-        tokens = _count_tokens(model_obj, full_text)
+            final_key = "majority_9" if tts_candidates >= 9 else "majority_5"
+            answer = voting[final_key]["answer"]
+            tokens = total_tokens
+        else:
+            answer = chain.get("answer", "") or ""
+            cot_steps = chain.get("cot_steps", [])
+            full_text = "\n".join(cot_steps) if cot_steps else answer
+            tokens = _count_tokens(model_obj, full_text)
+            candidate_answers = None
+            candidate_answers_norm = None
+            candidate_answer_token_ids = None
+            candidate_answer_tokens = None
+            voting = None
 
         correct = evaluate_vqa(answer, refs)
         tag = f"{GREEN}✓{RESET}" if correct else f"{RED}✗{RESET}"
-        print(
-            f"    {tag}  pred={answer[:55]!r}  ref={refs[0]!r}  "
-            f"tok={tokens}  t={elapsed:.1f}s"
-        )
+        if tts_candidates > 1:
+            m3 = voting.get("majority_3", {}).get("answer", "")
+            m5 = voting.get("majority_5", {}).get("answer", "")
+            m9 = voting.get("majority_9", {}).get("answer", "")
+            print(
+                f"    {tag}  pred={answer[:55]!r}  ref={refs[0]!r}  "
+                f"tok={tokens}  t={elapsed:.1f}s  "
+                f"m3={m3!r}  m5={m5!r}  m9={m9!r}"
+            )
+        else:
+            print(
+                f"    {tag}  pred={answer[:55]!r}  ref={refs[0]!r}  "
+                f"tok={tokens}  t={elapsed:.1f}s"
+            )
         results.append(InferenceResult(
             question_id=samp["question_id"],
             question=q, answer=answer, references=refs,
             correct=correct, tokens=tokens, elapsed_s=elapsed,
+            candidate_answers=candidate_answers,
+            candidate_answers_normalized=candidate_answers_norm,
+            candidate_answer_token_ids=candidate_answer_token_ids,
+            candidate_answer_tokens=candidate_answer_tokens,
+            voting=voting,
         ))
     return results
 
@@ -174,6 +327,11 @@ def save_checkpoint(
                     "correct": r.correct,
                     "tokens": r.tokens,
                     "elapsed_s": r.elapsed_s,
+                    "candidate_answers": r.candidate_answers,
+                    "candidate_answers_normalized": r.candidate_answers_normalized,
+                    "candidate_answer_token_ids": r.candidate_answer_token_ids,
+                    "candidate_answer_tokens": r.candidate_answer_tokens,
+                    "voting": r.voting,
                 }
                 for r in model_data.get(tl, [])
             ]
@@ -294,10 +452,11 @@ def build_model_configs(
     include_viscot: bool,
     include_deepeyes: bool,
     load_in_8bit: bool,
+    only_qwen: bool = False,
 ) -> List[Dict[str, Any]]:
     """Build the ordered list of model configs for the comparison run."""
     model_configs: List[Dict[str, Any]] = []
-    if include_viscot:
+    if include_viscot and not only_qwen:
         model_configs.append({
             "label": "VisCoT (7B)",
             "type": "viscot",
@@ -307,15 +466,15 @@ def build_model_configs(
         })
 
     model_configs.append({
-        "label": "Qwen2.5-VL (7B, no CoT)",
+        "label": "Qwen2.5-VL (3B, no CoT)",
         "type": "direct_vlm",
-        "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+        "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
         "load_in_8bit": load_in_8bit,
         "temperature": 0.0,
         "max_new_tokens": 256,
     })
 
-    if include_deepeyes:
+    if include_deepeyes and not only_qwen:
         model_configs.append({
             "label": "DeepEyesV2-RL (7B)",
             "type": "deepeyes_v2",
@@ -326,14 +485,15 @@ def build_model_configs(
             "max_new_tokens": 512,
         })
 
-    model_configs.append({
-        "label": "GRIT (3B)",
-        "type": "grit",
-        "model_id": "yfan1997/GRIT-20-Qwen2.5-VL-3B",
-        "load_in_8bit": load_in_8bit,
-        "temperature": 0.0,
-        "max_new_tokens": 512,
-    })
+    if not only_qwen:
+        model_configs.append({
+            "label": "GRIT (3B)",
+            "type": "grit",
+            "model_id": "yfan1997/GRIT-20-Qwen2.5-VL-3B",
+            "load_in_8bit": load_in_8bit,
+            "temperature": 0.0,
+            "max_new_tokens": 512,
+        })
 
     return model_configs
 
@@ -356,6 +516,21 @@ def main() -> None:
                         help="Skip DeepEyesV2-RL for faster comparison runs.")
     parser.add_argument("--no-8bit", action="store_true",
                         help="Disable 8-bit quantisation (needs >=40 GB VRAM).")
+    parser.add_argument("--qwen-only", action="store_true",
+                        help="Run only Qwen2.5-VL (skip VisCoT/DeepEyes/GRIT).")
+    parser.add_argument("--tts-candidates", type=int, default=1, choices=[1, 5, 9],
+                        help="Number of per-question candidates for self-consistency voting. "
+                             "Use 9 to enable 9-way voting (majority_9).")
+    parser.add_argument(
+        "--paraphrase-path", metavar="PATH",
+        default=str(_PROJECT_ROOT / "results" / "questions_to_rephrase.json"),
+        help="JSON file with human paraphrases (keyed by task+question_id). "
+             "When --tts-candidates=9, paraphrases replace candidate slots #4 and #9.",
+    )
+    parser.add_argument(
+        "--require-paraphrase-coverage", action="store_true",
+        help="Fail fast if any of the first N samples per task is missing a non-empty paraphrase.",
+    )
     parser.add_argument("--save-output", metavar="PATH", default=None)
     parser.add_argument(
         "--resume", action="store_true",
@@ -380,6 +555,19 @@ def main() -> None:
         "counting": load_task("counting", n),
         "ocr":      load_task("ocr",      n),
     }
+
+    # ── Load paraphrase lookup ───────────────────────────────────────────────
+    paraphrase_lookup: Dict[tuple[str, str], str] = {}
+    pp = Path(args.paraphrase_path)
+    if pp.exists():
+        entries = json.loads(pp.read_text(encoding="utf-8"))
+        for e in entries:
+            if e.get("paraphrase"):
+                paraphrase_lookup[(e["task"], str(e["question_id"]))] = e["paraphrase"]
+        print(f"  {CYAN}Loaded {len(paraphrase_lookup)} paraphrases from {pp.name}{RESET}")
+    else:
+        print(f"  {DIM}No paraphrase file at {pp} — running without paraphrases.{RESET}")
+
     task_labels = [t for t, s in all_samples.items() if s]
 
     for task, samples in all_samples.items():
@@ -389,11 +577,25 @@ def main() -> None:
         print(f"\n{RED}No samples loaded for any task — aborting.{RESET}")
         sys.exit(1)
 
+    if args.require_paraphrase_coverage and args.tts_candidates > 1:
+        missing: List[str] = []
+        for task, samples in all_samples.items():
+            for s in samples:
+                key = (task, str(s.get("question_id", "")))
+                if not paraphrase_lookup.get(key, "").strip():
+                    missing.append(f"{task}:{s.get('question_id', '?')}")
+        if missing:
+            print(f"\n{RED}Missing paraphrases for {len(missing)} samples.{RESET}")
+            print("  First missing:", ", ".join(missing[:10]))
+            sys.exit(2)
+        print(f"  {GREEN}Paraphrase coverage OK for all loaded samples.{RESET}")
+
     # ── 2. Define models ─────────────────────────────────────────────────────
     model_configs = build_model_configs(
         include_viscot=not args.no_viscot,
         include_deepeyes=not args.no_deepeyes,
         load_in_8bit=not args.no_8bit,
+        only_qwen=args.qwen_only,
     )
 
     # ── 3. Run inference — one model at a time ───────────────────────────────
@@ -441,6 +643,11 @@ def main() -> None:
                     correct=r["correct"],
                     tokens=r["tokens"],
                     elapsed_s=r["elapsed_s"],
+                    candidate_answers=r.get("candidate_answers"),
+                    candidate_answers_normalized=r.get("candidate_answers_normalized"),
+                    candidate_answer_token_ids=r.get("candidate_answer_token_ids"),
+                    candidate_answer_tokens=r.get("candidate_answer_tokens"),
+                    voting=r.get("voting"),
                 )
                 for r in checkpoint.get(label, {}).get(tl, [])
             ]
@@ -495,6 +702,8 @@ def main() -> None:
                 max_new_tokens=mcfg["max_new_tokens"],
                 model_label=label,
                 task=task,
+                tts_candidates=args.tts_candidates,
+                paraphrase_lookup=paraphrase_lookup or None,
             )
 
         print(f"\n  {DIM}Unloading {label}…{RESET}")
@@ -532,10 +741,15 @@ def main() -> None:
                         "correct": r.correct,
                         "tokens": r.tokens,
                         "elapsed_s": r.elapsed_s,
+                        "candidate_answers": r.candidate_answers,
+                        "candidate_answers_normalized": r.candidate_answers_normalized,
+                        "candidate_answer_token_ids": r.candidate_answer_token_ids,
+                        "candidate_answer_tokens": r.candidate_answer_tokens,
+                        "voting": r.voting,
                     }
                     for r in all_results.get(ml, {}).get(tl, [])
                 ]
-        out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+        out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Output saved -> {out_path}")
 
 

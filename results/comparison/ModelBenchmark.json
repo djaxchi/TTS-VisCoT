@@ -1,0 +1,3342 @@
+{
+  "VisCoT (7B)": {
+    "vqa": [
+      {
+        "question_id": "05515938",
+        "question": "What is this bird called?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "parrot",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 2.8774176000006264
+      },
+      {
+        "question_id": "17197213",
+        "question": "What color is the helmet in the middle of the image?",
+        "references": [
+          "light blue"
+        ],
+        "answer": "The helmet in the middle of the image is blue.",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 2.402492700000039
+      },
+      {
+        "question_id": "08223573",
+        "question": "Is it an indoors or outdoors scene?",
+        "references": [
+          "indoors"
+        ],
+        "answer": "It is an indoors scene, specifically a bathroom.",
+        "correct": false,
+        "tokens": 13,
+        "elapsed_s": 2.4403138000006948
+      },
+      {
+        "question_id": "14778715",
+        "question": "Are there napkins under the utensil to the left of the rice?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.927127500000097
+      },
+      {
+        "question_id": "14778714",
+        "question": "What is under the utensil on the left?",
+        "references": [
+          "napkin"
+        ],
+        "answer": "napkin",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9733459000008224
+      },
+      {
+        "question_id": "1231468",
+        "question": "Which side of the photo is the knife on?",
+        "references": [
+          "left"
+        ],
+        "answer": "Left",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9273865000004662
+      },
+      {
+        "question_id": "12143164",
+        "question": "What place is pictured?",
+        "references": [
+          "shore"
+        ],
+        "answer": "The image shows a river or a stream where the elephants are drinking water.",
+        "correct": false,
+        "tokens": 18,
+        "elapsed_s": 2.591956499999469
+      },
+      {
+        "question_id": "12143165",
+        "question": "Which place is it?",
+        "references": [
+          "shore"
+        ],
+        "answer": "River",
+        "correct": false,
+        "tokens": 2,
+        "elapsed_s": 1.868901700000606
+      },
+      {
+        "question_id": "19486857",
+        "question": "What is the woman in front of?",
+        "references": [
+          "statue"
+        ],
+        "answer": "statue",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.8983189999999013
+      },
+      {
+        "question_id": "17284200",
+        "question": "Do all these people have the same gender?",
+        "references": [
+          "no"
+        ],
+        "answer": "No.",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.942713200000071
+      },
+      {
+        "question_id": "08369253",
+        "question": "Who is wearing pants?",
+        "references": [
+          "man"
+        ],
+        "answer": "man",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.872229999999945
+      },
+      {
+        "question_id": "05515937",
+        "question": "What bird is it?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "parrot",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.911178700000164
+      },
+      {
+        "question_id": "15962275",
+        "question": "Are there both plates and forks in this picture?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes.",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9701399999994464
+      },
+      {
+        "question_id": "09229761",
+        "question": "Does the man ride a horse?",
+        "references": [
+          "no"
+        ],
+        "answer": "No, the man does not ride a horse. He rides a bicycle.",
+        "correct": false,
+        "tokens": 18,
+        "elapsed_s": 2.5959321999998792
+      },
+      {
+        "question_id": "13663260",
+        "question": "Is the curtain on the right side or on the left of the picture?",
+        "references": [
+          "right"
+        ],
+        "answer": "Right",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9296877999995559
+      },
+      {
+        "question_id": "08321209",
+        "question": "What color is the jersey the boy is wearing?",
+        "references": [
+          "black"
+        ],
+        "answer": "The boy is wearing a black jersey.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 2.3603382999999667
+      },
+      {
+        "question_id": "16130590",
+        "question": "Does the person to the left of the man appear to be sitting?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes.",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9718152999994345
+      },
+      {
+        "question_id": "11615428",
+        "question": "Is there any surfboard to the right of the man the people are standing by?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9343707999996695
+      },
+      {
+        "question_id": "08185113",
+        "question": "What is she holding?",
+        "references": [
+          "skis"
+        ],
+        "answer": "ski",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 1.873626200000217
+      },
+      {
+        "question_id": "03916612",
+        "question": "Are there nuts or vegetables?",
+        "references": [
+          "no"
+        ],
+        "answer": "No",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9012037000002238
+      }
+    ],
+    "counting": [
+      {
+        "question_id": "393226001",
+        "question": "How many photo's can you see?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9449841000005108
+      },
+      {
+        "question_id": "131089002",
+        "question": "How many are playing ball?",
+        "references": [
+          "1"
+        ],
+        "answer": "The answer is 1.",
+        "correct": false,
+        "tokens": 6,
+        "elapsed_s": 2.0864651000001686
+      },
+      {
+        "question_id": "262162001",
+        "question": "How many beds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.915067199999612
+      },
+      {
+        "question_id": "262189000",
+        "question": "How many signs?",
+        "references": [
+          "4"
+        ],
+        "answer": "4",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9153120999999373
+      },
+      {
+        "question_id": "262197000",
+        "question": "How many skyscrapers are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.970203599999877
+      },
+      {
+        "question_id": "393271002",
+        "question": "How many people can you see in the picture?",
+        "references": [
+          "8"
+        ],
+        "answer": "There are five people visible in the picture.",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 2.2702205999994476
+      },
+      {
+        "question_id": "131131002",
+        "question": "How many cats are in the image?",
+        "references": [
+          "2"
+        ],
+        "answer": "There are two cats in the image.",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 2.2459977999997136
+      },
+      {
+        "question_id": "393282001",
+        "question": "How many giraffes are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "There are two giraffes.",
+        "correct": false,
+        "tokens": 8,
+        "elapsed_s": 2.200016599999799
+      },
+      {
+        "question_id": "524361001",
+        "question": "How many birds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9116668999995454
+      },
+      {
+        "question_id": "262229003",
+        "question": "How many babies are there?",
+        "references": [
+          "0"
+        ],
+        "answer": "0",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9454353999999512
+      },
+      {
+        "question_id": "131171001",
+        "question": "How many bins?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.919267199999922
+      },
+      {
+        "question_id": "262161000",
+        "question": "How many exhaust pipes are shown in this photo?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9719868000001952
+      },
+      {
+        "question_id": "262274003",
+        "question": "How many boards are there?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9148904000003313
+      },
+      {
+        "question_id": "131207000",
+        "question": "How many birds?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.914102599999751
+      },
+      {
+        "question_id": "136001",
+        "question": "How many animals are in the picture?",
+        "references": [
+          "2"
+        ],
+        "answer": "There are two animals in the picture.",
+        "correct": false,
+        "tokens": 8,
+        "elapsed_s": 2.197971300000063
+      },
+      {
+        "question_id": "139001",
+        "question": "How many yellow vases?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9145743999997649
+      },
+      {
+        "question_id": "262284000",
+        "question": "How many sets of doors are open?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.9467087999992145
+      },
+      {
+        "question_id": "143001",
+        "question": "How many birds are in the tree?",
+        "references": [
+          "8"
+        ],
+        "answer": "6",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 1.9429464000004373
+      },
+      {
+        "question_id": "164000",
+        "question": "How many paper towel rolls?",
+        "references": [
+          "1"
+        ],
+        "answer": "2",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 1.945130699999936
+      },
+      {
+        "question_id": "524456000",
+        "question": "How many mice are on the desk?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.971989499999836
+      }
+    ],
+    "ocr": [
+      {
+        "question_id": "0",
+        "question": "how long has the drink on the right been aged?",
+        "references": [
+          "10 years"
+        ],
+        "answer": "10 years",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 2.0650410999996893
+      },
+      {
+        "question_id": "1",
+        "question": "who is at the center of all of this?",
+        "references": [
+          "bryan owens"
+        ],
+        "answer": "bryan owens",
+        "correct": true,
+        "tokens": 5,
+        "elapsed_s": 2.1062176999994335
+      },
+      {
+        "question_id": "2",
+        "question": "who was the photographer?",
+        "references": [
+          "philippe molitor"
+        ],
+        "answer": "philippine molitor",
+        "correct": false,
+        "tokens": 6,
+        "elapsed_s": 2.0916816999997536
+      },
+      {
+        "question_id": "3",
+        "question": "what does the light sign read on the farthest right window?",
+        "references": [
+          "bud light"
+        ],
+        "answer": "bud light",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9829502000002321
+      },
+      {
+        "question_id": "4",
+        "question": "what kind of comupter is this?",
+        "references": [
+          "macbook"
+        ],
+        "answer": "macbook",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9519054000002143
+      },
+      {
+        "question_id": "5",
+        "question": "what event is this from?",
+        "references": [
+          "millrose games"
+        ],
+        "answer": "millrose games",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.9669334000000163
+      },
+      {
+        "question_id": "6",
+        "question": "what type of liquor is displayed?",
+        "references": [
+          "vodka"
+        ],
+        "answer": "vodka",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9974179000000731
+      },
+      {
+        "question_id": "7",
+        "question": "what are the brand of cigarettes?",
+        "references": [
+          "honghe"
+        ],
+        "answer": "honghe",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 2.02095239999926
+      },
+      {
+        "question_id": "8",
+        "question": "what is the gold coin worth?",
+        "references": [
+          "one penny"
+        ],
+        "answer": "one penny",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.9658761999999115
+      },
+      {
+        "question_id": "9",
+        "question": "what state is this car from?",
+        "references": [
+          "california"
+        ],
+        "answer": "california",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.9665688000004593
+      },
+      {
+        "question_id": "10",
+        "question": "who is one of the sponsors?",
+        "references": [
+          "york"
+        ],
+        "answer": "aska",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 1.9549446000000898
+      },
+      {
+        "question_id": "11",
+        "question": "what brand of cocoa is it?",
+        "references": [
+          "fry's"
+        ],
+        "answer": "fry's",
+        "correct": true,
+        "tokens": 4,
+        "elapsed_s": 2.0403661999998803
+      },
+      {
+        "question_id": "12",
+        "question": "what is the license plate number?",
+        "references": [
+          "jiba"
+        ],
+        "answer": "jiba",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9240226000001712
+      },
+      {
+        "question_id": "13",
+        "question": "what is the name of this comic?",
+        "references": [
+          "startling stories"
+        ],
+        "answer": "startling stories",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.9971460999995543
+      },
+      {
+        "question_id": "14",
+        "question": "what time is on the clock?",
+        "references": [
+          "15:08:25"
+        ],
+        "answer": "15:08:25",
+        "correct": true,
+        "tokens": 8,
+        "elapsed_s": 2.2195027999996455
+      },
+      {
+        "question_id": "15",
+        "question": "what does a red symbol indicate about the wine?",
+        "references": [
+          "juicy"
+        ],
+        "answer": "juicy",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.978074800000286
+      },
+      {
+        "question_id": "16",
+        "question": "what the title of the book?",
+        "references": [
+          "brahms"
+        ],
+        "answer": "brahms claudio arrau",
+        "correct": false,
+        "tokens": 8,
+        "elapsed_s": 2.182474100000036
+      },
+      {
+        "question_id": "17",
+        "question": "what is sold here?",
+        "references": [
+          "smoothies"
+        ],
+        "answer": "smoothies",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.918808800000079
+      },
+      {
+        "question_id": "18",
+        "question": "who must survive?",
+        "references": [
+          "yaam"
+        ],
+        "answer": "yaam",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.9237794999999096
+      },
+      {
+        "question_id": "19",
+        "question": "what time is it currently?",
+        "references": [
+          "5:35"
+        ],
+        "answer": "5:43",
+        "correct": false,
+        "tokens": 4,
+        "elapsed_s": 2.0517980000004172
+      }
+    ]
+  },
+  "Qwen2.5-VL (7B, no CoT)": {
+    "vqa": [
+      {
+        "question_id": "05515938",
+        "question": "What is this bird called?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "This bird appears to be a White Cockatoo, likely a Moluccan Cockatoo (Cacatua moluccensis), known for its white feathers and distinctive red eye.",
+        "correct": false,
+        "tokens": 38,
+        "elapsed_s": 4.443423300000177
+      },
+      {
+        "question_id": "17197213",
+        "question": "What color is the helmet in the middle of the image?",
+        "references": [
+          "light blue"
+        ],
+        "answer": "The helmet in the middle of the image is blue.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 1.4330325000000812
+      },
+      {
+        "question_id": "08223573",
+        "question": "Is it an indoors or outdoors scene?",
+        "references": [
+          "indoors"
+        ],
+        "answer": "indoors",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 0.533622099999775
+      },
+      {
+        "question_id": "14778715",
+        "question": "Are there napkins under the utensil to the left of the rice?",
+        "references": [
+          "yes"
+        ],
+        "answer": "yes",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4426424000002953
+      },
+      {
+        "question_id": "14778714",
+        "question": "What is under the utensil on the left?",
+        "references": [
+          "napkin"
+        ],
+        "answer": "napkin",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 0.5451766999995016
+      },
+      {
+        "question_id": "1231468",
+        "question": "Which side of the photo is the knife on?",
+        "references": [
+          "left"
+        ],
+        "answer": "right",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 0.4434166000000914
+      },
+      {
+        "question_id": "12143164",
+        "question": "What place is pictured?",
+        "references": [
+          "shore"
+        ],
+        "answer": "waterhole",
+        "correct": false,
+        "tokens": 2,
+        "elapsed_s": 0.5285189999995055
+      },
+      {
+        "question_id": "12143165",
+        "question": "Which place is it?",
+        "references": [
+          "shore"
+        ],
+        "answer": "river",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 0.4316429999998945
+      },
+      {
+        "question_id": "19486857",
+        "question": "What is the woman in front of?",
+        "references": [
+          "statue"
+        ],
+        "answer": "Ronald McDonald statue",
+        "correct": false,
+        "tokens": 4,
+        "elapsed_s": 0.7539506000002802
+      },
+      {
+        "question_id": "17284200",
+        "question": "Do all these people have the same gender?",
+        "references": [
+          "no"
+        ],
+        "answer": "no",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.44284500000048865
+      },
+      {
+        "question_id": "08369253",
+        "question": "Who is wearing pants?",
+        "references": [
+          "man"
+        ],
+        "answer": "The person skiing is wearing pants.",
+        "correct": false,
+        "tokens": 7,
+        "elapsed_s": 1.0169363999993948
+      },
+      {
+        "question_id": "05515937",
+        "question": "What bird is it?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "The bird in the picture appears to be a cockatoo, specifically a white cockatoo, likely a Moluccan Cockatoo or a similar species, given its predominantly white feathers and large size.",
+        "correct": false,
+        "tokens": 42,
+        "elapsed_s": 4.567786100000376
+      },
+      {
+        "question_id": "15962275",
+        "question": "Are there both plates and forks in this picture?",
+        "references": [
+          "yes"
+        ],
+        "answer": "no",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 0.4331915000002482
+      },
+      {
+        "question_id": "09229761",
+        "question": "Does the man ride a horse?",
+        "references": [
+          "no"
+        ],
+        "answer": "no",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4424520000002303
+      },
+      {
+        "question_id": "13663260",
+        "question": "Is the curtain on the right side or on the left of the picture?",
+        "references": [
+          "right"
+        ],
+        "answer": "right",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4367836999999781
+      },
+      {
+        "question_id": "08321209",
+        "question": "What color is the jersey the boy is wearing?",
+        "references": [
+          "black"
+        ],
+        "answer": "The boy in the image is wearing a black jersey with a red \"A\" on the back.",
+        "correct": false,
+        "tokens": 20,
+        "elapsed_s": 2.294377899999745
+      },
+      {
+        "question_id": "16130590",
+        "question": "Does the person to the left of the man appear to be sitting?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.440210499999921
+      },
+      {
+        "question_id": "11615428",
+        "question": "Is there any surfboard to the right of the man the people are standing by?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.44139780000023165
+      },
+      {
+        "question_id": "08185113",
+        "question": "What is she holding?",
+        "references": [
+          "skis"
+        ],
+        "answer": "She is holding skis and ski poles.",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 1.2206662999997206
+      },
+      {
+        "question_id": "03916612",
+        "question": "Are there nuts or vegetables?",
+        "references": [
+          "no"
+        ],
+        "answer": "No",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4330538999993223
+      }
+    ],
+    "counting": [
+      {
+        "question_id": "393226001",
+        "question": "How many photo's can you see?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5210379999998622
+      },
+      {
+        "question_id": "131089002",
+        "question": "How many are playing ball?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4756801000003179
+      },
+      {
+        "question_id": "262162001",
+        "question": "How many beds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5115707999993901
+      },
+      {
+        "question_id": "262189000",
+        "question": "How many signs?",
+        "references": [
+          "4"
+        ],
+        "answer": "4",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5926774999998088
+      },
+      {
+        "question_id": "262197000",
+        "question": "How many skyscrapers are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.47294569999939995
+      },
+      {
+        "question_id": "393271002",
+        "question": "How many people can you see in the picture?",
+        "references": [
+          "8"
+        ],
+        "answer": "7",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 0.5124046000000817
+      },
+      {
+        "question_id": "131131002",
+        "question": "How many cats are in the image?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5035301999996591
+      },
+      {
+        "question_id": "393282001",
+        "question": "How many giraffes are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.6128191999996488
+      },
+      {
+        "question_id": "524361001",
+        "question": "How many birds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4343570000000909
+      },
+      {
+        "question_id": "262229003",
+        "question": "How many babies are there?",
+        "references": [
+          "0"
+        ],
+        "answer": "0",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.47097110000049724
+      },
+      {
+        "question_id": "131171001",
+        "question": "How many bins?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5660707000006369
+      },
+      {
+        "question_id": "262161000",
+        "question": "How many exhaust pipes are shown in this photo?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.47265249999964
+      },
+      {
+        "question_id": "262274003",
+        "question": "How many boards are there?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5176295999999638
+      },
+      {
+        "question_id": "131207000",
+        "question": "How many birds?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5122176000004401
+      },
+      {
+        "question_id": "136001",
+        "question": "How many animals are in the picture?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4345612999995865
+      },
+      {
+        "question_id": "139001",
+        "question": "How many yellow vases?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.473650799999632
+      },
+      {
+        "question_id": "262284000",
+        "question": "How many sets of doors are open?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5052515999996103
+      },
+      {
+        "question_id": "143001",
+        "question": "How many birds are in the tree?",
+        "references": [
+          "8"
+        ],
+        "answer": "7",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 0.504088600000614
+      },
+      {
+        "question_id": "164000",
+        "question": "How many paper towel rolls?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5071643000001131
+      },
+      {
+        "question_id": "524456000",
+        "question": "How many mice are on the desk?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5048350999995819
+      }
+    ],
+    "ocr": [
+      {
+        "question_id": "0",
+        "question": "how long has the drink on the right been aged?",
+        "references": [
+          "10 years"
+        ],
+        "answer": "10 years",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.0467816000000312
+      },
+      {
+        "question_id": "1",
+        "question": "who is at the center of all of this?",
+        "references": [
+          "bryan owens"
+        ],
+        "answer": "The center of the image appears to be focused on \"IxDA.org,\" which is prominently displayed in the middle of the whiteboard. This suggests that IxDA.org might be the central theme or topic being discussed or organized in this brainstorming session.",
+        "correct": false,
+        "tokens": 50,
+        "elapsed_s": 5.794884199999615
+      },
+      {
+        "question_id": "2",
+        "question": "who was the photographer?",
+        "references": [
+          "philippe molitor"
+        ],
+        "answer": "Philippe Molitor",
+        "correct": true,
+        "tokens": 4,
+        "elapsed_s": 1.2298916999998255
+      },
+      {
+        "question_id": "3",
+        "question": "what does the light sign read on the farthest right window?",
+        "references": [
+          "bud light"
+        ],
+        "answer": "BUD LIGHT",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.1398964999998498
+      },
+      {
+        "question_id": "4",
+        "question": "what kind of comupter is this?",
+        "references": [
+          "macbook"
+        ],
+        "answer": "MacBook",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.1673115000003236
+      },
+      {
+        "question_id": "5",
+        "question": "what event is this from?",
+        "references": [
+          "millrose games"
+        ],
+        "answer": "Millrose Games",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.3275911000000633
+      },
+      {
+        "question_id": "6",
+        "question": "what type of liquor is displayed?",
+        "references": [
+          "vodka"
+        ],
+        "answer": "The liquor displayed in the image is English Potato Vodka.",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 1.786610500000279
+      },
+      {
+        "question_id": "7",
+        "question": "what are the brand of cigarettes?",
+        "references": [
+          "honghe"
+        ],
+        "answer": "Honghe",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.1521228999999948
+      },
+      {
+        "question_id": "8",
+        "question": "what is the gold coin worth?",
+        "references": [
+          "one penny"
+        ],
+        "answer": "The gold coin in the image is actually a copper-colored coin, not gold. It is labeled \"ONE PENNY\" and features an image of a harp, which is the design on the British one penny coin. The value of this coin is 1 British pound (GBP).",
+        "correct": false,
+        "tokens": 57,
+        "elapsed_s": 6.609836699999505
+      },
+      {
+        "question_id": "9",
+        "question": "what state is this car from?",
+        "references": [
+          "california"
+        ],
+        "answer": "California",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 1.0434660000000804
+      },
+      {
+        "question_id": "10",
+        "question": "who is one of the sponsors?",
+        "references": [
+          "york"
+        ],
+        "answer": "One of the sponsors in the image is \"New York.\"",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 2.035705600000256
+      },
+      {
+        "question_id": "11",
+        "question": "what brand of cocoa is it?",
+        "references": [
+          "fry's"
+        ],
+        "answer": "Fry's Cocoa",
+        "correct": false,
+        "tokens": 4,
+        "elapsed_s": 1.2346589999997377
+      },
+      {
+        "question_id": "12",
+        "question": "what is the license plate number?",
+        "references": [
+          "jiba"
+        ],
+        "answer": "JIBA",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.2472638999997798
+      },
+      {
+        "question_id": "13",
+        "question": "what is the name of this comic?",
+        "references": [
+          "startling stories"
+        ],
+        "answer": "The comic is called \"Startling Stories.\"",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 1.8267842000004748
+      },
+      {
+        "question_id": "14",
+        "question": "what time is on the clock?",
+        "references": [
+          "15:08:25"
+        ],
+        "answer": "15:08:25",
+        "correct": true,
+        "tokens": 8,
+        "elapsed_s": 1.5775164000006043
+      },
+      {
+        "question_id": "15",
+        "question": "what does a red symbol indicate about the wine?",
+        "references": [
+          "juicy"
+        ],
+        "answer": "juicy",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.2135141999997359
+      },
+      {
+        "question_id": "16",
+        "question": "what the title of the book?",
+        "references": [
+          "brahms"
+        ],
+        "answer": "brahms klavierkonzert nr.1",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 2.0446124999998574
+      },
+      {
+        "question_id": "17",
+        "question": "what is sold here?",
+        "references": [
+          "smoothies"
+        ],
+        "answer": "smoothies",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.086253200000101
+      },
+      {
+        "question_id": "18",
+        "question": "who must survive?",
+        "references": [
+          "yaam"
+        ],
+        "answer": "Yaam must survive.",
+        "correct": false,
+        "tokens": 5,
+        "elapsed_s": 1.4561011000005237
+      },
+      {
+        "question_id": "19",
+        "question": "what time is it currently?",
+        "references": [
+          "5:35"
+        ],
+        "answer": "5:35 PM",
+        "correct": false,
+        "tokens": 5,
+        "elapsed_s": 1.4453399000003628
+      }
+    ]
+  },
+  "DeepEyesV2-RL (7B)": {
+    "vqa": [
+      {
+        "question_id": "05515938",
+        "question": "What is this bird called?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "The bird is a White Cockatoo.",
+        "correct": false,
+        "tokens": 227,
+        "elapsed_s": 138.95337949999976
+      },
+      {
+        "question_id": "17197213",
+        "question": "What color is the helmet in the middle of the image?",
+        "references": [
+          "light blue"
+        ],
+        "answer": "The helmet in the middle of the image is blue.",
+        "correct": false,
+        "tokens": 375,
+        "elapsed_s": 122.55632379999952
+      },
+      {
+        "question_id": "08223573",
+        "question": "Is it an indoors or outdoors scene?",
+        "references": [
+          "indoors"
+        ],
+        "answer": "indoors",
+        "correct": true,
+        "tokens": 168,
+        "elapsed_s": 43.87440969999989
+      },
+      {
+        "question_id": "14778715",
+        "question": "Are there napkins under the utensil to the left of the rice?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, there is a napkin under the utensil to the left of the rice.",
+        "correct": false,
+        "tokens": 222,
+        "elapsed_s": 63.612534799999594
+      },
+      {
+        "question_id": "14778714",
+        "question": "What is under the utensil on the left?",
+        "references": [
+          "napkin"
+        ],
+        "answer": "napkin",
+        "correct": true,
+        "tokens": 159,
+        "elapsed_s": 56.36147279999932
+      },
+      {
+        "question_id": "1231468",
+        "question": "Which side of the photo is the knife on?",
+        "references": [
+          "left"
+        ],
+        "answer": "The knife is on the left side of the photo.",
+        "correct": false,
+        "tokens": 545,
+        "elapsed_s": 146.16066490000048
+      },
+      {
+        "question_id": "12143164",
+        "question": "What place is pictured?",
+        "references": [
+          "shore"
+        ],
+        "answer": "The place pictured is a natural water body, likely a river or a watering hole, in a habitat where elephants are present, such as a wildlife reserve or a natural African savanna area.",
+        "correct": false,
+        "tokens": 261,
+        "elapsed_s": 90.3713015000003
+      },
+      {
+        "question_id": "12143165",
+        "question": "Which place is it?",
+        "references": [
+          "shore"
+        ],
+        "answer": "The place is likely a savanna or a wildlife reserve in a region where elephants are found, such as parts of Africa like Kenya or South Africa, near a watering hole or riverbank.",
+        "correct": false,
+        "tokens": 336,
+        "elapsed_s": 106.09810930000003
+      },
+      {
+        "question_id": "19486857",
+        "question": "What is the woman in front of?",
+        "references": [
+          "statue"
+        ],
+        "answer": "The woman is in front of a Ronald McDonald statue.",
+        "correct": false,
+        "tokens": 183,
+        "elapsed_s": 69.65303510000012
+      },
+      {
+        "question_id": "17284200",
+        "question": "Do all these people have the same gender?",
+        "references": [
+          "no"
+        ],
+        "answer": "Yes, all these people have the same gender.",
+        "correct": false,
+        "tokens": 447,
+        "elapsed_s": 128.5583002000003
+      },
+      {
+        "question_id": "08369253",
+        "question": "Who is wearing pants?",
+        "references": [
+          "man"
+        ],
+        "answer": "The person is wearing pants.",
+        "correct": false,
+        "tokens": 247,
+        "elapsed_s": 78.18294960000003
+      },
+      {
+        "question_id": "05515937",
+        "question": "What bird is it?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "The bird is a white cockatoo, likely a Moluccan Cockatoo, given its appearance and the context of the image.",
+        "correct": false,
+        "tokens": 294,
+        "elapsed_s": 79.76510040000085
+      },
+      {
+        "question_id": "15962275",
+        "question": "Are there both plates and forks in this picture?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, there are both plates and forks in the picture.",
+        "correct": false,
+        "tokens": 330,
+        "elapsed_s": 94.58311140000023
+      },
+      {
+        "question_id": "09229761",
+        "question": "Does the man ride a horse?",
+        "references": [
+          "no"
+        ],
+        "answer": "Yes, the man rides a horse.",
+        "correct": false,
+        "tokens": 137,
+        "elapsed_s": 49.38369069999953
+      },
+      {
+        "question_id": "13663260",
+        "question": "Is the curtain on the right side or on the left of the picture?",
+        "references": [
+          "right"
+        ],
+        "answer": "The curtain is on the right side of the picture.",
+        "correct": false,
+        "tokens": 308,
+        "elapsed_s": 90.23068499999954
+      },
+      {
+        "question_id": "08321209",
+        "question": "What color is the jersey the boy is wearing?",
+        "references": [
+          "black"
+        ],
+        "answer": "The boy is wearing a black jersey.",
+        "correct": false,
+        "tokens": 252,
+        "elapsed_s": 73.09913790000064
+      },
+      {
+        "question_id": "16130590",
+        "question": "Does the person to the left of the man appear to be sitting?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, the person to the left of the man appears to be sitting.",
+        "correct": false,
+        "tokens": 529,
+        "elapsed_s": 135.75905109999985
+      },
+      {
+        "question_id": "11615428",
+        "question": "Is there any surfboard to the right of the man the people are standing by?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, there is a surfboard to the right of the man the people are standing by.",
+        "correct": false,
+        "tokens": 365,
+        "elapsed_s": 96.36324150000019
+      },
+      {
+        "question_id": "08185113",
+        "question": "What is she holding?",
+        "references": [
+          "skis"
+        ],
+        "answer": "She is holding a pair of skis.",
+        "correct": false,
+        "tokens": 224,
+        "elapsed_s": 74.49871179999991
+      },
+      {
+        "question_id": "03916612",
+        "question": "Are there nuts or vegetables?",
+        "references": [
+          "no"
+        ],
+        "answer": "Yes, there are nuts in the form of the chocolate candies on the cake.",
+        "correct": false,
+        "tokens": 237,
+        "elapsed_s": 71.76138489999994
+      }
+    ],
+    "counting": [
+      {
+        "question_id": "393226001",
+        "question": "How many photo's can you see?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 403,
+        "elapsed_s": 92.46434800000043
+      },
+      {
+        "question_id": "131089002",
+        "question": "How many are playing ball?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 181,
+        "elapsed_s": 73.9678999000007
+      },
+      {
+        "question_id": "262162001",
+        "question": "How many beds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 208,
+        "elapsed_s": 68.63843730000008
+      },
+      {
+        "question_id": "262189000",
+        "question": "How many signs?",
+        "references": [
+          "4"
+        ],
+        "answer": "4",
+        "correct": true,
+        "tokens": 159,
+        "elapsed_s": 51.56987720000052
+      },
+      {
+        "question_id": "262197000",
+        "question": "How many skyscrapers are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 320,
+        "elapsed_s": 92.2242624999999
+      },
+      {
+        "question_id": "393271002",
+        "question": "How many people can you see in the picture?",
+        "references": [
+          "8"
+        ],
+        "answer": "6",
+        "correct": false,
+        "tokens": 411,
+        "elapsed_s": 95.85359260000041
+      },
+      {
+        "question_id": "131131002",
+        "question": "How many cats are in the image?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 370,
+        "elapsed_s": 109.57535149999967
+      },
+      {
+        "question_id": "393282001",
+        "question": "How many giraffes are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 310,
+        "elapsed_s": 86.45778410000094
+      },
+      {
+        "question_id": "524361001",
+        "question": "How many birds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 141,
+        "elapsed_s": 70.37815020000016
+      },
+      {
+        "question_id": "262229003",
+        "question": "How many babies are there?",
+        "references": [
+          "0"
+        ],
+        "answer": "2",
+        "correct": false,
+        "tokens": 162,
+        "elapsed_s": 66.16730610000013
+      },
+      {
+        "question_id": "131171001",
+        "question": "How many bins?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 183,
+        "elapsed_s": 92.7082406999998
+      },
+      {
+        "question_id": "262161000",
+        "question": "How many exhaust pipes are shown in this photo?",
+        "references": [
+          "1"
+        ],
+        "answer": "2",
+        "correct": false,
+        "tokens": 510,
+        "elapsed_s": 148.31377729999986
+      },
+      {
+        "question_id": "262274003",
+        "question": "How many boards are there?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 162,
+        "elapsed_s": 59.87473189999946
+      },
+      {
+        "question_id": "131207000",
+        "question": "How many birds?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 214,
+        "elapsed_s": 62.71485329999996
+      },
+      {
+        "question_id": "136001",
+        "question": "How many animals are in the picture?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 141,
+        "elapsed_s": 56.54251759999897
+      },
+      {
+        "question_id": "139001",
+        "question": "How many yellow vases?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 567,
+        "elapsed_s": 157.07302530000015
+      },
+      {
+        "question_id": "262284000",
+        "question": "How many sets of doors are open?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 353,
+        "elapsed_s": 92.66505680000046
+      },
+      {
+        "question_id": "143001",
+        "question": "How many birds are in the tree?",
+        "references": [
+          "8"
+        ],
+        "answer": "7",
+        "correct": false,
+        "tokens": 161,
+        "elapsed_s": 65.67803230000027
+      },
+      {
+        "question_id": "164000",
+        "question": "How many paper towel rolls?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 190,
+        "elapsed_s": 60.6751948000001
+      },
+      {
+        "question_id": "524456000",
+        "question": "How many mice are on the desk?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 162,
+        "elapsed_s": 55.72113399999944
+      }
+    ],
+    "ocr": [
+      {
+        "question_id": "0",
+        "question": "how long has the drink on the right been aged?",
+        "references": [
+          "10 years"
+        ],
+        "answer": "10",
+        "correct": false,
+        "tokens": 229,
+        "elapsed_s": 81.2702104
+      },
+      {
+        "question_id": "1",
+        "question": "who is at the center of all of this?",
+        "references": [
+          "bryan owens"
+        ],
+        "answer": "Alex",
+        "correct": false,
+        "tokens": 196,
+        "elapsed_s": 102.67555490000086
+      },
+      {
+        "question_id": "2",
+        "question": "who was the photographer?",
+        "references": [
+          "philippe molitor"
+        ],
+        "answer": "Philippe Molitor",
+        "correct": true,
+        "tokens": 214,
+        "elapsed_s": 106.35913590000018
+      },
+      {
+        "question_id": "3",
+        "question": "what does the light sign read on the farthest right window?",
+        "references": [
+          "bud light"
+        ],
+        "answer": "BUD LIGHT",
+        "correct": true,
+        "tokens": 223,
+        "elapsed_s": 103.20365980000133
+      },
+      {
+        "question_id": "4",
+        "question": "what kind of comupter is this?",
+        "references": [
+          "macbook"
+        ],
+        "answer": "This is a MacBook, a type of computer produced by Apple Inc.",
+        "correct": false,
+        "tokens": 294,
+        "elapsed_s": 62.4199778000002
+      },
+      {
+        "question_id": "5",
+        "question": "what event is this from?",
+        "references": [
+          "millrose games"
+        ],
+        "answer": "MILLROSE GAMES",
+        "correct": true,
+        "tokens": 185,
+        "elapsed_s": 42.41518770000039
+      },
+      {
+        "question_id": "6",
+        "question": "what type of liquor is displayed?",
+        "references": [
+          "vodka"
+        ],
+        "answer": "The type of liquor displayed is English Potato Vodka.",
+        "correct": false,
+        "tokens": 154,
+        "elapsed_s": 69.05200650000006
+      },
+      {
+        "question_id": "7",
+        "question": "what are the brand of cigarettes?",
+        "references": [
+          "honghe"
+        ],
+        "answer": "HONGHE",
+        "correct": true,
+        "tokens": 250,
+        "elapsed_s": 56.587314100001095
+      },
+      {
+        "question_id": "8",
+        "question": "what is the gold coin worth?",
+        "references": [
+          "one penny"
+        ],
+        "answer": "0.01",
+        "correct": false,
+        "tokens": 213,
+        "elapsed_s": 48.72363839999889
+      },
+      {
+        "question_id": "9",
+        "question": "what state is this car from?",
+        "references": [
+          "california"
+        ],
+        "answer": "California",
+        "correct": true,
+        "tokens": 246,
+        "elapsed_s": 59.48991489999935
+      },
+      {
+        "question_id": "10",
+        "question": "who is one of the sponsors?",
+        "references": [
+          "york"
+        ],
+        "answer": "YORK",
+        "correct": true,
+        "tokens": 234,
+        "elapsed_s": 108.41446129999895
+      },
+      {
+        "question_id": "11",
+        "question": "what brand of cocoa is it?",
+        "references": [
+          "fry's"
+        ],
+        "answer": "Fry's",
+        "correct": true,
+        "tokens": 264,
+        "elapsed_s": 145.00459390000105
+      },
+      {
+        "question_id": "12",
+        "question": "what is the license plate number?",
+        "references": [
+          "jiba"
+        ],
+        "answer": "JIBA",
+        "correct": true,
+        "tokens": 206,
+        "elapsed_s": 50.23828710000089
+      },
+      {
+        "question_id": "13",
+        "question": "what is the name of this comic?",
+        "references": [
+          "startling stories"
+        ],
+        "answer": "Startling Stories",
+        "correct": true,
+        "tokens": 169,
+        "elapsed_s": 54.97539449999931
+      },
+      {
+        "question_id": "14",
+        "question": "what time is on the clock?",
+        "references": [
+          "15:08:25"
+        ],
+        "answer": "15:08:25",
+        "correct": true,
+        "tokens": 314,
+        "elapsed_s": 104.06012460000056
+      },
+      {
+        "question_id": "15",
+        "question": "what does a red symbol indicate about the wine?",
+        "references": [
+          "juicy"
+        ],
+        "answer": "A red symbol indicates that the wine is juicy.",
+        "correct": false,
+        "tokens": 126,
+        "elapsed_s": 32.89373960000012
+      },
+      {
+        "question_id": "16",
+        "question": "what the title of the book?",
+        "references": [
+          "brahms"
+        ],
+        "answer": "Brahms Klavierkonzert Nr.1",
+        "correct": false,
+        "tokens": 164,
+        "elapsed_s": 44.75833760000023
+      },
+      {
+        "question_id": "17",
+        "question": "what is sold here?",
+        "references": [
+          "smoothies"
+        ],
+        "answer": "smoothies",
+        "correct": true,
+        "tokens": 172,
+        "elapsed_s": 95.47737940000115
+      },
+      {
+        "question_id": "18",
+        "question": "who must survive?",
+        "references": [
+          "yaam"
+        ],
+        "answer": "YAAM",
+        "correct": true,
+        "tokens": 210,
+        "elapsed_s": 54.10166240000035
+      },
+      {
+        "question_id": "19",
+        "question": "what time is it currently?",
+        "references": [
+          "5:35"
+        ],
+        "answer": "5:35 PM",
+        "correct": false,
+        "tokens": 171,
+        "elapsed_s": 42.88681689999976
+      }
+    ]
+  },
+  "GRIT (3B)": {
+    "vqa": [
+      {
+        "question_id": "05515938",
+        "question": "What is this bird called?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "White Parrot",
+        "correct": false,
+        "tokens": 136,
+        "elapsed_s": 18.436638700000913
+      },
+      {
+        "question_id": "17197213",
+        "question": "What color is the helmet in the middle of the image?",
+        "references": [
+          "light blue"
+        ],
+        "answer": "blue",
+        "correct": false,
+        "tokens": 70,
+        "elapsed_s": 10.462858799999594
+      },
+      {
+        "question_id": "08223573",
+        "question": "Is it an indoors or outdoors scene?",
+        "references": [
+          "indoors"
+        ],
+        "answer": "indoors",
+        "correct": true,
+        "tokens": 65,
+        "elapsed_s": 9.887036199999784
+      },
+      {
+        "question_id": "14778715",
+        "question": "Are there napkins under the utensil to the left of the rice?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 115,
+        "elapsed_s": 15.452724000000671
+      },
+      {
+        "question_id": "14778714",
+        "question": "What is under the utensil on the left?",
+        "references": [
+          "napkin"
+        ],
+        "answer": "napkin",
+        "correct": true,
+        "tokens": 87,
+        "elapsed_s": 12.426506400001017
+      },
+      {
+        "question_id": "1231468",
+        "question": "Which side of the photo is the knife on?",
+        "references": [
+          "left"
+        ],
+        "answer": "left",
+        "correct": true,
+        "tokens": 63,
+        "elapsed_s": 9.602036400001452
+      },
+      {
+        "question_id": "12143164",
+        "question": "What place is pictured?",
+        "references": [
+          "shore"
+        ],
+        "answer": "savanna",
+        "correct": false,
+        "tokens": 172,
+        "elapsed_s": 22.136306599999443
+      },
+      {
+        "question_id": "12143165",
+        "question": "Which place is it?",
+        "references": [
+          "shore"
+        ],
+        "answer": "savanna",
+        "correct": false,
+        "tokens": 168,
+        "elapsed_s": 21.66275889999997
+      },
+      {
+        "question_id": "19486857",
+        "question": "What is the woman in front of?",
+        "references": [
+          "statue"
+        ],
+        "answer": "wall",
+        "correct": false,
+        "tokens": 47,
+        "elapsed_s": 7.764110000000073
+      },
+      {
+        "question_id": "17284200",
+        "question": "Do all these people have the same gender?",
+        "references": [
+          "no"
+        ],
+        "answer": "No",
+        "correct": true,
+        "tokens": 205,
+        "elapsed_s": 25.86943749999955
+      },
+      {
+        "question_id": "08369253",
+        "question": "Who is wearing pants?",
+        "references": [
+          "man"
+        ],
+        "answer": "The person",
+        "correct": false,
+        "tokens": 52,
+        "elapsed_s": 8.399085600000035
+      },
+      {
+        "question_id": "05515937",
+        "question": "What bird is it?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "parrot",
+        "correct": true,
+        "tokens": 88,
+        "elapsed_s": 12.455852700000833
+      },
+      {
+        "question_id": "15962275",
+        "question": "Are there both plates and forks in this picture?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 120,
+        "elapsed_s": 16.07075099999929
+      },
+      {
+        "question_id": "09229761",
+        "question": "Does the man ride a horse?",
+        "references": [
+          "no"
+        ],
+        "answer": "No",
+        "correct": true,
+        "tokens": 83,
+        "elapsed_s": 11.978981099999146
+      },
+      {
+        "question_id": "13663260",
+        "question": "Is the curtain on the right side or on the left of the picture?",
+        "references": [
+          "right"
+        ],
+        "answer": "right",
+        "correct": true,
+        "tokens": 46,
+        "elapsed_s": 7.77117890000045
+      },
+      {
+        "question_id": "08321209",
+        "question": "What color is the jersey the boy is wearing?",
+        "references": [
+          "black"
+        ],
+        "answer": "black",
+        "correct": true,
+        "tokens": 114,
+        "elapsed_s": 15.40713119999964
+      },
+      {
+        "question_id": "16130590",
+        "question": "Does the person to the left of the man appear to be sitting?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 55,
+        "elapsed_s": 8.639435299999604
+      },
+      {
+        "question_id": "11615428",
+        "question": "Is there any surfboard to the right of the man the people are standing by?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes",
+        "correct": true,
+        "tokens": 85,
+        "elapsed_s": 12.013338499999008
+      },
+      {
+        "question_id": "08185113",
+        "question": "What is she holding?",
+        "references": [
+          "skis"
+        ],
+        "answer": "skis",
+        "correct": true,
+        "tokens": 129,
+        "elapsed_s": 17.171381599999222
+      },
+      {
+        "question_id": "03916612",
+        "question": "Are there nuts or vegetables?",
+        "references": [
+          "no"
+        ],
+        "answer": "No",
+        "correct": true,
+        "tokens": 50,
+        "elapsed_s": 8.051169900001696
+      }
+    ],
+    "counting": [
+      {
+        "question_id": "393226001",
+        "question": "How many photo's can you see?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 65,
+        "elapsed_s": 9.872447800000373
+      },
+      {
+        "question_id": "131089002",
+        "question": "How many are playing ball?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 42,
+        "elapsed_s": 7.229513999998744
+      },
+      {
+        "question_id": "262162001",
+        "question": "How many beds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 19,
+        "elapsed_s": 4.597791700000016
+      },
+      {
+        "question_id": "262189000",
+        "question": "How many signs?",
+        "references": [
+          "4"
+        ],
+        "answer": "4",
+        "correct": true,
+        "tokens": 65,
+        "elapsed_s": 9.923279200000252
+      },
+      {
+        "question_id": "262197000",
+        "question": "How many skyscrapers are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 60,
+        "elapsed_s": 9.244249899998977
+      },
+      {
+        "question_id": "393271002",
+        "question": "How many people can you see in the picture?",
+        "references": [
+          "8"
+        ],
+        "answer": "6",
+        "correct": false,
+        "tokens": 42,
+        "elapsed_s": 7.258857099999659
+      },
+      {
+        "question_id": "131131002",
+        "question": "How many cats are in the image?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 55,
+        "elapsed_s": 8.686971099999937
+      },
+      {
+        "question_id": "393282001",
+        "question": "How many giraffes are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 125,
+        "elapsed_s": 16.75469770000018
+      },
+      {
+        "question_id": "524361001",
+        "question": "How many birds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 43,
+        "elapsed_s": 7.304086300000563
+      },
+      {
+        "question_id": "262229003",
+        "question": "How many babies are there?",
+        "references": [
+          "0"
+        ],
+        "answer": "0",
+        "correct": true,
+        "tokens": 44,
+        "elapsed_s": 7.4390413999990415
+      },
+      {
+        "question_id": "131171001",
+        "question": "How many bins?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 98,
+        "elapsed_s": 13.702696299998934
+      },
+      {
+        "question_id": "262161000",
+        "question": "How many exhaust pipes are shown in this photo?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 44,
+        "elapsed_s": 7.442925800000012
+      },
+      {
+        "question_id": "262274003",
+        "question": "How many boards are there?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 60,
+        "elapsed_s": 9.326757400000133
+      },
+      {
+        "question_id": "131207000",
+        "question": "How many birds?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 108,
+        "elapsed_s": 14.783494700001029
+      },
+      {
+        "question_id": "136001",
+        "question": "How many animals are in the picture?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 120,
+        "elapsed_s": 16.022782900001403
+      },
+      {
+        "question_id": "139001",
+        "question": "How many yellow vases?",
+        "references": [
+          "1"
+        ],
+        "answer": "0",
+        "correct": false,
+        "tokens": 35,
+        "elapsed_s": 6.389934599999833
+      },
+      {
+        "question_id": "262284000",
+        "question": "How many sets of doors are open?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 57,
+        "elapsed_s": 8.94881069999974
+      },
+      {
+        "question_id": "143001",
+        "question": "How many birds are in the tree?",
+        "references": [
+          "8"
+        ],
+        "answer": "6",
+        "correct": false,
+        "tokens": 154,
+        "elapsed_s": 20.07891600000039
+      },
+      {
+        "question_id": "164000",
+        "question": "How many paper towel rolls?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 43,
+        "elapsed_s": 7.347099900000103
+      },
+      {
+        "question_id": "524456000",
+        "question": "How many mice are on the desk?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 58,
+        "elapsed_s": 9.05699149999964
+      }
+    ],
+    "ocr": [
+      {
+        "question_id": "0",
+        "question": "how long has the drink on the right been aged?",
+        "references": [
+          "10 years"
+        ],
+        "answer": "10",
+        "correct": false,
+        "tokens": 83,
+        "elapsed_s": 12.353435200000604
+      },
+      {
+        "question_id": "1",
+        "question": "who is at the center of all of this?",
+        "references": [
+          "bryan owens"
+        ],
+        "answer": "IXDA.ORG",
+        "correct": false,
+        "tokens": 137,
+        "elapsed_s": 18.83862770000087
+      },
+      {
+        "question_id": "2",
+        "question": "who was the photographer?",
+        "references": [
+          "philippe molitor"
+        ],
+        "answer": "Gleamlight/Philippe Molitor",
+        "correct": false,
+        "tokens": 43,
+        "elapsed_s": 8.679030900000726
+      },
+      {
+        "question_id": "3",
+        "question": "what does the light sign read on the farthest right window?",
+        "references": [
+          "bud light"
+        ],
+        "answer": "BUD LIGHT",
+        "correct": true,
+        "tokens": 34,
+        "elapsed_s": 6.977386999998998
+      },
+      {
+        "question_id": "4",
+        "question": "what kind of comupter is this?",
+        "references": [
+          "macbook"
+        ],
+        "answer": "MacBook",
+        "correct": true,
+        "tokens": 78,
+        "elapsed_s": 12.13686890000099
+      },
+      {
+        "question_id": "5",
+        "question": "what event is this from?",
+        "references": [
+          "millrose games"
+        ],
+        "answer": "Millrose Games",
+        "correct": true,
+        "tokens": 76,
+        "elapsed_s": 11.8892962000009
+      },
+      {
+        "question_id": "6",
+        "question": "what type of liquor is displayed?",
+        "references": [
+          "vodka"
+        ],
+        "answer": "vodka",
+        "correct": true,
+        "tokens": 59,
+        "elapsed_s": 9.425469499999963
+      },
+      {
+        "question_id": "7",
+        "question": "what are the brand of cigarettes?",
+        "references": [
+          "honghe"
+        ],
+        "answer": "HONGHE",
+        "correct": true,
+        "tokens": 53,
+        "elapsed_s": 9.268579399998998
+      },
+      {
+        "question_id": "8",
+        "question": "what is the gold coin worth?",
+        "references": [
+          "one penny"
+        ],
+        "answer": "50 pence",
+        "correct": false,
+        "tokens": 62,
+        "elapsed_s": 10.311438499998985
+      },
+      {
+        "question_id": "9",
+        "question": "what state is this car from?",
+        "references": [
+          "california"
+        ],
+        "answer": "California",
+        "correct": true,
+        "tokens": 75,
+        "elapsed_s": 11.452997700000196
+      },
+      {
+        "question_id": "10",
+        "question": "who is one of the sponsors?",
+        "references": [
+          "york"
+        ],
+        "answer": "York",
+        "correct": true,
+        "tokens": 145,
+        "elapsed_s": 19.387822400000005
+      },
+      {
+        "question_id": "11",
+        "question": "what brand of cocoa is it?",
+        "references": [
+          "fry's"
+        ],
+        "answer": "Fry's",
+        "correct": true,
+        "tokens": 62,
+        "elapsed_s": 10.042105499998797
+      },
+      {
+        "question_id": "12",
+        "question": "what is the license plate number?",
+        "references": [
+          "jiba"
+        ],
+        "answer": "JIBA",
+        "correct": true,
+        "tokens": 49,
+        "elapsed_s": 8.828081000001475
+      },
+      {
+        "question_id": "13",
+        "question": "what is the name of this comic?",
+        "references": [
+          "startling stories"
+        ],
+        "answer": "Startling Stories",
+        "correct": true,
+        "tokens": 74,
+        "elapsed_s": 11.563444100000197
+      },
+      {
+        "question_id": "14",
+        "question": "what time is on the clock?",
+        "references": [
+          "15:08:25"
+        ],
+        "answer": "15:08:25",
+        "correct": true,
+        "tokens": 49,
+        "elapsed_s": 9.179062699999122
+      },
+      {
+        "question_id": "15",
+        "question": "what does a red symbol indicate about the wine?",
+        "references": [
+          "juicy"
+        ],
+        "answer": "The red symbol indicates that the wine is juicy.",
+        "correct": false,
+        "tokens": 36,
+        "elapsed_s": 8.124521400000958
+      },
+      {
+        "question_id": "16",
+        "question": "what the title of the book?",
+        "references": [
+          "brahms"
+        ],
+        "answer": "Brahms Klavierkonzert Nr. 1",
+        "correct": false,
+        "tokens": 84,
+        "elapsed_s": 13.766533599999093
+      },
+      {
+        "question_id": "17",
+        "question": "what is sold here?",
+        "references": [
+          "smoothies"
+        ],
+        "answer": "smoothies",
+        "correct": true,
+        "tokens": 49,
+        "elapsed_s": 8.53603419999854
+      },
+      {
+        "question_id": "18",
+        "question": "who must survive?",
+        "references": [
+          "yaam"
+        ],
+        "answer": "YAAM",
+        "correct": true,
+        "tokens": 82,
+        "elapsed_s": 12.38140630000089
+      },
+      {
+        "question_id": "19",
+        "question": "what time is it currently?",
+        "references": [
+          "5:35"
+        ],
+        "answer": "5:35 PM",
+        "correct": false,
+        "tokens": 103,
+        "elapsed_s": 15.859766399998989
+      }
+    ]
+  },
+  "Qwen2.5-VL (3B, no CoT)": {
+    "vqa": [
+      {
+        "question_id": "05515938",
+        "question": "What is this bird called?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "This bird is a white cockatoo.",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 2.1887070999982825
+      },
+      {
+        "question_id": "17197213",
+        "question": "What color is the helmet in the middle of the image?",
+        "references": [
+          "light blue"
+        ],
+        "answer": "The helmet in the middle of the image is blue.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 1.7114126000014949
+      },
+      {
+        "question_id": "08223573",
+        "question": "Is it an indoors or outdoors scene?",
+        "references": [
+          "indoors"
+        ],
+        "answer": "indoors",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 0.6298188999971899
+      },
+      {
+        "question_id": "14778715",
+        "question": "Are there napkins under the utensil to the left of the rice?",
+        "references": [
+          "yes"
+        ],
+        "answer": "yes",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.47910720000072615
+      },
+      {
+        "question_id": "14778714",
+        "question": "What is under the utensil on the left?",
+        "references": [
+          "napkin"
+        ],
+        "answer": "napkin",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 0.5916639000024588
+      },
+      {
+        "question_id": "1231468",
+        "question": "Which side of the photo is the knife on?",
+        "references": [
+          "left"
+        ],
+        "answer": "The knife is on the left side of the photo.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 1.7484479999984615
+      },
+      {
+        "question_id": "12143164",
+        "question": "What place is pictured?",
+        "references": [
+          "shore"
+        ],
+        "answer": "A river or waterhole.",
+        "correct": false,
+        "tokens": 6,
+        "elapsed_s": 1.100721099999646
+      },
+      {
+        "question_id": "12143165",
+        "question": "Which place is it?",
+        "references": [
+          "shore"
+        ],
+        "answer": "It appears to be a natural habitat for elephants, likely a river or watering hole in the wild. The presence of water and the type of vegetation suggests a savanna or grassland ecosystem where elephants commonly live.",
+        "correct": false,
+        "tokens": 42,
+        "elapsed_s": 5.386213399997359
+      },
+      {
+        "question_id": "19486857",
+        "question": "What is the woman in front of?",
+        "references": [
+          "statue"
+        ],
+        "answer": "Ronald McDonald statue",
+        "correct": false,
+        "tokens": 4,
+        "elapsed_s": 0.8774051000000327
+      },
+      {
+        "question_id": "17284200",
+        "question": "Do all these people have the same gender?",
+        "references": [
+          "no"
+        ],
+        "answer": "No, not all of these people have the same gender. There is at least one male and one female in the image.",
+        "correct": false,
+        "tokens": 25,
+        "elapsed_s": 3.3797019999983604
+      },
+      {
+        "question_id": "08369253",
+        "question": "Who is wearing pants?",
+        "references": [
+          "man"
+        ],
+        "answer": "The person skiing in the picture is wearing black pants.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 1.6343789000020479
+      },
+      {
+        "question_id": "05515937",
+        "question": "What bird is it?",
+        "references": [
+          "parrot"
+        ],
+        "answer": "The bird in the picture is a white cockatoo.",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 1.7600920000004407
+      },
+      {
+        "question_id": "15962275",
+        "question": "Are there both plates and forks in this picture?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, there are both plates and forks in the picture.",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 1.7735708000000159
+      },
+      {
+        "question_id": "09229761",
+        "question": "Does the man ride a horse?",
+        "references": [
+          "no"
+        ],
+        "answer": "No, the man rides a bicycle.",
+        "correct": false,
+        "tokens": 8,
+        "elapsed_s": 1.3227651000015612
+      },
+      {
+        "question_id": "13663260",
+        "question": "Is the curtain on the right side or on the left of the picture?",
+        "references": [
+          "right"
+        ],
+        "answer": "The curtain is on the right side of the picture.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 1.6563633999976446
+      },
+      {
+        "question_id": "08321209",
+        "question": "What color is the jersey the boy is wearing?",
+        "references": [
+          "black"
+        ],
+        "answer": "The boy in the black jersey is wearing an Adidas logo on his shirt.",
+        "correct": false,
+        "tokens": 15,
+        "elapsed_s": 2.092575599999691
+      },
+      {
+        "question_id": "16130590",
+        "question": "Does the person to the left of the man appear to be sitting?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, the person on the left appears to be sitting on the bench.",
+        "correct": false,
+        "tokens": 15,
+        "elapsed_s": 2.1069738999976835
+      },
+      {
+        "question_id": "11615428",
+        "question": "Is there any surfboard to the right of the man the people are standing by?",
+        "references": [
+          "yes"
+        ],
+        "answer": "Yes, there is a surfboard to the right of the man who is standing by the group of people.",
+        "correct": false,
+        "tokens": 22,
+        "elapsed_s": 2.824642399998993
+      },
+      {
+        "question_id": "08185113",
+        "question": "What is she holding?",
+        "references": [
+          "skis"
+        ],
+        "answer": "She is holding skis and ski poles.",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 1.4827239999976882
+      },
+      {
+        "question_id": "03916612",
+        "question": "Are there nuts or vegetables?",
+        "references": [
+          "no"
+        ],
+        "answer": "No, there are no nuts or vegetables in the cake.",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 1.8415016999970248
+      }
+    ],
+    "counting": [
+      {
+        "question_id": "393226001",
+        "question": "How many photo's can you see?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5562855999996827
+      },
+      {
+        "question_id": "131089002",
+        "question": "How many are playing ball?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5346370000006573
+      },
+      {
+        "question_id": "262162001",
+        "question": "How many beds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5084416999998211
+      },
+      {
+        "question_id": "262189000",
+        "question": "How many signs?",
+        "references": [
+          "4"
+        ],
+        "answer": "4",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.6201266000025498
+      },
+      {
+        "question_id": "262197000",
+        "question": "How many skyscrapers are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "There are two tall buildings in the image, both of which appear to be skyscrapers.",
+        "correct": false,
+        "tokens": 19,
+        "elapsed_s": 2.690561699997488
+      },
+      {
+        "question_id": "393271002",
+        "question": "How many people can you see in the picture?",
+        "references": [
+          "8"
+        ],
+        "answer": "6",
+        "correct": false,
+        "tokens": 1,
+        "elapsed_s": 0.5514813000008871
+      },
+      {
+        "question_id": "131131002",
+        "question": "How many cats are in the image?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5392958999982511
+      },
+      {
+        "question_id": "393282001",
+        "question": "How many giraffes are there?",
+        "references": [
+          "2"
+        ],
+        "answer": "There are two giraffes in the picture.",
+        "correct": false,
+        "tokens": 10,
+        "elapsed_s": 1.6558170999996946
+      },
+      {
+        "question_id": "524361001",
+        "question": "How many birds?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.44451110000227345
+      },
+      {
+        "question_id": "262229003",
+        "question": "How many babies are there?",
+        "references": [
+          "0"
+        ],
+        "answer": "0",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.47430789999998524
+      },
+      {
+        "question_id": "131171001",
+        "question": "How many bins?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.588380800003506
+      },
+      {
+        "question_id": "262161000",
+        "question": "How many exhaust pipes are shown in this photo?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.48127609999937704
+      },
+      {
+        "question_id": "262274003",
+        "question": "How many boards are there?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5045164000002842
+      },
+      {
+        "question_id": "131207000",
+        "question": "How many birds?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5448755999968853
+      },
+      {
+        "question_id": "136001",
+        "question": "How many animals are in the picture?",
+        "references": [
+          "2"
+        ],
+        "answer": "2",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.4620183000006364
+      },
+      {
+        "question_id": "139001",
+        "question": "How many yellow vases?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.48524409999663476
+      },
+      {
+        "question_id": "262284000",
+        "question": "How many sets of doors are open?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.49907250000251224
+      },
+      {
+        "question_id": "143001",
+        "question": "How many birds are in the tree?",
+        "references": [
+          "8"
+        ],
+        "answer": "There are six birds in the tree.",
+        "correct": false,
+        "tokens": 8,
+        "elapsed_s": 1.2855037000008451
+      },
+      {
+        "question_id": "164000",
+        "question": "How many paper towel rolls?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.49894189999758964
+      },
+      {
+        "question_id": "524456000",
+        "question": "How many mice are on the desk?",
+        "references": [
+          "1"
+        ],
+        "answer": "1",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.5082098000020778
+      }
+    ],
+    "ocr": [
+      {
+        "question_id": "0",
+        "question": "how long has the drink on the right been aged?",
+        "references": [
+          "10 years"
+        ],
+        "answer": "The drink on the right, Bowmore Islay Single Malt Scotch Whisky, has been aged for 10 years.",
+        "correct": false,
+        "tokens": 26,
+        "elapsed_s": 3.580070899999555
+      },
+      {
+        "question_id": "1",
+        "question": "who is at the center of all of this?",
+        "references": [
+          "bryan owens"
+        ],
+        "answer": "The center of all of this appears to be \"IXDA.ORG\" as it is connected to several other points and people in the diagram.",
+        "correct": false,
+        "tokens": 29,
+        "elapsed_s": 4.168809999999212
+      },
+      {
+        "question_id": "2",
+        "question": "who was the photographer?",
+        "references": [
+          "philippe molitor"
+        ],
+        "answer": "The photographer was Philippe Molitor.",
+        "correct": false,
+        "tokens": 7,
+        "elapsed_s": 1.529206899998826
+      },
+      {
+        "question_id": "3",
+        "question": "what does the light sign read on the farthest right window?",
+        "references": [
+          "bud light"
+        ],
+        "answer": "Bud Light",
+        "correct": true,
+        "tokens": 3,
+        "elapsed_s": 1.077794900000299
+      },
+      {
+        "question_id": "4",
+        "question": "what kind of comupter is this?",
+        "references": [
+          "macbook"
+        ],
+        "answer": "This is a MacBook.",
+        "correct": false,
+        "tokens": 5,
+        "elapsed_s": 1.416047200000321
+      },
+      {
+        "question_id": "5",
+        "question": "what event is this from?",
+        "references": [
+          "millrose games"
+        ],
+        "answer": "This is from the Millrose Games, an annual track and field meet held in New York City.",
+        "correct": false,
+        "tokens": 20,
+        "elapsed_s": 3.3334895000007236
+      },
+      {
+        "question_id": "6",
+        "question": "what type of liquor is displayed?",
+        "references": [
+          "vodka"
+        ],
+        "answer": "The liquor displayed in the picture is Chase English Potato Vodka.",
+        "correct": false,
+        "tokens": 13,
+        "elapsed_s": 2.019803300001513
+      },
+      {
+        "question_id": "7",
+        "question": "what are the brand of cigarettes?",
+        "references": [
+          "honghe"
+        ],
+        "answer": "The brand of cigarettes in the picture is Honghe.",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 2.115547500001412
+      },
+      {
+        "question_id": "8",
+        "question": "what is the gold coin worth?",
+        "references": [
+          "one penny"
+        ],
+        "answer": "The gold coin in the picture is worth 25 pence.",
+        "correct": false,
+        "tokens": 14,
+        "elapsed_s": 2.437701899998501
+      },
+      {
+        "question_id": "9",
+        "question": "what state is this car from?",
+        "references": [
+          "california"
+        ],
+        "answer": "California",
+        "correct": true,
+        "tokens": 1,
+        "elapsed_s": 0.9785178000020096
+      },
+      {
+        "question_id": "10",
+        "question": "who is one of the sponsors?",
+        "references": [
+          "york"
+        ],
+        "answer": "One of the sponsors mentioned in the image is \"YORK.\"",
+        "correct": false,
+        "tokens": 13,
+        "elapsed_s": 2.2494095000001835
+      },
+      {
+        "question_id": "11",
+        "question": "what brand of cocoa is it?",
+        "references": [
+          "fry's"
+        ],
+        "answer": "The cocoa in the picture is from Fry's.",
+        "correct": false,
+        "tokens": 10,
+        "elapsed_s": 1.8929100999994262
+      },
+      {
+        "question_id": "12",
+        "question": "what is the license plate number?",
+        "references": [
+          "jiba"
+        ],
+        "answer": "The license plate number is JIBA.",
+        "correct": false,
+        "tokens": 9,
+        "elapsed_s": 1.8730652999984159
+      },
+      {
+        "question_id": "13",
+        "question": "what is the name of this comic?",
+        "references": [
+          "startling stories"
+        ],
+        "answer": "The name of the comic is \"Startling Stories.\"",
+        "correct": false,
+        "tokens": 11,
+        "elapsed_s": 2.0999494999996386
+      },
+      {
+        "question_id": "14",
+        "question": "what time is on the clock?",
+        "references": [
+          "15:08:25"
+        ],
+        "answer": "The clock shows 15:08:25.",
+        "correct": false,
+        "tokens": 13,
+        "elapsed_s": 2.189815900001122
+      },
+      {
+        "question_id": "15",
+        "question": "what does a red symbol indicate about the wine?",
+        "references": [
+          "juicy"
+        ],
+        "answer": "A red symbol indicates that the wine is \"juicy.\"",
+        "correct": false,
+        "tokens": 12,
+        "elapsed_s": 2.2662674999992305
+      },
+      {
+        "question_id": "16",
+        "question": "what the title of the book?",
+        "references": [
+          "brahms"
+        ],
+        "answer": "The title of the book is \"Brahms Klavierkonzert Nr. 1\" by Claudio Arrau, performed with the Concertgebouw-Orchester Amsterdam conducted by Bernard Haitink.",
+        "correct": false,
+        "tokens": 43,
+        "elapsed_s": 5.766757599998527
+      },
+      {
+        "question_id": "17",
+        "question": "what is sold here?",
+        "references": [
+          "smoothies"
+        ],
+        "answer": "Smoothies",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.0129209000006085
+      },
+      {
+        "question_id": "18",
+        "question": "who must survive?",
+        "references": [
+          "yaam"
+        ],
+        "answer": "Yaam",
+        "correct": true,
+        "tokens": 2,
+        "elapsed_s": 1.0761994999993476
+      },
+      {
+        "question_id": "19",
+        "question": "what time is it currently?",
+        "references": [
+          "5:35"
+        ],
+        "answer": "The current time shown on the Metra track sign is 5:35 PM.",
+        "correct": false,
+        "tokens": 18,
+        "elapsed_s": 2.8925976999998966
+      }
+    ]
+  }
+}

@@ -28,8 +28,8 @@ from src.utils.logging import get_logger
 logger = get_logger(__name__)
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-_BENCHMARK_DIR = _REPO_ROOT / "data" / "benchmark"
-_IMAGE_CACHE_DIR = _BENCHMARK_DIR / "images"
+_BENCHMARK_DIR = _REPO_ROOT / "data" / "VGQAV2"
+_IMAGE_CACHE_DIR = _REPO_ROOT / "data" / "benchmark" / "images"
 
 _HF_IMAGE_CONFIGS = {
     "gqa": ("lmms-lab/GQA", "val_balanced_images", "val"),
@@ -80,6 +80,7 @@ def _load_from_disk(source: str, image_ids: List[str]) -> tuple[Dict[str, Image.
 def load_task(
     task: str,
     n: Optional[int] = None,
+    offset: int = 0,
     seed: int = 0,
 ) -> List[Dict[str, Any]]:
     """Load *n* samples for *task* with images attached.
@@ -116,6 +117,8 @@ def load_task(
     with open(jsonl_path, encoding="utf-8") as f:
         rows = [json.loads(l) for l in f if l.strip()]
 
+    if offset:
+        rows = rows[offset:]
     if n is not None:
         rows = rows[:n]
 

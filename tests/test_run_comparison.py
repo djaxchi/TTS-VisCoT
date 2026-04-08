@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from experiments.run_comparison import (
+from experiments.run_model_benchmark import (
     DEFAULT_QUESTION_COUNT,
     InferenceResult,
     build_model_configs,
@@ -250,7 +250,7 @@ class TestRunConfiguration:
 
         assert labels == [
             "VisCoT (7B)",
-            "Qwen2.5-VL (7B, no CoT)",
+            "Qwen2.5-VL (3B, no CoT)",
             "GRIT (3B)",
         ]
 
@@ -273,7 +273,7 @@ class TestRunModelOnSamplesErrorHandling:
         }
 
     def test_failed_sample_is_skipped_and_run_continues(self) -> None:
-        from experiments.run_comparison import _run_model_on_samples
+        from experiments.run_model_benchmark import _run_model_on_samples
 
         model = MagicMock()
         # First call raises, second succeeds
@@ -288,7 +288,7 @@ class TestRunModelOnSamplesErrorHandling:
         assert results[0].question_id == "q2"
 
     def test_all_samples_fail_returns_empty_list(self) -> None:
-        from experiments.run_comparison import _run_model_on_samples
+        from experiments.run_model_benchmark import _run_model_on_samples
 
         model = MagicMock()
         model.predict.side_effect = RuntimeError("always fails")
@@ -296,3 +296,178 @@ class TestRunModelOnSamplesErrorHandling:
         with patch("src.eval.vqa_eval.evaluate_vqa", return_value=False):
             results = _run_model_on_samples(model, samples, 0.0, 256, "TestModel", "vqa")
         assert results == []
+
+
+class TestRunModelOnSamplesTTS:
+    def _make_sample(self, qid: str) -> dict:
+        from PIL import Image as PILImage
+
+        return {
+            "question_id": qid,
+            "question": "What is shown?",
+            "answer": "red car",
+            "image": PILImage.new("RGB", (64, 64), color=(255, 0, 0)),
+        }
+
+    def test_tts_stores_all_candidate_answers_and_replays_3_vs_5_votes(self) -> None:
+        from experiments.run_model_benchmark import _run_model_on_samples
+
+        model = MagicMock()
+        model.predict.side_effect = [
+            {"answer": "red car"},
+            {"answer": "a red car"},
+            {"answer": "blue car"},
+            {"answer": "blue car"},
+            {"answer": "blue car"},
+        ]
+        samples = [self._make_sample("q1")]
+
+        results = _run_model_on_samples(
+            model,
+            samples,
+            temperature=0.0,
+            max_new_tokens=256,
+            model_label="Qwen2.5-VL (3B, no CoT)",
+            task="vqa",
+            tts_candidates=5,
+        )
+
+        assert len(results) == 1
+        row = results[0]
+        assert row.candidate_answers == [
+            "red car",
+            "a red car",
+            "blue car",
+            "blue car",
+            "blue car",
+        ]
+        assert row.candidate_answers_normalized == [
+            "red car",
+            "red car",
+            "blue car",
+            "blue car",
+            "blue car",
+        ]
+        assert row.candidate_answer_token_ids is not None
+        assert row.candidate_answer_tokens is not None
+        assert len(row.candidate_answer_token_ids) == 5
+        assert len(row.candidate_answer_tokens) == 5
+
+        v3 = row.voting.get("majority_3", {})
+        v5 = row.voting.get("majority_5", {})
+        assert v3.get("answer") == "red car"
+        assert v5.get("answer") == "blue car"
+
+    def test_save_checkpoint_persists_tts_trace_fields(self, tmp_path: Path) -> None:
+        out = tmp_path / "cp.json"
+        r = InferenceResult(
+            question_id="q1",
+            question="What is shown?",
+            answer="blue car",
+            references=["red car"],
+            correct=False,
+            tokens=50,
+            elapsed_s=2.5,
+            candidate_answers=["red car", "a red car", "blue car", "blue car", "blue car"],
+            candidate_answers_normalized=["red car", "red car", "blue car", "blue car", "blue car"],
+            voting={
+                "majority_3": {"answer": "red car", "correct": True},
+                "majority_5": {"answer": "blue car", "correct": False},
+            },
+        )
+        save_checkpoint(out, {"ModelA": {"vqa": [r]}}, ["ModelA"], ["vqa"])
+
+        data = json.loads(out.read_text(encoding="utf-8"))
+        row = data["ModelA"]["vqa"][0]
+        assert "candidate_answers" in row
+        assert "candidate_answers_normalized" in row
+        assert "candidate_answer_token_ids" in row
+        assert "candidate_answer_tokens" in row
+        assert "voting" in row
+        assert row["voting"]["majority_3"]["answer"] == "red car"
+
+    def test_tts9_uses_majority_9_and_records_vote(self) -> None:
+        from experiments.run_model_benchmark import _run_model_on_samples
+
+        model = MagicMock()
+        model.predict.side_effect = [
+            {"answer": "cat"},
+            {"answer": "dog"},
+            {"answer": "dog"},
+            {"answer": "dog"},
+            {"answer": "dog"},
+            {"answer": "dog"},
+            {"answer": "dog"},
+            {"answer": "cat"},
+            {"answer": "cat"},
+        ]
+        samples = [self._make_sample("q1")]
+
+        results = _run_model_on_samples(
+            model,
+            samples,
+            temperature=0.0,
+            max_new_tokens=256,
+            model_label="Qwen2.5-VL (3B, no CoT)",
+            task="vqa",
+            tts_candidates=9,
+        )
+
+        assert len(results) == 1
+        row = results[0]
+        assert row.voting is not None
+        assert row.voting["majority_9"]["answer"] == "dog"
+        assert row.answer == "dog"
+
+
+class TestBuildTTSQueries:
+    def test_paraphrase_injected_at_candidate_4_and_9(self) -> None:
+        from experiments.run_model_benchmark import _build_tts_queries
+
+        question = "What is shown?"
+        para = "Which object is visible?"
+        queries = _build_tts_queries(
+            question,
+            9,
+            paraphrase=para,
+            paraphrase_slots_1based=[4, 9],
+        )
+
+        assert len(queries) == 9
+        assert queries[3] == para
+        assert queries[8] == para
+        assert queries[0] != para
+
+
+class TestTokenizationForStorage:
+    def test_tokenize_text_for_storage_uses_tokenizer_when_available(self) -> None:
+        from experiments.run_model_benchmark import _tokenize_text_for_storage
+
+        class _Tok:
+            def encode(self, text: str, add_special_tokens: bool = False):
+                assert add_special_tokens is False
+                return [11, 22]
+
+            def convert_ids_to_tokens(self, ids):
+                return [f"tok_{i}" for i in ids]
+
+        class _Proc:
+            tokenizer = _Tok()
+
+        class _Model:
+            _processor = _Proc()
+
+        ids, toks = _tokenize_text_for_storage(_Model(), "hello world")
+        assert ids == [11, 22]
+        assert toks == ["tok_11", "tok_22"]
+
+    def test_tokenize_text_for_storage_falls_back_to_whitespace_tokens(self) -> None:
+        from experiments.run_model_benchmark import _tokenize_text_for_storage
+
+        class _Model:
+            _processor = None
+            _tokenizer = None
+
+        ids, toks = _tokenize_text_for_storage(_Model(), "red car")
+        assert ids == []
+        assert toks == ["red", "car"]

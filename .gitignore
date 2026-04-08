@@ -8,18 +8,11 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-eggs/
-parts/
-var/
-sdist/
-develop-eggs/
-.installed.cfg
-lib/
-lib64/
 
 # Virtual environments
 .env
 .venv
+.venv310
 env/
 venv/
 ENV/
@@ -35,25 +28,16 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Results & outputs (keep structure, ignore content)
-results/**/*
-!results/.gitkeep
-
-# Data (large files)
-data/raw/
-data/processed/
-*.hdf5
-*.h5
-*.pkl
-*.npz
-*.npy
-
-# Model checkpoints
-checkpoints/
-*.pt
-*.pth
-*.bin
-*.safetensors
+# Cache
+cache/
+.cache
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
 
 # Logs
 logs/
@@ -61,18 +45,34 @@ logs/
 wandb/
 runs/
 
-# Secrets / credentials
+# Model checkpoints & large binaries
+checkpoints/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.hdf5
+*.h5
+*.pkl
+*.npz
+*.npy
+
+# Secrets
 .env.local
 *.key
 secrets.yaml
 
-# Distribution
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
+# Trash folder
+_trash/
+
+# Data — ignore image directories, keep metadata/jsonl
+data/**/images/
+data/benchmark/images/
+
+# Results — ignore intermediate runs and figures, keep JSON data
+results/tts_eval/
+results/tts_debug/
+results/**/*.png
+
+# Local Claude Code settings
+.claude/settings.local.json

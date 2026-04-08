@@ -10,6 +10,13 @@ from .metrics import (
     create_summary_table,
     print_metrics_summary,
 )
+from .tts_trace_metrics import (
+    build_agreement_bins,
+    build_task_rows,
+    build_zero_shot_rows,
+    compute_transition_counts,
+    get_model_tasks,
+)
 
 __all__ = [
     "AccuracyMetrics",
@@ -20,4 +27,9 @@ __all__ = [
     "compute_bbox_metrics",
     "create_summary_table",
     "print_metrics_summary",
+    "get_model_tasks",
+    "build_task_rows",
+    "build_zero_shot_rows",
+    "compute_transition_counts",
+    "build_agreement_bins",
 ]

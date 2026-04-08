@@ -65,6 +65,7 @@ class GRITModel(BaseVisualCoTModel):
     ) -> None:
         self.model_id = model_id
         self.load_in_8bit = load_in_8bit
+        self.system_prompt = _SYSTEM_PROMPT
         self._model: Any = None
         self._processor: Any = None
 
@@ -182,6 +183,7 @@ class GRITModel(BaseVisualCoTModel):
             "bbox_raw": None,
             "coords": [],
             "answer": answer,
+            "raw_output": raw_output,  # full generated text including <think>/<answer> tags
             "cot_steps": cot_steps,
             "tool_results": [],
         }

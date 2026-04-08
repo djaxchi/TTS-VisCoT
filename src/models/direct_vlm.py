@@ -1,4 +1,4 @@
-"""DirectVLMModel — Qwen2.5-VL-7B-Instruct with single-turn direct answering.
+"""DirectVLMModel — Qwen2.5-VL-3B-Instruct with single-turn direct answering.
 
 No chain-of-thought, no tool use.  Used as a no-CoT baseline against
 VisCoT and DeepEyesV2-RL.
@@ -16,7 +16,7 @@ from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-DEFAULT_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
+DEFAULT_MODEL_ID = "Qwen/Qwen2.5-VL-3B-Instruct"
 
 _SYSTEM_PROMPT = "You are a helpful visual question answering assistant. Answer concisely."
 

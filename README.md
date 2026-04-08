@@ -1,170 +1,192 @@
-# TTS-VisCoT: Test-Time Scaling for Visual Chain-of-Thought
+# TTS-VisCoT: Test-Time Scaling for Visual Reasoning Models
 
-> **Research repository** — Investigating how test-time compute scaling enhances the reasoning capability of Visual Chain-of-Thought (CoT) models on visual cognitive tasks.
+> **Research project** (IFT6765 — Polytechnique Montréal, March 2026)
+> Authors: Djalil Chikhi, Youssef Laatar
 
----
-
-## Overview
-
-This project benchmarks **test-time scaling (TTS)** strategies against baselines on visual chain-of-thought tasks. We evaluate across:
-
-- **Datasets** — Standardized visual reasoning benchmarks (initially scoped to counting tasks)
-- **Data augmentation** — Augmentation pipelines applied at inference time to diversify the reasoning paths sampled
-- **Voting / aggregation systems** — Methods for combining multiple sampled CoT paths into a final prediction (majority vote, weighted vote, best-of-N, etc.)
-
-The central hypothesis is that allowing a visual CoT model more compute at test time — through repeated sampling + smart aggregation — yields measurable accuracy gains, even without additional training.
+Investigating whether test-time scaling (TTS) — running multiple perturbed inference passes and aggregating via majority vote — improves the accuracy of visual reasoning models on VQA, OCR, and counting tasks.
 
 ---
 
-## Repository Structure
+## Key findings
+
+- **GRIT (3B)** is the primary TTS candidate: its explicit reasoning structure benefits most from multi-candidate aggregation.
+- **Qwen2.5-VL (3B/7B)** serves as the direct-answer baseline.
+- TTS with 9 candidates (7 augmentation variants + 2 paraphrase variants) yields consistent gains on VQA and counting; OCR is more sensitive to image distortions.
+- Full results and plots: [`results/comparison/`](results/comparison/) and [`results/tts/`](results/tts/).
+
+---
+
+## Models benchmarked
+
+| Model | Size | Reasoning style |
+|---|---|---|
+| Qwen2.5-VL | 3B / 7B | Direct answer (baseline) |
+| GRIT | 3B | Explicit CoT before answering |
+| VisCoT | 7B | Bounding-box grounded reasoning |
+| DeepEyesV2-RL | 7B | Agentic tool-calling loop |
+
+---
+
+## Datasets
+
+| Dataset | Tasks | Notes |
+|---|---|---|
+| VGQAV2 | VQA, OCR, Counting | 100 samples per task — primary benchmark |
+| TreeBench | VQA (hard) | Harder evaluation set |
+
+Data lives under `data/`. Image directories are gitignored (large); JSONL metadata is committed.
+
+---
+
+## TTS approach
+
+For each input, generate **9 candidates** using a fixed recipe of input perturbations, then aggregate via **majority vote**:
+
+### Image augmentations
+| ID | Transform |
+|---|---|
+| `edge` | Edge enhancement |
+| `gray` | Grayscale conversion |
+| `jpeg` | JPEG recompression (blur) |
+| `brightness` | Brightness + contrast shift |
+| `rotate90` | 90° rotation |
+
+### Text (prompt) variants
+| ID | Method |
+|---|---|
+| `hardcoded_paraphrase` | Pre-written rephrase of the question |
+| `model_paraphrase` | LLM-generated rephrase (cached) |
+
+---
+
+## Repository layout
 
 ```
 TTS-VisCoT/
-├── configs/                    # YAML configuration files
-│   ├── datasets/               #   per-dataset configs
-│   ├── models/                 #   model / backbone configs
-│   └── experiments/            #   full experiment configs (baseline, TTS variants)
+├── configs/
+│   ├── datasets/           treebench.yaml
+│   ├── models/             grit.yaml, viscot.yaml, deepeyes_v2.yaml
+│   └── experiments/        baseline.yaml, tts.yaml, comparison.yaml
 │
-├── src/                        # Core source package
+├── data/
+│   ├── VGQAV2/             counting_100.jsonl, ocr_100.jsonl, vqa_100.jsonl
+│   └── treebench_samples/  metadata.jsonl (images gitignored)
+│
+├── experiments/
+│   ├── run_model_benchmark.py      Baseline comparison across all models
+│   ├── run_tts_eval.py             TTS evaluation on VGQAV2
+│   ├── run_test_time_scaling.py    Full TTS scaling sweep
+│   ├── run_tts_hard.py             TTS on hard subsets
+│   └── run_tts_treebench.py        TTS on TreeBench
+│
+├── results/
+│   ├── comparison/         ModelBenchmark.json + final figures (figA–figG)
+│   └── tts/                TTS.json, TTS_Hard.json + scaling plots
+│
+├── scripts/
+│   ├── plot_results.py             Generate comparison figures
+│   ├── plot_tts_scaling.py         TTS scaling curves
+│   ├── plot_tts_hard_candidates.py Hard-subset analysis
+│   ├── plot_presentation.py        Slide-ready figures
+│   ├── build_static_paraphrase_cache.py  Pre-compute question paraphrases
+│   └── export_treebench_questions.py     Export TreeBench samples
+│
+├── src/
+│   ├── augment_image.py    Image perturbation specs + generators
+│   ├── augment_text.py     Prompt paraphrase generators
+│   ├── pipeline_tts.py     Core TTS pipeline (build_candidate_inputs, run_tts_pipeline)
+│   ├── voting_tts.py       Voting utilities (VoteStats, compute_vote_stats)
+│   ├── utils_normalize.py  Answer normalization (open-ended + MCQ)
+│   ├── token_aggregation.py  Token-level logit aggregation (experimental)
+│   ├── check_token_support.py  Check if model exposes token probabilities
 │   ├── data/
-│   │   ├── datasets/           #   Dataset loaders (counting, …)
-│   │   └── augmentation/       #   Augmentation strategies (geometric, semantic, …)
-│   ├── models/                 #   Model wrappers / Visual-CoT interface
+│   │   ├── datasets/       base.py, viscot_benchmark.py, treebench.py, treebench_export.py
+│   │   └── augmentation/   base.py, image_aug.py, text_aug.py, views.py
+│   ├── eval/
+│   │   ├── metrics.py      AccuracyMetrics, BBoxMetrics, RobustnessMetrics
+│   │   ├── tts_eval.py     make_predict_fn, evaluate_one, compute_summary
+│   │   ├── voting_replay.py  Replay saved candidates under different voting strategies
+│   │   ├── token_trace.py  Token-level agreement analytics (experimental)
+│   │   ├── tts_trace_metrics.py  Candidate trace analytics
+│   │   └── vqa_eval.py     VQA string-match evaluation
 │   ├── methods/
-│   │   ├── baseline.py         #   Greedy / single-pass baseline
-│   │   └── tts/                #   Test-time scaling strategies (sampling, budgeting)
-│   ├── voting/                 #   Aggregation / voting systems
-│   ├── eval/                   #   Metrics, benchmark runner, result visualizations
-│   └── utils/                  #   Logging, I/O helpers
+│   │   ├── baseline.py     Single-pass inference
+│   │   └── tts/            sampling.py, scaling.py, open_ended.py
+│   ├── models/
+│   │   ├── base.py         BaseVisualCoTModel
+│   │   ├── direct_vlm.py   Qwen2.5-VL wrapper
+│   │   ├── grit.py         GRIT wrapper
+│   │   ├── viscot.py       VisCoT wrapper
+│   │   └── deepeyes_v2.py  DeepEyesV2 agentic wrapper
+│   ├── voting/
+│   │   ├── majority.py, bbox_consensus.py, normalize.py
+│   └── utils/
+│       ├── io.py, logging.py
 │
-├── experiments/                # Top-level runnable experiment scripts
-│   ├── run_baseline.py
-│   ├── run_tts.py
-│   └── ablations/              #   Isolated ablation scripts
-│
-├── notebooks/                  # Exploratory & results analysis notebooks
-│
-├── results/                    # Output artefacts (ignored by git except structure)
-│
-├── scripts/                    # Shell utility scripts (env setup, data download)
-│
-└── tests/                      # Unit & integration tests
+└── tests/
+    ├── test_run_comparison.py      Benchmark checkpoint/resume logic
+    ├── test_run_tts_eval.py        Paraphrase cache + candidate view saving
+    ├── test_tts_eval.py            make_predict_fn, evaluate_one, compute_summary
+    ├── test_tts_pipeline.py        build_candidate_inputs, run_tts_pipeline, voting
+    ├── test_voting_replay.py       Voting replay + reliability weights
+    ├── test_treebench_export.py    TreeBench export utility
+    ├── test_token_aggregation.py   Token-level aggregation (experimental)
+    ├── test_token_trace.py         Token trace analytics
+    └── test_tts_trace_metrics.py   Candidate trace metrics
 ```
 
 ---
 
-## Key Concepts
+## Running experiments
 
-| Term | Definition |
-|---|---|
-| **Visual CoT** | A multimodal LLM prompted to produce a step-by-step reasoning chain before giving a final answer to a visual question |
-| **Test-time scaling (TTS)** | Allocating additional compute at inference time (e.g., sampling N completions) without changing model weights |
-| **Voting system** | An aggregation function that maps N candidate answers/chains to a single final prediction |
-| **Augmentation** | Transformations applied to the input image (and/or prompt) to increase diversity across sampled reasoning chains |
-
----
-
-## Experimental Axes
-
-### 1. Datasets
-- `counting` — Visual counting tasks (primary benchmark)
-- *(extensible)* — Additional visual reasoning categories
-
-### 2. Data Augmentation Methods
-| Method | Description |
-|---|---|
-| `none` | No augmentation (baseline) |
-| `geometric` | Flips, crops, rotations, color jitter |
-| `semantic` | Caption-guided or region-mask perturbations |
-| `mixed` | Combination of geometric + semantic |
-
-### 3. Voting / Aggregation Systems
-| System | Description |
-|---|---|
-| `majority` | Plurality vote over final predicted answers |
-| `weighted` | Vote weighted by model confidence / log-prob |
-| `best_of_n` | Select chain with highest self-consistency score |
-| `orm` | Outcome reward model re-ranking |
-
-### 4. Scaling Budgets (N)
-`N ∈ {1, 4, 8, 16, 32, 64}` — number of sampled completions per example.
-
----
-
-## Getting Started
-
-### Installation
+### 1. Model benchmark (baseline comparison)
 
 ```bash
-git clone https://github.com/djaxchi/TTS-VisCoT.git
-cd TTS-VisCoT
-pip install -e ".[dev]"
-```
-### Test model
-
-cd /Users/djadja/Code/TTS-VisCoT && /opt/homebrew/bin/python3.11 experiments/run_viscot.py \
-    --image "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Cute_dog.jpg/1200px-Cute_dog.jpg" \
-    --query "What is the dog doing?" 2>&1
-
-### Running a Baseline Experiment
-
-```bash
-python experiments/run_baseline.py \
-    --config configs/experiments/baseline.yaml \
-    --dataset counting \
-    --output results/baseline_counting/
+python experiments/run_model_benchmark.py \
+    --n 100 \
+    --save-output results/comparison/ModelBenchmark.json
 ```
 
-### Running a TTS Experiment
+### 2. TTS evaluation on VGQAV2
 
 ```bash
-python experiments/run_tts.py \
-    --config configs/experiments/tts_majority_vote.yaml \
-    --dataset counting \
-    --n_samples 16 \
-    --voting majority \
-    --augmentation geometric \
-    --output results/tts_counting_n16/
+python experiments/run_tts_eval.py \
+    --data-dir data/VGQAV2 \
+    --benchmark-task vqa \
+    --model-type grit \
+    --save-dir results/tts_eval/grit_vqa
 ```
 
-### Running All Ablations
+### 3. Full TTS scaling sweep
 
 ```bash
-bash scripts/run_ablations.sh
+python experiments/run_test_time_scaling.py \
+    --save-output results/tts/TTS.json
+```
+
+### 4. Plot final figures
+
+```bash
+python scripts/plot_results.py
+python scripts/plot_tts_scaling.py
+```
+
+### 5. Run all tests
+
+```bash
+pytest tests/ -v
 ```
 
 ---
 
-## Results
+## Hardware requirements
 
-Results and analysis notebooks are stored in `results/` and `notebooks/`. Once experiments are complete, summary tables and plots will be populated here.
-
-| Method | Augmentation | Voting | N | Accuracy |
-|---|---|---|---|---|
-| Baseline | none | — | 1 | — |
-| TTS | none | majority | 16 | — |
-| TTS | geometric | majority | 16 | — |
-| TTS | geometric | weighted | 16 | — |
-| TTS | semantic | majority | 16 | — |
-
----
-
-## Contributing
-
-This is an active research project. See `docs/contributing.md` for conventions on adding new datasets, augmentation methods, or voting strategies.
-
----
-
-## Citation
-
-*(To be added upon publication)*
+- GRIT / VisCoT / Qwen2.5-VL (3B): ≥ 8 GB VRAM
+- Qwen2.5-VL (7B) / VisCoT (7B): ≥ 16 GB VRAM
+- DeepEyesV2-RL (7B): ≥ 16 GB VRAM (`load_in_8bit=True` default)
 
 ---
 
 ## License
 
 MIT
-
-
-
-python experiments/run_comparison.py --n 20 --resume --save-output results/comparison/run2.json

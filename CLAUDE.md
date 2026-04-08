@@ -23,33 +23,91 @@ Do not skip step 1.  Do not write implementation code that has no corresponding 
 
 ```
 TTS-VisCoT/
-├── configs/         YAML experiment configs (datasets, models, experiments)
-├── experiments/     Top-level runnable scripts (run_baseline.py, run_tts.py, ablations/)
-├── notebooks/       Exploratory analysis and results visualisation
-├── results/         Output artefacts — gitignored except .gitkeep
-├── scripts/         Shell utilities (setup_env.sh, run_ablations.sh)
+├── configs/
+│   ├── datasets/        treebench.yaml
+│   ├── models/          grit.yaml, viscot.yaml, deepeyes_v2.yaml
+│   └── experiments/     baseline.yaml, tts.yaml, comparison.yaml
+│
+├── data/
+│   ├── VGQAV2/          counting_100.jsonl, ocr_100.jsonl, vqa_100.jsonl
+│   └── treebench_samples/  metadata.jsonl (images gitignored)
+│
+├── experiments/
+│   ├── run_model_benchmark.py    Baseline comparison across all models
+│   ├── run_tts_eval.py           TTS evaluation on VGQAV2
+│   ├── run_test_time_scaling.py  Full TTS scaling sweep
+│   ├── run_tts_hard.py           TTS on hard question subsets
+│   └── run_tts_treebench.py      TTS on TreeBench
+│
+├── results/
+│   ├── comparison/       Final benchmark figures + ModelBenchmark.json
+│   └── tts/              TTS.json, TTS_Hard.json + scaling plots
+│
+├── scripts/
+│   ├── plot_results.py, plot_tts_scaling.py, plot_tts_hard_candidates.py
+│   ├── plot_presentation.py
+│   ├── build_static_paraphrase_cache.py
+│   └── export_treebench_questions.py
+│
 ├── src/
-│   ├── data/        Dataset loaders + augmentation strategies
-│   ├── eval/        Metrics, benchmark runner, visualisations
-│   ├── methods/     baseline.py and tts/ (sampling + scaling)
-│   ├── models/      BaseVisualCoTModel + VisualCoTModel + DeepEyesV2Model (HuggingFace)
-│   ├── utils/       logging, I/O helpers
-│   └── voting/      Aggregation systems (majority, weighted, best_of_n)
-└── tests/           Mirrors src/ structure; one test file per module
+│   ├── augment_image.py          Image perturbation specs + generators
+│   ├── augment_text.py           Prompt paraphrase generators
+│   ├── pipeline_tts.py           Core TTS pipeline
+│   ├── voting_tts.py             Voting utilities (VoteStats, compute_vote_stats)
+│   ├── utils_normalize.py        Answer normalization
+│   ├── token_aggregation.py      Token-level logit aggregation (experimental)
+│   ├── check_token_support.py    Token probability support check
+│   ├── data/
+│   │   ├── datasets/             base.py, viscot_benchmark.py, treebench.py, treebench_export.py
+│   │   └── augmentation/         base.py, image_aug.py, text_aug.py, views.py
+│   ├── eval/
+│   │   ├── metrics.py            AccuracyMetrics, BBoxMetrics, RobustnessMetrics
+│   │   ├── tts_eval.py           make_predict_fn, evaluate_one, compute_summary
+│   │   ├── voting_replay.py      Replay candidates under different voting strategies
+│   │   ├── token_trace.py        Token-level agreement analytics (experimental)
+│   │   ├── tts_trace_metrics.py  Candidate trace analytics
+│   │   └── vqa_eval.py           VQA string-match evaluation
+│   ├── methods/
+│   │   ├── baseline.py           Single-pass inference
+│   │   └── tts/                  sampling.py, scaling.py, open_ended.py
+│   ├── models/
+│   │   ├── base.py               BaseVisualCoTModel
+│   │   ├── direct_vlm.py         Qwen2.5-VL wrapper
+│   │   ├── grit.py               GRIT wrapper
+│   │   ├── viscot.py             VisCoT wrapper
+│   │   └── deepeyes_v2.py        DeepEyesV2 agentic wrapper
+│   ├── voting/                   majority.py, bbox_consensus.py, normalize.py
+│   └── utils/                    io.py, logging.py
+│
+└── tests/
+    ├── test_run_comparison.py      Benchmark checkpoint/resume logic
+    ├── test_run_tts_eval.py        Paraphrase cache + candidate view saving
+    ├── test_tts_eval.py            make_predict_fn, evaluate_one, compute_summary
+    ├── test_tts_pipeline.py        build_candidate_inputs, voting utilities
+    ├── test_voting_replay.py       Voting replay + reliability weights
+    ├── test_treebench_export.py    TreeBench export utility
+    ├── test_token_aggregation.py   Token-level aggregation (experimental)
+    ├── test_token_trace.py         Token trace analytics
+    └── test_tts_trace_metrics.py   Candidate trace metrics
 ```
 
 ---
 
 ## TDD rules for this project
 
-### 1. Tests live in `tests/`, mirrors `src/`
+### 1. Tests live in `tests/`
 
 | Source file | Test file |
 |---|---|
-| `src/voting/majority.py` | `tests/test_voting.py` → `TestMajorityVote` |
-| `src/eval/metrics.py` | `tests/test_eval.py` → `TestComputeMetrics` |
-| `src/data/augmentation/geometric.py` | `tests/test_data.py` → `TestGeometricAugmentation` |
-| `src/models/deepeyes_v2.py` | `tests/test_models.py` → `TestDeepEyesV2Model` |
+| `src/pipeline_tts.py` | `tests/test_tts_pipeline.py` |
+| `src/eval/tts_eval.py` | `tests/test_tts_eval.py` |
+| `src/eval/voting_replay.py` | `tests/test_voting_replay.py` |
+| `src/token_aggregation.py` | `tests/test_token_aggregation.py` |
+| `src/eval/token_trace.py` | `tests/test_token_trace.py` |
+| `src/eval/tts_trace_metrics.py` | `tests/test_tts_trace_metrics.py` |
+| `src/data/datasets/treebench_export.py` | `tests/test_treebench_export.py` |
+| `experiments/run_model_benchmark.py` | `tests/test_run_comparison.py` |
+| `experiments/run_tts_eval.py` | `tests/test_run_tts_eval.py` |
 
 ### 2. Write the test before touching the source file
 
@@ -59,13 +117,13 @@ complete the test cases for that unit, then implement against them.
 ### 3. Fixtures over mocks where possible
 
 Use small, deterministic in-memory fixtures (e.g. a 64×64 PIL Image, a
-hand-crafted list of chain dicts) instead of patching external services.
+hand-crafted list of candidate dicts) instead of patching external services.
 Reserve `unittest.mock` for I/O boundaries (model API calls, disk access).
 
 ### 4. Tests must be fast and isolated
 
 - No real model downloads or GPU calls in unit tests.
-- Mock `BaseVisualCoTModel.generate` to return deterministic chain lists.
+- Mock model `generate` / `_call_model` to return deterministic outputs.
 - Use `tmp_path` (pytest built-in fixture) for anything that writes to disk.
 
 ### 5. One class, one behaviour per test method
@@ -74,22 +132,19 @@ Name tests as `test_<what>_<condition>_<expected>`.  For example:
 ```python
 def test_majority_vote_tie_returns_first_seen_answer(): ...
 def test_accuracy_empty_input_returns_zero(): ...
-def test_geometric_aug_output_size_equals_input_size(): ...
+def test_build_candidate_inputs_returns_nine_entries(): ...
 ```
 
 ### 6. Parametrize sweeps
 
-Use `@pytest.mark.parametrize` to cover edge cases without duplicating test bodies:
 ```python
-@pytest.mark.parametrize("n", [1, 4, 8, 16, 32])
-def test_tts_method_calls_generate_exactly_n_times(n): ...
+@pytest.mark.parametrize("n", [1, 5, 9])
+def test_tts_pipeline_generates_n_candidates(n): ...
 ```
 
 ---
 
 ## Implementing a new component
-
-Follow this sequence every time:
 
 ```
 Step 1 — Open the corresponding test file.
@@ -105,17 +160,10 @@ Step 7 — Update the __init__.py registry if the component is factory-built.
 
 ## Adding a new dataset
 
-1. Write `tests/test_data.py::TestMyDataset` — cover `__len__`, `__getitem__`,
-   `split` filtering, and `max_samples` cap.
-2. Create `src/data/datasets/my_dataset.py` inheriting `BaseDataset`.
-3. Register it in `src/data/datasets/__init__.py::_DATASET_REGISTRY`.
-4. Add a YAML config in `configs/datasets/my_dataset.yaml`.
-
-## Adding a new augmentation
-
-1. Write `tests/test_data.py::TestMyAugmentation`.
-2. Create `src/data/augmentation/my_aug.py` inheriting `BaseAugmentation`.
-3. Register it in `src/data/augmentation/__init__.py::_AUGMENTATION_REGISTRY`.
+1. Write `tests/test_<name>.py` — cover `__len__`, `__getitem__`, split filtering, and `max_samples` cap.
+2. Create `src/data/datasets/<name>.py` inheriting `BaseDataset`.
+3. Register it in `src/data/datasets/__init__.py`.
+4. Add a YAML config in `configs/datasets/<name>.yaml`.
 
 ## Adding a new model
 
@@ -132,16 +180,16 @@ Every model's `generate()` must return a list of dicts with **at minimum** these
 
 | Key | Type | Notes |
 |---|---|---|
-| `"bbox_raw"` | `str \| None` | Raw bbox string (VisCoT) or `None` (agentic models) |
+| `"bbox_raw"` | `str \| None` | Raw bbox string (VisCoT) or `None` |
 | `"coords"` | `list[float]` | Parsed `[x1, y1, x2, y2]` or `[]` if not applicable |
 | `"answer"` | `str` | Final answer (may be `""` if max turns exhausted) |
 
-Agentic models (like DeepEyesV2) additionally return:
+Agentic models (DeepEyesV2) additionally return:
 
 | Key | Type | Notes |
 |---|---|---|
-| `"cot_steps"` | `list[str]` | One entry per agentic turn (raw model output) |
-| `"tool_results"` | `list[str]` | Captured stdout / error for each code execution |
+| `"cot_steps"` | `list[str]` | One entry per agentic turn |
+| `"tool_results"` | `list[str]` | Captured stdout / error per code execution |
 
 ---
 
@@ -159,72 +207,29 @@ generate(image, query, n=N)
           └── loop up to max_turns:
                 _call_model(messages) → response
                   ├── <answer>...</answer> found  → terminate, return answer
-                  ├── <code>...</code> found       → _execute_code(), append tool result to messages
+                  ├── <code>...</code> found       → _execute_code(), append tool result
                   └── neither                      → treat full response as answer, terminate
 ```
 
-### Key constants (deepeyes_v2.py)
+### Key constants
 
-- `DEFAULT_MODEL_ID = "honglyhly/DeepEyesV2_7B_1031"` — RL-tuned checkpoint (SFT + GRPO).
-- `DEFAULT_MAX_TURNS = 10` — safety ceiling on the agentic loop.
-- `SYSTEM_PROMPT` — instructs the model on tool syntax (`<code>`, `<answer>` tags).
+- `DEFAULT_MODEL_ID = "honglyhly/DeepEyesV2_7B_1031"`
+- `DEFAULT_MAX_TURNS = 10`
 
 ### Code execution sandbox (`_execute_code`)
 
-- Runs in an isolated `exec` namespace; **never** shares state between chains.
+- Isolated `exec` namespace per chain — never shared between chains.
 - Pre-populated with `image_1` (NumPy H×W×3 uint8 RGB), `np`, `math`, `collections`.
 - Captures stdout via `contextlib.redirect_stdout`; returns error summary on exception.
-- Do **not** allow imports of `matplotlib`, file writes, or network calls inside the sandbox.
+- Do **not** allow `matplotlib`, file writes, or network calls inside the sandbox.
 
 ### Parser helpers (module-level, public for testability)
 
 | Function | Purpose |
 |---|---|
-| `_parse_answer(text)` | Extract first `<answer>...</answer>`, strip whitespace, or `None` |
-| `_extract_code_block(text)` | Extract first `<code>...</code>` (preserves indentation), or `None` |
+| `_parse_answer(text)` | Extract `<answer>...</answer>` or `None` |
+| `_extract_code_block(text)` | Extract `<code>...</code>` or `None` |
 | `_execute_code(code, namespace)` | Run code, return stdout or `"ExcType: msg"` |
-
-These are **module-level functions**, not methods, so tests can call them without
-instantiating or loading the model.
-
-### Testing an agentic model — checklist
-
-When writing `tests/test_models.py::TestDeepEyesV2Model` (or any future agentic model):
-
-1. **Contract tests** — `generate` returns list of n dicts; all required keys present.
-2. **Lazy-loading guard** — patch `_load` and verify it is called before `_run_chain`.
-3. **Parser unit tests** — `_parse_answer` / `_extract_code_block` cover happy-path,
-   missing tag, whitespace, and multiline content.
-4. **Executor tests** — `_execute_code` covers: stdout capture, namespace access
-   (`image_1`), exception summary, empty output.
-5. **Termination tests** — mock `_call_model` to return:
-   - A response with `<answer>` → verify chain terminates immediately.
-   - `max_turns` responses without `<answer>` → verify `answer == ""`.
-6. **Never call real HF weights** in unit tests — stub `_model` and `_processor`
-   attributes directly on the instance or via `unittest.mock.patch.object`.
-
-### Running DeepEyesV2 interactively
-
-```bash
-python experiments/run_deepeyes_v2.py \
-    --image path/to/image.jpg \
-    --query "What colour is the car on the left?" \
-    [--model-id honglyhly/DeepEyesV2_7B_1031] \
-    [--max-turns 10] \
-    [--temperature 0.2] \
-    [--save-output results/my_run/output.json]
-```
-
-Requires ≥16 GB VRAM; `load_in_8bit: true` (default) fits in 16 GB.
-Use `load_in_8bit: false` only if you have 40+ GB VRAM.
-
----
-
-## Adding a new voting system
-
-1. Write `tests/test_voting.py::TestMyVoting` using the shared `CHAINS_*` fixtures.
-2. Create `src/voting/my_voting.py` inheriting `BaseVotingSystem`.
-3. Register it in `src/voting/__init__.py::_VOTING_REGISTRY`.
 
 ---
 
@@ -234,27 +239,20 @@ Use `load_in_8bit: false` only if you have 40+ GB VRAM.
 # All tests with coverage
 pytest
 
-# Single module
-pytest tests/test_voting.py -v
+# Single file
+pytest tests/test_tts_pipeline.py -v
 
-# Only fast unit tests (no integration)
+# Only fast unit tests
 pytest -m "not integration"
-
-# Watch mode (requires pytest-watch)
-ptw tests/
 ```
-
-Coverage target: **≥ 90 %** on `src/` before any experiment is considered valid.
 
 ---
 
 ## Experiment reproducibility
 
-- Every experiment must be driven by a YAML config under `configs/experiments/`.
-- Random seeds must be set in the config (`seed` key) and respected by all
-  stochastic components (augmentation, model sampling).
-- Results are saved to `results/<run_name>/` with `predictions.jsonl` and
-  `metrics.json`.  Never hard-code output paths in source files.
+- Experiments are driven by YAML configs under `configs/experiments/`.
+- Results are saved to `results/<run_name>/` with `predictions.jsonl` and `metrics.json`.
+- Never hard-code output paths in source files.
 
 ---
 
@@ -274,9 +272,6 @@ Coverage target: **≥ 90 %** on `src/` before any experiment is considered vali
 - Do not add `print()` statements to production code — use `get_logger()`.
 - Do not hard-code model names, paths, or hyperparameters — use configs.
 - Do not commit large binary files (images, checkpoints) — use remote storage.
-- Do not share execution namespaces between agentic chains — each `_run_chain` call
-  must build a fresh `exec_ns` to prevent cross-chain state pollution.
-- Do not allow the code sandbox to import `matplotlib`, perform file I/O, or make
-  network requests — the sandbox is for numerical inspection only.
-- Do not raise an exception when `max_turns` is exhausted — return `answer = ""`
-  and let the caller (TTS method + voting) handle the empty prediction gracefully.
+- Do not share execution namespaces between agentic chains.
+- Do not allow the code sandbox to import `matplotlib`, perform file I/O, or make network requests.
+- Do not raise an exception when `max_turns` is exhausted — return `answer = ""`.
