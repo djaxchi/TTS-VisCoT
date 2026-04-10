@@ -65,9 +65,10 @@ secrets.yaml
 # Trash folder
 _trash/
 
-# Data — ignore image directories, keep metadata/jsonl
+# Data — ignore image cache directories, keep metadata/jsonl
 data/**/images/
 data/benchmark/images/
+data/hard_bench/images/
 
 # Results — ignore intermediate runs and figures, keep JSON data
 results/tts_eval/

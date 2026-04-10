@@ -29,7 +29,7 @@ TTS-VisCoT/
 │   └── experiments/     baseline.yaml, tts.yaml, comparison.yaml
 │
 ├── data/
-│   ├── VGQAV2/                          counting_100.jsonl, ocr_100.jsonl, vqa_100.jsonl
+│   ├── hard_bench/                      vqa_100.jsonl, ocr_100.jsonl, counting_100.jsonl
 │   ├── treebench_samples/               metadata.jsonl (images gitignored)
 │   ├── treebench_paraphrase_template.jsonl
 │   └── treebench_paraphrased.jsonl
@@ -45,6 +45,7 @@ TTS-VisCoT/
 │   └── tts/              TTS.json, TTS_Hard.json, TTS_TreeBench.json + scaling plots
 │
 ├── scripts/
+│   ├── prepare_hard_bench.py              Generate data/hard_bench/ JSONL files from HF
 │   ├── build_static_paraphrase_cache.py   Pre-compute hardcoded paraphrase cache
 │   ├── export_treebench_questions.py       Export TreeBench questions for paraphrasing
 │   ├── run_ablations.sh                    Ablation sweep driver
@@ -81,6 +82,61 @@ TTS-VisCoT/
     ├── test_voting_replay.py       Voting replay + reliability weights
     └── test_treebench_export.py    TreeBench export utility
 ```
+
+---
+
+## Benchmark datasets
+
+### Why we replaced VGQAV2
+
+The original benchmark (VGQAV2 — GQA/TextVQA/VQAv2 subsets) was retired because
+state-of-the-art 7B VLMs score above 80 % on all three tasks, leaving no room to
+measure TTS gains.  The new `hard_bench` datasets target regimes where current
+models still struggle (roughly 35–60 %).
+
+### hard_bench layout
+
+```
+data/hard_bench/
+├── vqa_100.jsonl        MMMU-Pro  (100 samples, 30 academic subjects)
+├── ocr_100.jsonl        OCRBench  (100 samples, 10 recognition types)
+├── counting_100.jsonl   ChartQA   (100 counting-style questions)
+└── images/              Local image cache — gitignored, populated on first run
+```
+
+Each JSONL row has fields: `question_id`, `question`, `answer`, `image_id`, `image_source`.
+Images are **not** stored in git.  The loader (`src/data/datasets/viscot_benchmark.py`)
+fetches them from HuggingFace on first access and caches them under `data/hard_bench/images/`.
+
+To regenerate the JSONL files (e.g. after changing the sample selection):
+
+```bash
+python scripts/prepare_hard_bench.py          # all three tasks
+python scripts/prepare_hard_bench.py vqa      # single task
+```
+
+### Dataset details
+
+| Task | Dataset | HF repo | Why it's hard |
+|---|---|---|---|
+| VQA | **MMMU-Pro** | `MMMU/MMMU_Pro` | 10-option MCQ across 30 academic disciplines; questions that require genuine visual grounding, not text shortcuts; Qwen2.5-VL-7B ~38-41 % |
+| OCR | **OCRBench v1** | `echo840/OCRBench` | 10 recognition types including handwriting, artistic text, irregular layouts, and handwritten math; Qwen2.5-VL-7B ~42/100 |
+| Counting | **ChartQA (counting subset)** | `lmms-lab/ChartQA` | Counting bars/segments/data-points in real scientific charts; requires reading chart structure, not subitizing; filtered to non-trivial counts (answer > 3) |
+
+### Image sources and loader
+
+`src/data/datasets/viscot_benchmark.py → load_task(task, n)` dispatches on
+`image_source` per row:
+
+| `image_source` value | HF dataset fetched |
+|---|---|
+| `mmmu_pro` | `MMMU/MMMU_Pro`, standard (10 options), test split — matched by question `id` |
+| `ocrbench` | `echo840/OCRBench`, test split — matched by sequential dataset index |
+| `chartqa` | `lmms-lab/ChartQA`, test split — matched by sequential dataset index |
+| `gqa` | `lmms-lab/GQA`, val_balanced_images — retained for TreeBench compatibility |
+
+Images are saved as JPEG to `data/hard_bench/images/<source>/<image_id>.jpg` after
+the first fetch; subsequent runs are fully offline.
 
 ---
 
