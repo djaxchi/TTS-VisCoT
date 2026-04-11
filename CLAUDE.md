@@ -298,7 +298,7 @@ All GPU experiments run on **Narval** (A100-40GB nodes).
 
 ### Account details
 - **Username:** `dchikhi`
-- **SLURM accounts:** `def-azouaq` (default), `aip-azouaq` (research project — prefer for GPU jobs)
+- **SLURM accounts:** `def-azouaq` (only available account — use for all jobs)
 - **Login node:** `narval.alliancecan.ca`
 
 ### Key paths on Narval
@@ -331,7 +331,7 @@ pip install -e .   # install this repo
 ### Example SLURM job script
 ```bash
 #!/bin/bash
-#SBATCH --account=aip-azouaq
+#SBATCH --account=def-azouaq
 #SBATCH --job-name=deepeyes_vqa
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=40G
@@ -348,7 +348,7 @@ python experiments/run_model_benchmark.py --config configs/experiments/baseline.
 ```
 
 ### Writing new job scripts
-- Always use `--account=aip-azouaq` for research GPU jobs.
+- Always use `--account=def-azouaq` for all GPU jobs.
 - Request `--mem=40G` for one A100 (matches VRAM); add more for large batches.
 - Put output files under `$SCRATCH/results/`, never `$HOME`.
 - Copy dataset to `$SLURM_TMPDIR` at job start if doing many random reads.

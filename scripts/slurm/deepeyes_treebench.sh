@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=aip-azouaq
+#SBATCH --account=def-azouaq
 #SBATCH --job-name=deepeyes_treebench
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=40G
