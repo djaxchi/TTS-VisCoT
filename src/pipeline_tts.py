@@ -50,6 +50,23 @@ DEFAULT_CANDIDATE_RECIPE: List[tuple[int, str, str]] = [
 ]
 
 
+def make_temperature_recipe(n: int) -> List[tuple[int, str, str]]:
+    """Build a candidate recipe for pure temperature sampling (no input perturbation).
+
+    All *n* candidates use the original image and original prompt.  Diversity
+    comes entirely from stochastic decoding (temperature > 0 in the predict_fn).
+
+    Args:
+        n: Number of candidates to generate.
+
+    Returns:
+        Recipe list of length *n*, all entries ``(1, "original", "original")``.
+    """
+    if n < 1:
+        raise ValueError(f"n must be >= 1, got {n}")
+    return [(1, "original", "original")] * n
+
+
 def export_debug_artifacts(
     output_dir: str | Path,
     original_image: Image.Image,

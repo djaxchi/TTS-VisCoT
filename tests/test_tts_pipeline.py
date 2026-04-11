@@ -114,6 +114,22 @@ class TestNormalizeAnswer:
     def test_normalize_answer_returns_none_when_invalid(self) -> None:
         assert normalize_answer("I am not sure") is None
 
+    # A–J extension (MMMU-Pro uses 10-option MCQ)
+    def test_normalize_answer_handles_letters_e_through_j(self) -> None:
+        for letter in "EFGHIJ":
+            assert normalize_answer(letter) == letter, f"Failed for letter {letter}"
+            assert normalize_answer(f"({letter})") == letter
+            assert normalize_answer(f"Option {letter}") == letter
+            assert normalize_answer(f"The answer is {letter}") == letter
+
+    def test_normalize_answer_rejects_letters_beyond_j(self) -> None:
+        assert normalize_answer("K") is None
+        assert normalize_answer("Z") is None
+
+    def test_normalize_answer_lowercase_e_through_j(self) -> None:
+        for letter in "efghij":
+            assert normalize_answer(letter) == letter.upper()
+
 
 class TestTextVariation:
     def test_generate_prompt_variants_includes_expected_variant_ids(self) -> None:

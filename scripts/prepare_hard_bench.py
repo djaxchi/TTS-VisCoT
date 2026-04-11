@@ -3,8 +3,8 @@
 
 Generates:
   data/hard_bench/vqa_100.jsonl       — MMMU-Pro (standard 10-option, test split)
-  data/hard_bench/ocr_100.jsonl       — OCRBench v1 (echo840/OCRBench, test split)
-  data/hard_bench/counting_100.jsonl  — GQA hard counting (val_balanced_instructions)
+  data/hard_bench/ocr_100.jsonl       — OCRBench v2 (lmms-lab/OCRBench-v2, test split)
+  data/hard_bench/counting_100.jsonl  — MMStar instance-counting subset (val split)
 
 Images are NOT stored here; they are fetched lazily by the dataset loader.
 Run this script once to regenerate the JSONL files.
@@ -15,9 +15,9 @@ from __future__ import annotations
 import ast
 import json
 import random
-import re
 import sys
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = REPO_ROOT / "data" / "hard_bench"
@@ -58,7 +58,6 @@ def build_vqa() -> None:
         subj = row.get("subject", "unknown")
         by_subject.setdefault(subj, []).append(row)
 
-    rng = random.Random(SEED)
     subjects = sorted(by_subject.keys())
     selected: list[dict] = []
     # Round-robin across subjects until we have 100
@@ -92,140 +91,104 @@ def build_vqa() -> None:
 
 
 # ---------------------------------------------------------------------------
-# OCR — OCRBench v1
+# OCR — OCRBench v2 (lmms-lab/OCRBench-v2)
 # ---------------------------------------------------------------------------
 
 def build_ocr() -> None:
     from datasets import load_dataset  # type: ignore
 
-    print("Building OCR (OCRBench)…")
-    ds = load_dataset("echo840/OCRBench", split="test", streaming=True)
+    print("Building OCR (OCRBench v2)…")
+    ds = load_dataset("lmms-lab/OCRBench-v2", split="test", streaming=True)
 
-    # Collect by question_type, favour harder types
+    # Collect by question type for diverse sampling
     by_type: dict[str, list[dict]] = {}
-    for i, row in enumerate(ds):
-        qt = row.get("question_type", "unknown")
-        by_type.setdefault(qt, []).append((i, row))
+    for row in ds:
+        qt = str(row.get("type", "unknown"))
+        by_type.setdefault(qt, []).append(row)
 
-    print(f"  Available types: { {k: len(v) for k, v in by_type.items()} }")
+    print(f"  Available types ({len(by_type)}): { {k: len(v) for k, v in by_type.items()} }")
 
-    # Priority order: hardest first
-    priority = [
-        "Handwriting Recognition",
-        "Artistic Text Recognition",
-        "Irregular Text Recognition",
-        "Regular Text Recognition",
-        "Digit String Recognition",
-    ]
-    other_types = [t for t in by_type if t not in priority]
-    ordered = priority + other_types
-
+    # Round-robin across types for maximum type diversity
     rng = random.Random(SEED)
-    selected: list[tuple[int, dict]] = []
-    per_type = max(1, 100 // max(1, len([t for t in ordered if t in by_type])))
+    ordered = sorted(by_type.keys())
+    for t in ordered:
+        rng.shuffle(by_type[t])
 
-    for qt in ordered:
-        if qt not in by_type:
-            continue
-        pool = by_type[qt]
-        rng.shuffle(pool)
-        selected.extend(pool[:per_type])
-        if len(selected) >= 100:
+    selected: list[dict] = []
+    idx_per_type = {t: 0 for t in ordered}
+
+    while len(selected) < 100:
+        made_progress = False
+        for t in ordered:
+            i = idx_per_type[t]
+            if i < len(by_type[t]):
+                selected.append(by_type[t][i])
+                idx_per_type[t] += 1
+                made_progress = True
+                if len(selected) == 100:
+                    break
+        if not made_progress:
             break
 
-    # Top up if needed
-    all_remaining = [
-        item for qt in ordered for item in by_type.get(qt, [])
-        if item not in selected
-    ]
-    rng.shuffle(all_remaining)
-    selected.extend(all_remaining[: max(0, 100 - len(selected))])
-    selected = selected[:100]
-
-    def _parse_ocr_answer(raw: Any) -> str:
-        """OCRBench stores answers as Python list strings — extract first element."""
-        s = str(raw).strip()
-        try:
-            val = ast.literal_eval(s)
-            if isinstance(val, list) and val:
-                return str(val[0]).strip()
-        except Exception:
-            pass
-        return s
-
     rows = []
-    for idx, (ds_idx, r) in enumerate(selected):
+    for r in selected:
+        answers_raw = r.get("answers", [])
+        if isinstance(answers_raw, list):
+            answers_list = [str(a).strip() for a in answers_raw if str(a).strip()]
+        else:
+            answers_list = [str(answers_raw).strip()]
+
+        primary_answer = answers_list[0] if answers_list else ""
+        iid = str(r["id"])
         rows.append({
-            "question_id": str(ds_idx),
+            "question_id": iid,
             "question": r["question"],
-            "answer": _parse_ocr_answer(r["answer"]),
-            "image_id": str(ds_idx),
-            "image_source": "ocrbench",
+            "answer": primary_answer,
+            "answers_all": answers_list,
+            "image_id": iid,
+            "image_source": "ocrbench_v2",
         })
 
     _write(OUT_DIR / "ocr_100.jsonl", rows)
-    print(f"  Wrote {len(rows)} OCR rows.")
+    print(f"  Wrote {len(rows)} OCR rows across {len({r['image_source'] for r in rows})} source(s).")
 
 
 # ---------------------------------------------------------------------------
-# Counting — ChartQA "how many / count" questions (chart element counting)
+# Counting — MMStar instance-counting subset
 # ---------------------------------------------------------------------------
-# Charts require precise visual counting of bars, segments, and data points —
-# genuinely hard for 7B VLMs (~85% overall on ChartQA, lower on counting subset).
-# We prefer human-authored questions and non-trivial counts (answer not a single
-# small integer) to filter out the easiest cases.
-
-_COUNT_KEYWORDS = re.compile(
-    r"\b(how many|number of|count|in total|altogether)\b", re.IGNORECASE
-)
-
-
-def _is_trivial_count(answer: str) -> bool:
-    """True if the answer is a small integer ≤ 3 (subitizable, too easy)."""
-    try:
-        return float(answer) <= 3
-    except ValueError:
-        return False
-
+# MMStar (NeurIPS 2024) is curated explicitly to be vision-indispensable:
+# each sample was verified to require visual content (no text-only shortcuts).
+# The "instance counting" category tests object enumeration in real images
+# with MCQ format (A/B/C/D), making it resistant to training contamination.
 
 def build_counting() -> None:
     from datasets import load_dataset  # type: ignore
 
-    print("Building Counting (ChartQA — chart element counting)…")
-    ds = load_dataset("lmms-lab/ChartQA", split="test", streaming=True)
+    print("Building Counting (MMStar — instance counting)…")
+    ds = load_dataset("Lin-Chen/MMStar", split="val", streaming=True)
 
-    # Collect with sequential index (no stable ID in this dataset)
-    human_candidates: list[dict] = []
-    augmented_candidates: list[dict] = []
-    for idx, row in enumerate(ds):
-        q = str(row.get("question", ""))
-        a = str(row.get("answer", "")).strip()
-        qtype = str(row.get("type", ""))
-        if not _COUNT_KEYWORDS.search(q):
-            continue
-        if _is_trivial_count(a):
-            continue
-        entry = {
-            "question_id": str(idx),
-            "question": q,
-            "answer": a,
-            "image_id": str(idx),
-            "image_source": "chartqa",
-        }
-        if "human" in qtype:
-            human_candidates.append(entry)
-        else:
-            augmented_candidates.append(entry)
+    candidates: list[dict] = []
+    for row in ds:
+        cat = str(row.get("category", "")).lower()
+        if "count" in cat or "instance" in cat:
+            candidates.append(row)
 
-    print(
-        f"  Found {len(human_candidates)} human + {len(augmented_candidates)} augmented candidates."
-    )
+    print(f"  Found {len(candidates)} instance-counting candidates.")
 
-    # Prefer human-authored; fill with augmented if needed
     rng = random.Random(SEED)
-    rng.shuffle(human_candidates)
-    rng.shuffle(augmented_candidates)
-    rows = (human_candidates + augmented_candidates)[:100]
+    rng.shuffle(candidates)
+    selected = candidates[:100]
+
+    rows = []
+    for r in selected:
+        iid = str(r["index"])
+        rows.append({
+            "question_id": iid,
+            "question": r["question"],
+            "answer": str(r["answer"]).strip(),
+            "image_id": iid,
+            "image_source": "mmstar",
+        })
 
     _write(OUT_DIR / "counting_100.jsonl", rows)
     print(f"  Wrote {len(rows)} counting rows.")

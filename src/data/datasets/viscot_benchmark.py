@@ -3,15 +3,16 @@
 Reads curated question/answer JSONL files from ``data/hard_bench/`` and
 fetches images on-demand from public HuggingFace mirrors:
 
-- ``mmmu_pro``  → ``MMMU/MMMU_Pro`` (standard 10 options, test split)
-- ``ocrbench``  → ``echo840/OCRBench`` (test split)
-- ``chartqa``   → ``lmms-lab/ChartQA`` (test split)
-- ``gqa``       → ``lmms-lab/GQA`` (val_balanced_images, retained for compatibility)
+- ``mmmu_pro``    → ``MMMU/MMMU_Pro`` (standard 10 options, test split)
+- ``ocrbench_v2`` → ``lmms-lab/OCRBench-v2`` (test split)
+- ``mmstar``      → ``Lin-Chen/MMStar`` (val split, instance-counting subset)
+- ``gqa``         → ``lmms-lab/GQA`` (val_balanced_images, retained for TreeBench compatibility)
 
 The JSONL rows have fields::
 
     question_id, question, answer, image_id, image_source
 
+OCR rows additionally carry ``answers_all`` (list of acceptable answers).
 Images are downloaded once, saved to ``data/hard_bench/images/<source>/``
 and reloaded from disk on subsequent runs (no network required).
 """
@@ -93,6 +94,7 @@ def load_task(
     Returns:
         List of dicts with keys ``question_id``, ``question``, ``answer``,
         ``image_id``, ``image_source``, ``image`` (PIL.Image).
+        OCR rows also carry ``answers_all`` (list[str]).
 
     Raises:
         FileNotFoundError: If the JSONL file does not exist.
@@ -157,10 +159,10 @@ def load_task(
 def _fetch_images(source: str, image_ids: List[str]) -> Dict[str, Image.Image]:
     if source == "mmmu_pro":
         return _fetch_mmmu_pro_images(image_ids)
-    if source == "ocrbench":
-        return _fetch_ocrbench_images(image_ids)
-    if source == "chartqa":
-        return _fetch_chartqa_images(image_ids)
+    if source == "ocrbench_v2":
+        return _fetch_ocrbench_v2_images(image_ids)
+    if source == "mmstar":
+        return _fetch_mmstar_images(image_ids)
     if source == "gqa":
         return _fetch_gqa_images(image_ids)
     raise ValueError(f"Unknown image_source {source!r}")
@@ -199,74 +201,76 @@ def _fetch_mmmu_pro_images(image_ids: List[str]) -> Dict[str, Image.Image]:
     return found
 
 
-def _fetch_ocrbench_images(image_ids: List[str]) -> Dict[str, Image.Image]:
-    """Fetch OCRBench images by sequential dataset index."""
-    found, needed_list = _load_from_disk("ocrbench", image_ids)
+def _fetch_ocrbench_v2_images(image_ids: List[str]) -> Dict[str, Image.Image]:
+    """Fetch OCRBench v2 images by the dataset's integer ``id`` field."""
+    found, needed_list = _load_from_disk("ocrbench_v2", image_ids)
     if not needed_list:
-        logger.info("OCRBench: all {} images loaded from disk cache.", len(found))
+        logger.info("OCRBench-v2: all {} images loaded from disk cache.", len(found))
         return found
 
     logger.info(
-        "OCRBench: {}/{} images on disk; fetching {} from echo840/OCRBench…",
+        "OCRBench-v2: {}/{} images on disk; fetching {} from lmms-lab/OCRBench-v2…",
         len(found), len(image_ids), len(needed_list),
     )
     from datasets import load_dataset  # type: ignore
 
     needed = set(needed_list)
     needed_ints = {int(i) for i in needed}
-    ds = load_dataset("echo840/OCRBench", split="test", streaming=True)
-    for idx, row in enumerate(ds):
+    ds = load_dataset("lmms-lab/OCRBench-v2", split="test", streaming=True)
+    for row in ds:
         if not needed:
             break
-        if idx not in needed_ints:
+        row_id = row.get("id")
+        if row_id not in needed_ints:
             continue
-        iid = str(idx)
+        iid = str(row_id)
         pil = _to_pil(row.get("image"))
         if pil is not None:
             found[iid] = pil
             needed.discard(iid)
-            needed_ints.discard(idx)
-            _save_to_disk("ocrbench", iid, pil)
+            needed_ints.discard(row_id)
+            _save_to_disk("ocrbench_v2", iid, pil)
 
-    logger.info("OCRBench: retrieved {}/{} images.", len(found), len(image_ids))
+    logger.info("OCRBench-v2: retrieved {}/{} images.", len(found), len(image_ids))
     return found
 
 
-def _fetch_chartqa_images(image_ids: List[str]) -> Dict[str, Image.Image]:
-    """Fetch ChartQA images by sequential dataset index."""
-    found, needed_list = _load_from_disk("chartqa", image_ids)
+def _fetch_mmstar_images(image_ids: List[str]) -> Dict[str, Image.Image]:
+    """Fetch MMStar images by the dataset's integer ``index`` field."""
+    found, needed_list = _load_from_disk("mmstar", image_ids)
     if not needed_list:
-        logger.info("ChartQA: all {} images loaded from disk cache.", len(found))
+        logger.info("MMStar: all {} images loaded from disk cache.", len(found))
         return found
 
     logger.info(
-        "ChartQA: {}/{} images on disk; fetching {} from lmms-lab/ChartQA…",
+        "MMStar: {}/{} images on disk; fetching {} from Lin-Chen/MMStar…",
         len(found), len(image_ids), len(needed_list),
     )
     from datasets import load_dataset  # type: ignore
 
     needed = set(needed_list)
     needed_ints = {int(i) for i in needed}
-    ds = load_dataset("lmms-lab/ChartQA", split="test", streaming=True)
-    for idx, row in enumerate(ds):
+    ds = load_dataset("Lin-Chen/MMStar", split="val", streaming=True)
+    for row in ds:
         if not needed:
             break
-        if idx not in needed_ints:
+        row_idx = row.get("index")
+        if row_idx not in needed_ints:
             continue
-        iid = str(idx)
+        iid = str(row_idx)
         pil = _to_pil(row.get("image"))
         if pil is not None:
             found[iid] = pil
             needed.discard(iid)
-            needed_ints.discard(idx)
-            _save_to_disk("chartqa", iid, pil)
+            needed_ints.discard(row_idx)
+            _save_to_disk("mmstar", iid, pil)
 
-    logger.info("ChartQA: retrieved {}/{} images.", len(found), len(image_ids))
+    logger.info("MMStar: retrieved {}/{} images.", len(found), len(image_ids))
     return found
 
 
 def _fetch_gqa_images(image_ids: List[str]) -> Dict[str, Image.Image]:
-    """Fetch GQA images (retained for backward-compatibility)."""
+    """Fetch GQA images (retained for TreeBench backward-compatibility)."""
     found, needed_list = _load_from_disk("gqa", image_ids)
     if not needed_list:
         logger.info("GQA: all {} images loaded from disk cache.", len(found))

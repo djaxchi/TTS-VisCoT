@@ -91,20 +91,39 @@ TTS-VisCoT/
 
 The original benchmark (VGQAV2 — GQA/TextVQA/VQAv2 subsets) was retired because
 state-of-the-art 7B VLMs score above 80 % on all three tasks, leaving no room to
-measure TTS gains.  The new `hard_bench` datasets target regimes where current
-models still struggle (roughly 35–60 %).
+measure TTS gains.  The `hard_bench` datasets target regimes where current models
+still struggle (roughly 35–60 %).
+
+### Dataset selection rationale
+
+Datasets were chosen for three properties:
+
+1. **Hardness** — current 7B VLMs score well below ceiling (< 60 %).
+2. **Recency** — released at or after the training cutoffs of our models (late 2024),
+   reducing the risk that answers were memorised during fine-tuning.
+3. **Vision-indispensability** — questions cannot be answered from text alone; the
+   image is required.
+
+| Task | Dataset | Released | Why hard & recent |
+|---|---|---|---|
+| VQA | **MMMU-Pro** | Sep 2024 | 10-option MCQ across 30 academic disciplines; genuine visual grounding required; Qwen2.5-VL-7B ~38-41 % |
+| OCR | **OCRBench v2** | NeurIPS 2024 | 30 OCR types (4× more than v1); 10,000 samples; harder distribution with handwriting, artistic text, irregular layouts |
+| Counting | **MMStar** (instance-counting subset) | NeurIPS 2024 | Curated to be vision-indispensable — each sample verified to require visual content; MCQ A/B/C/D format |
 
 ### hard_bench layout
 
 ```
 data/hard_bench/
 ├── vqa_100.jsonl        MMMU-Pro  (100 samples, 30 academic subjects)
-├── ocr_100.jsonl        OCRBench  (100 samples, 10 recognition types)
-├── counting_100.jsonl   ChartQA   (100 counting-style questions)
+├── ocr_100.jsonl        OCRBench v2  (100 samples, round-robin across 30 types)
+├── counting_100.jsonl   MMStar instance-counting  (up to 100 samples)
 └── images/              Local image cache — gitignored, populated on first run
 ```
 
-Each JSONL row has fields: `question_id`, `question`, `answer`, `image_id`, `image_source`.
+JSONL row fields: `question_id`, `question`, `answer`, `image_id`, `image_source`.
+OCR rows additionally carry `answers_all` (list of all acceptable answers for that
+question — OCRBench v2 provides multiple valid answers per row).
+
 Images are **not** stored in git.  The loader (`src/data/datasets/viscot_benchmark.py`)
 fetches them from HuggingFace on first access and caches them under `data/hard_bench/images/`.
 
@@ -115,25 +134,17 @@ python scripts/prepare_hard_bench.py          # all three tasks
 python scripts/prepare_hard_bench.py vqa      # single task
 ```
 
-### Dataset details
-
-| Task | Dataset | HF repo | Why it's hard |
-|---|---|---|---|
-| VQA | **MMMU-Pro** | `MMMU/MMMU_Pro` | 10-option MCQ across 30 academic disciplines; questions that require genuine visual grounding, not text shortcuts; Qwen2.5-VL-7B ~38-41 % |
-| OCR | **OCRBench v1** | `echo840/OCRBench` | 10 recognition types including handwriting, artistic text, irregular layouts, and handwritten math; Qwen2.5-VL-7B ~42/100 |
-| Counting | **ChartQA (counting subset)** | `lmms-lab/ChartQA` | Counting bars/segments/data-points in real scientific charts; requires reading chart structure, not subitizing; filtered to non-trivial counts (answer > 3) |
-
 ### Image sources and loader
 
 `src/data/datasets/viscot_benchmark.py → load_task(task, n)` dispatches on
 `image_source` per row:
 
-| `image_source` value | HF dataset fetched |
-|---|---|
-| `mmmu_pro` | `MMMU/MMMU_Pro`, standard (10 options), test split — matched by question `id` |
-| `ocrbench` | `echo840/OCRBench`, test split — matched by sequential dataset index |
-| `chartqa` | `lmms-lab/ChartQA`, test split — matched by sequential dataset index |
-| `gqa` | `lmms-lab/GQA`, val_balanced_images — retained for TreeBench compatibility |
+| `image_source` value | HF dataset fetched | Match key |
+|---|---|---|
+| `mmmu_pro` | `MMMU/MMMU_Pro`, standard (10 options), test split | question `id` field |
+| `ocrbench_v2` | `lmms-lab/OCRBench-v2`, test split | integer `id` field |
+| `mmstar` | `Lin-Chen/MMStar`, val split | integer `index` field |
+| `gqa` | `lmms-lab/GQA`, val_balanced_images — retained for TreeBench compatibility | `id` / `imageId` field |
 
 Images are saved as JPEG to `data/hard_bench/images/<source>/<image_id>.jpg` after
 the first fetch; subsequent runs are fully offline.

@@ -141,15 +141,20 @@ class GRITModel(BaseVisualCoTModel):
             return_tensors="pt",
         ).to(self._model.device)
 
-        gen_kwargs: Dict[str, Any] = {"max_new_tokens": max_new_tokens, "use_cache": True}
-        if temperature > 0.0:
-            gen_kwargs["do_sample"] = True
-            gen_kwargs["temperature"] = temperature
-        else:
-            gen_kwargs["do_sample"] = False
+        from transformers import GenerationConfig
+
+        # Build an explicit GenerationConfig so transformers doesn't merge/override
+        # with the model's own generation_config.json (which has do_sample=False).
+        # Passing temperature as a bare kwarg triggers a "not valid and may be ignored"
+        # warning in newer transformers when the resolved config has do_sample=False.
+        gen_config = GenerationConfig(
+            do_sample=temperature > 0.0,
+            temperature=temperature if temperature > 0.0 else 1.0,
+            max_new_tokens=max_new_tokens,
+        )
 
         with torch.inference_mode():
-            out_ids = self._model.generate(**inputs, **gen_kwargs)
+            out_ids = self._model.generate(**inputs, generation_config=gen_config, use_cache=True)
 
         prompt_len = inputs["input_ids"].shape[1]
         # Decode without skipping special tokens so that <answer>...</answer>
