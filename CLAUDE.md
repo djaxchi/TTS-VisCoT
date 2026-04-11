@@ -263,7 +263,7 @@ generate(image, query, n=N)
 ### Code execution sandbox (`_execute_code`)
 
 - Isolated `exec` namespace per chain — never shared between chains.
-- Pre-populated with `image_1` (NumPy H×W×3 uint8 RGB), `np`, `math`, `collections`.
+- Pre-populated with `image_1` (PIL Image, matching `PIL.Image.open()` semantics), `np`, `PIL`, `math`, `collections`.
 - Captures stdout via `contextlib.redirect_stdout`; returns error summary on exception.
 - Do **not** allow `matplotlib`, file writes, or network calls inside the sandbox.
 
@@ -289,6 +289,69 @@ pytest tests/test_tts_pipeline.py -v
 # Only fast unit tests
 pytest -m "not integration"
 ```
+
+---
+
+## Compute: Narval (Digital Research Alliance of Canada)
+
+All GPU experiments run on **Narval** (A100-40GB nodes).
+
+### Account details
+- **Username:** `dchikhi`
+- **SLURM accounts:** `def-azouaq` (default), `aip-azouaq` (research project — prefer for GPU jobs)
+- **Login node:** `narval.alliancecan.ca`
+
+### Key paths on Narval
+| Path | Use |
+|---|---|
+| `$HOME` (~50 GB) | Code, virtualenv |
+| `$SCRATCH` (20 TB, purged after 60 days) | Datasets, HuggingFace cache, results |
+| `$SLURM_TMPDIR` (fast local SSD, cleared after job) | Copy data here at job start for fast I/O |
+
+### HuggingFace model cache
+Compute nodes have **no internet access**. The model must be downloaded on the login node first:
+```bash
+# On login node only — set cache to scratch so it survives
+export HF_HOME=$SCRATCH/hf_cache
+python -c "from huggingface_hub import snapshot_download; snapshot_download('honglyhly/DeepEyesV2_7B_1031')"
+```
+Always set `HF_HOME=$SCRATCH/hf_cache` in job scripts so the model is found.
+
+### Environment setup (run once on login node)
+```bash
+module load python/3.11 cuda/12.2
+python -m venv $HOME/envs/viscot
+source $HOME/envs/viscot/bin/activate
+pip install --upgrade pip
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+pip install 'transformers>=4.45.0' accelerate qwen-vl-utils bitsandbytes
+pip install -e .   # install this repo
+```
+
+### Example SLURM job script
+```bash
+#!/bin/bash
+#SBATCH --account=aip-azouaq
+#SBATCH --job-name=deepeyes_vqa
+#SBATCH --gres=gpu:a100:1
+#SBATCH --mem=40G
+#SBATCH --cpus-per-task=4
+#SBATCH --time=02:00:00
+#SBATCH --output=logs/%x_%j.out
+
+module load python/3.11 cuda/12.2
+source $HOME/envs/viscot/bin/activate
+
+export HF_HOME=$SCRATCH/hf_cache
+
+python experiments/run_model_benchmark.py --config configs/experiments/baseline.yaml
+```
+
+### Writing new job scripts
+- Always use `--account=aip-azouaq` for research GPU jobs.
+- Request `--mem=40G` for one A100 (matches VRAM); add more for large batches.
+- Put output files under `$SCRATCH/results/`, never `$HOME`.
+- Copy dataset to `$SLURM_TMPDIR` at job start if doing many random reads.
 
 ---
 
