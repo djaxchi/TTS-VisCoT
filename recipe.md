@@ -2,207 +2,169 @@
 
 ## Hypothesis
 
-> Models with deeper chain-of-thought reasoning are more stochastic in their outputs,
-> and this stochasticity is what allows test-time scaling to work.
-> Therefore, TTS gains should be larger for agentic CoT models than for direct-answer baselines.
+> Models with deeper chain-of-thought reasoning are more stochastic in their outputs.
+> This stochasticity is what allows test-time scaling (majority voting over diverse candidates)
+> to work. Therefore, TTS gains should be larger for agentic CoT models than for direct-answer baselines.
 
 ---
 
-## Model lineup (ordered by CoT depth)
+## Model lineup
 
-| Model | CoT type | Size | Status |
-|---|---|---|---|
-| Qwen2.5-VL (7B, no CoT) | None — direct answer | 7B | Benchmark done (n=20) |
-| GRIT (3B) | Visual CoT, no tool use | 3B | TTS done (n=20/30) |
-| Qwen2.5-VL (3B, no CoT) | None — direct answer | 3B | TTS done (n=20/30) |
-| VisCoT (7B) | Visual CoT, no tool use | 7B | Benchmark done (n=20) |
-| DeepEyesV2-RL (7B) | Agentic CoT + code execution | 7B | Benchmark done (n=20), TTS **TODO** |
+| Model | CoT type | Size |
+|---|---|---|
+| Qwen2.5-VL (7B) | None — direct answer | 7B |
+| GRIT (3B) | Visual CoT, no tool use | 3B |
+| DeepEyesV2-RL (7B) | Agentic CoT + code execution | 7B |
 
 CoT depth axis: `none → visual CoT → agentic CoT`
+
+> Note: GRIT (3B) vs DeepEyesV2 (7B) differ in size. Acknowledge this as a confound.
+> The Qwen2.5-VL (7B) baseline shares base weights with DeepEyesV2, making that
+> pair the cleanest comparison.
 
 ---
 
 ## Data
 
-All experiments use `data/hard_bench/` — the only regime where models still struggle
-(~35–60 % accuracy), leaving room to measure TTS gains.
+All experiments use `data/hard_bench/` — the regime where models still struggle
+(~35–60% accuracy), leaving room to measure TTS gains.
 
-| File | Task | Dataset | n |
+| File | Task | Dataset | Total available |
 |---|---|---|---|
 | `data/hard_bench/vqa_100.jsonl` | VQA | MMMU-Pro | 100 |
 | `data/hard_bench/ocr_100.jsonl` | OCR | OCRBench v1 | 100 |
 | `data/hard_bench/counting_100.jsonl` | Counting | ChartQA | 100 |
 
-**Sample budget per experiment:**
-
-| Experiment | Questions/task | Tasks | Model calls/model | Reason |
-|---|---|---|---|---|
-| E1 — Stochasticity | 30 | 3 | 300 (×10 repeats) | Enough for stable entropy estimate |
-| E2 — TTS DeepEyesV2 | 50 | 3 | 450 (×9 candidates) | Matches existing GRIT/Qwen TTS runs |
-| E3 — Cross-model comparison | 50 | 3 | — | Reuses E2 + existing results |
-| E4 — Candidate ablation | 50 | 3 | — | Reuses E2 candidates, no new inference |
-
----
-
-## Experiment 1 — Stochasticity Audit
-
-**Goal:** Validate the premise. Measure whether CoT models produce more diverse
-answers across repeated samples than direct-answer models.
-
-**Input:**
-- `data/hard_bench/{vqa,ocr,counting}_100.jsonl` — first 30 questions of each task
-- All 3 models: Qwen2.5-VL-7B (no CoT), GRIT-3B, DeepEyesV2-7B
-- Temperature = 0.7 (fixed across all models to make entropy comparable)
-- N = 10 independent samples per question
-
-**Procedure:**
-1. For each model × task × question: run `generate(image, question, n=10, temperature=0.7)`
-2. For each question compute **answer entropy**:
-   `H = -Σ p(a) log p(a)` over the empirical distribution of 10 normalized answers
-3. Average H per model per task → `mean_entropy[model][task]`
-
-**Output:**
-- `results/stochasticity/entropy_{model}_{task}.jsonl` — per-question entropy + answer distribution
-- `results/stochasticity/entropy_summary.json` — mean entropy per model per task
-- Figure: grouped bar chart — models on x-axis, mean entropy on y-axis, one bar group per task
-
-**Expected result:** DeepEyesV2 > GRIT > Qwen (no CoT) on entropy.
-If this does not hold, the hypothesis needs revision before running TTS.
-
----
-
-## Experiment 2 — TTS on DeepEyesV2
-
-**Goal:** Run the existing TTS candidate framework on DeepEyesV2 so it can be
-directly compared against Qwen (no CoT) and GRIT.
-
-**Input:**
-- `data/hard_bench/{vqa,ocr,counting}_100.jsonl` — first 50 questions of each task
-- Model: DeepEyesV2-RL (7B), `load_in_8bit=True`
-- 9 candidates per question = 3 image augmentations × 3 text variants
-  (same augmentation grid as existing GRIT/Qwen TTS runs in `results/tts/TTS_Hard.json`)
-
-**Augmentation grid (matches existing framework):**
-
-| # | Image transform | Text variant |
-|---|---|---|
-| 1 | original | original |
-| 2 | original | paraphrase_1 |
-| 3 | original | paraphrase_2 |
-| 4 | grayscale | original |
-| 5 | grayscale | paraphrase_1 |
-| 6 | grayscale | paraphrase_2 |
-| 7 | rotation_15 | original |
-| 8 | rotation_15 | paraphrase_1 |
-| 9 | rotation_15 | paraphrase_2 |
-
-**Procedure:**
-1. Run `experiments/run_tts_hard.py --model deepeyes_v2 --n 50`
-   (or the equivalent once that script supports DeepEyesV2)
-2. Aggregate candidates with majority vote @3, @5, @9
-3. Save in same format as `results/tts/TTS_Hard.json`
-
-**Output:**
-- `results/tts/TTS_Hard_DeepEyes.json` — same schema as existing TTS_Hard.json
-- Accuracy@1 (baseline), @3, @5, @9 per task
-- Per-question breakdown: which candidate was correct, which augmentation it came from
-
-**Checkpoint:** save after every question (job can be killed and resumed).
-
----
-
-## Experiment 3 — Cross-Model TTS Comparison
-
-**Goal:** The central result of the paper. Plot TTS gain vs CoT depth across models
-and tasks.
-
-**Input:**
-- Existing: `results/tts/TTS_Hard.json` (Qwen 3B, GRIT 3B — 30 questions/task)
-- New: `results/tts/TTS_Hard_DeepEyes.json` (DeepEyesV2 7B — 50 questions/task)
-- Note: 7B vs 3B size difference is a confound — acknowledge in paper,
-  ideally add Qwen2.5-VL-7B (no CoT) TTS as a size-controlled baseline
-
-**Metrics per model per task:**
-- `baseline_acc` = Accuracy@1
-- `tts_acc_9` = Accuracy@9 (majority vote over 9 candidates)
-- `tts_gain` = tts_acc_9 − baseline_acc  ← **primary metric**
-- `oracle_9` = fraction of questions where at least 1 of 9 candidates is correct (upper bound)
-- `headroom` = oracle_9 − baseline_acc (how much TTS could theoretically gain)
-
-**Output:**
-- `results/comparison/tts_gain_by_model.json`
-- Figure 1: Line plot — x=N candidates (1,3,5,9), y=accuracy, one line per model, faceted by task
-- Figure 2: Bar chart — TTS gain per model per task, models ordered by CoT depth
-- Figure 3: Scatter — baseline entropy (E1) vs TTS gain (E3) per model × task point
-
-Figure 3 is the key result: if the hypothesis holds, entropy and TTS gain should correlate.
-
----
-
-## Experiment 4 — Candidate Quality Ablation
-
-**Goal:** Understand which augmentations drive TTS gains, and whether CoT models
-respond differently to image vs text augmentations.
-
-**Input:** The 9-candidate result files from E2 (DeepEyesV2) and existing TTS_Hard.json
-(GRIT, Qwen). No new inference needed.
-
-**Analysis:**
-
-**4a — Which augmentation wins most often?**
-For each correct-answer flip (question where @1 was wrong but @9 was right),
-identify which candidate provided the correct answer.
-→ tally by (image_transform, text_variant) to find the most productive augmentations.
-
-**4b — Worst-candidate removal**
-Re-run majority vote after dropping the k lowest-confidence candidates.
-Measure accuracy @9, @7 (−2 worst), @5 (−4 worst).
-→ Does pruning bad candidates hurt or help? Does the answer differ by model?
-
-**4c — Image-only vs text-only vs combined**
-Split the 9 candidates into 3 groups:
-- image-only diversity (3 image transforms, original text)
-- text-only diversity (original image, 3 text variants)
-- combined (remaining 3)
-Compute majority vote accuracy within each group.
-→ Do CoT models benefit more from image diversity (more to reason about)
-  while direct models benefit more from text diversity?
-
-**Output:**
-- `results/ablation/candidate_quality.json`
-- Table: augmentation type → win rate per model
-- Figure: grouped accuracy bar — image-only vs text-only vs combined vs all-9
+> Previous TTS results (`results/tts/TTS.json`, `TTS_Hard.json`) were run on an
+> older dataset and must be discarded. All models are rerun from scratch on hard_bench.
 
 ---
 
 ## Execution order
 
 ```
-E1 (stochasticity)        ← run first; validates premise before spending GPU on TTS
-E2 (DeepEyesV2 TTS)       ← main new inference, needs ~4–6h on 1×A100
-E3 (cross-model compare)  ← no new inference, post-processing only
-E4 (ablation)             ← no new inference, post-processing only
+Step 1 — Stochasticity pilot    (10 questions, fast, validates premise)
+Step 2 — Full TTS run           (50 questions × 3 tasks × 3 models)
+Step 3 — Analysis & figures     (no new inference)
 ```
+
+---
+
+## Step 1 — Stochasticity Pilot
+
+**Goal:** Confirm that CoT models produce more diverse answers than direct-answer models
+before committing GPU time to the full TTS run.
+
+**Input:**
+- First 10 questions from each of the 3 hard_bench tasks (30 questions total)
+- All 3 models
+- Temperature = 0.7
+- N = 10 independent samples per question (same image, same prompt, independent runs)
+
+**Procedure:**
+1. For each model × task × question: call `generate(image, question, n=10, temperature=0.7)`
+2. Normalize each of the 10 answers
+3. Compute per-question **answer entropy**: `H = -Σ p(a) log p(a)` over the 10 answers
+4. Average H per model per task
+
+**Output:**
+- `results/stochasticity/entropy_{model}_{task}.jsonl` — one row per question with the 10 answers and H
+- `results/stochasticity/entropy_summary.json` — mean H per model per task
+- Figure: grouped bar chart — x=task, y=mean entropy, one bar per model
+
+**Go/no-go:** If `entropy(DeepEyesV2) > entropy(GRIT) > entropy(Qwen)` on at least 2/3 tasks,
+proceed to Step 2. If not, revisit the temperature or the hypothesis framing.
+
+**Compute budget:** ~1–2h on 1×A100 (30 questions × 10 samples, 3 models sequentially)
+
+---
+
+## Step 2 — Full TTS Run (all models, all tasks)
+
+**Goal:** Run majority voting over diverse candidates on all 3 models on the new hard_bench
+data and measure TTS gain per model.
+
+**Input:**
+- First 50 questions from each of the 3 hard_bench tasks (150 questions per model)
+- All 3 models
+- Temperature = 0.7 (same as Step 1 for consistency)
+- 9 candidates per question = 3 image augmentations × 3 text variants
+
+**Candidate grid:**
+
+| # | Image augmentation | Text variant |
+|---|---|---|
+| 1 | original | original (baseline) |
+| 2 | original | paraphrase A |
+| 3 | original | paraphrase B |
+| 4 | grayscale | original |
+| 5 | grayscale | paraphrase A |
+| 6 | grayscale | paraphrase B |
+| 7 | rotation 15° | original |
+| 8 | rotation 15° | paraphrase A |
+| 9 | rotation 15° | paraphrase B |
+
+Candidate #1 (original × original) is the **baseline** (equivalent to @1, no TTS).
+
+**Voting:** majority vote at @3, @5, @9.
+
+**Output per model:**
+- `results/tts/TTS_hard_{model}.jsonl` — one row per question, checkpoint after each question
+- Fields per row: `question_id`, `task`, `correct_answer`, `baseline_answer`, `baseline_correct`,
+  `candidate_answers[9]`, `candidate_correct[9]`, `vote_3`, `vote_5`, `vote_9`,
+  `correct_at_3`, `correct_at_5`, `correct_at_9`
+
+**Metrics to extract:**
+- `acc@1` = baseline accuracy (candidate #1 only)
+- `acc@3` = majority vote over first 3 candidates
+- `acc@5` = majority vote over first 5 candidates
+- `acc@9` = majority vote over all 9 candidates
+- `tts_gain` = `acc@9 − acc@1`  ← **primary metric**
+- `oracle@9` = fraction of questions where ≥1 of 9 candidates is correct (upper bound on TTS)
+
+**Compute budget:** ~4–6h per model on 1×A100 (50×3=150 questions × 9 candidates).
+Run one model per SLURM job.
+
+---
+
+## Step 3 — Analysis & Figures
+
+No new inference. Aggregates the outputs of Steps 1 and 2.
+
+### 3a — Main result table
+
+| Model | CoT depth | VQA acc@1 | acc@9 | gain | OCR acc@1 | acc@9 | gain | Counting acc@1 | acc@9 | gain |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Qwen2.5-VL | none | … | … | … | … | … | … | … | … | … |
+| GRIT | visual CoT | … | … | … | … | … | … | … | … | … |
+| DeepEyesV2 | agentic CoT | … | … | … | … | … | … | … | … | … |
+
+### 3b — Figure 1: TTS scaling curves
+- x = N candidates (1, 3, 5, 9)
+- y = accuracy
+- One line per model, faceted by task (3 panels)
+- Shows whether accuracy improves with N and at what rate
+
+### 3c — Figure 2: TTS gain vs entropy
+- x = mean entropy from Step 1
+- y = TTS gain (`acc@9 − acc@1`) from Step 2
+- One point per (model × task) = 9 points total
+- Fit a regression line
+- **This is the key figure.** A positive slope supports the hypothesis.
+
+### 3d — Figure 3: Candidate augmentation breakdown
+For each correct-answer flip (baseline wrong, @9 right), identify which candidate was correct.
+Tally by augmentation type.
+→ Do image augmentations or text paraphrases drive more gains? Does this differ by model?
 
 ---
 
 ## Minimum viable result to support the hypothesis
 
-1. E1: `entropy(DeepEyesV2) > entropy(GRIT) > entropy(Qwen no-CoT)` on at least 2/3 tasks
-2. E3: `tts_gain(DeepEyesV2) > tts_gain(GRIT) > tts_gain(Qwen no-CoT)` on at least 2/3 tasks
-3. E3 Figure 3: positive correlation between entropy and TTS gain across model × task points
+1. Step 1: entropy ranks `DeepEyesV2 > GRIT > Qwen` on ≥ 2/3 tasks
+2. Step 2: TTS gain ranks `DeepEyesV2 > GRIT > Qwen` on ≥ 2/3 tasks
+3. Step 3c: positive correlation between entropy (Step 1) and TTS gain (Step 2)
 
-If result 1 holds but result 2 does not, the hypothesis is partially refuted:
-stochasticity exists but TTS cannot exploit it (e.g. because the model is wrong consistently
-across all diverse candidates — wrong but confidently wrong).
-
----
-
-## Key confounds to address
-
-| Confound | Mitigation |
-|---|---|
-| 7B vs 3B model size | Add Qwen2.5-VL-7B (no CoT) TTS as size-matched baseline for DeepEyesV2 |
-| GRIT 3B vs DeepEyesV2 7B fine-tuning difference | Acknowledge; note DeepEyesV2 uses same base (Qwen2.5-VL) as one of the baselines |
-| Different tasks have different answer spaces | Report TTS gain per task separately, not aggregated |
-| Temperature choice for E1 | Run E1 at two temperatures (0.5 and 0.9) to check robustness |
+If (1) holds but (2) does not: stochasticity exists but candidates are wrong in diverse ways —
+the model needs to be right sometimes for majority voting to work.
+Reframe around oracle@9 headroom instead of realized gain.
