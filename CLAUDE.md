@@ -116,7 +116,7 @@ Datasets were chosen for three properties:
 data/hard_bench/
 ├── vqa_100.jsonl        MMMU-Pro  (100 samples, 30 academic subjects)
 ├── ocr_100.jsonl        OCRBench v2  (100 samples, round-robin across 30 types)
-├── counting_100.jsonl   MMStar instance-counting  (up to 100 samples)
+├── counting_100.jsonl   MMStar instance-counting  (92 samples — full l2_category)
 └── images/              Local image cache — gitignored, populated on first run
 ```
 

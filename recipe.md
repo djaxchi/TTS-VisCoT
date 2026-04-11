@@ -32,8 +32,8 @@ All experiments use `data/hard_bench/` — the regime where models still struggl
 | File | Task | Dataset | Total available |
 |---|---|---|---|
 | `data/hard_bench/vqa_100.jsonl` | VQA | MMMU-Pro | 100 |
-| `data/hard_bench/ocr_100.jsonl` | OCR | OCRBench v1 | 100 |
-| `data/hard_bench/counting_100.jsonl` | Counting | ChartQA | 100 |
+| `data/hard_bench/ocr_100.jsonl` | OCR | OCRBench v2 | 100 |
+| `data/hard_bench/counting_100.jsonl` | Counting | MMStar instance-counting | 92 |
 
 > Previous TTS results (`results/tts/TTS.json`, `TTS_Hard.json`) were run on an
 > older dataset and must be discarded. All models are rerun from scratch on hard_bench.
@@ -43,7 +43,7 @@ All experiments use `data/hard_bench/` — the regime where models still struggl
 ## Execution order
 
 ```
-Step 1 — Stochasticity pilot    (10 questions, fast, validates premise)
+Step 1 — Stochasticity pilot    (3 questions, fast, validates premise)
 Step 2 — Full TTS run           (50 questions × 3 tasks × 3 models)
 Step 3 — Analysis & figures     (no new inference)
 ```

@@ -4,7 +4,7 @@
 Generates:
   data/hard_bench/vqa_100.jsonl       — MMMU-Pro (standard 10-option, test split)
   data/hard_bench/ocr_100.jsonl       — OCRBench v2 (lmms-lab/OCRBench-v2, test split)
-  data/hard_bench/counting_100.jsonl  — MMStar instance-counting subset (val split)
+  data/hard_bench/counting_100.jsonl  — MMStar instance-counting subset (val split, 92 samples)
 
 Images are NOT stored here; they are fetched lazily by the dataset loader.
 Run this script once to regenerate the JSONL files.
@@ -169,8 +169,8 @@ def build_counting() -> None:
 
     candidates: list[dict] = []
     for row in ds:
-        cat = str(row.get("category", "")).lower()
-        if "count" in cat or "instance" in cat:
+        l2 = str(row.get("l2_category", "")).lower()
+        if "count" in l2:
             candidates.append(row)
 
     print(f"  Found {len(candidates)} instance-counting candidates.")

@@ -14,6 +14,32 @@ Investigating whether test-time scaling (TTS) — running multiple perturbed inf
 - TTS with 9 candidates (7 augmentation variants + 2 paraphrase variants) yields consistent gains on VQA and counting; OCR is more sensitive to image distortions.
 - Full results and plots: [`results/comparison/`](results/comparison/) and [`results/tts/`](results/tts/).
 
+### Entropy pilot — stochasticity vs CoT depth (April 2026)
+
+We ran a stochasticity pilot on 3 open-ended questions (VQA, OCR, counting) with 10 samples at temperature=0.7 per model, measuring both **answer entropy** (diversity of final answers) and **token-level generation entropy** (mean Shannon entropy of per-token logit distributions).
+
+| Model | Task | Answer H (bits) | Token H (bits) | Mean gen time |
+|---|---|---|---|---|
+| Qwen2.5-VL-3B (no CoT) | VQA | 3.32 | 0.731 | 11.3s |
+| Qwen2.5-VL-3B | OCR | 2.65 | 0.590 | 2.2s |
+| Qwen2.5-VL-3B | Counting | 0.00 | 0.287 | 0.5s |
+| GRIT-3B (visual CoT) | VQA | 3.32 | 0.555 | 46.0s |
+| GRIT-3B | OCR | 2.16 | 0.740 | 11.2s |
+| GRIT-3B | Counting | 0.97 | 0.781 | 10.8s |
+| DeepEyesV2-7B (agentic CoT) | VQA | 1.57 | **0.156** | 61.9s |
+| DeepEyesV2-7B | OCR | 2.85 | **0.138** | 141.6s |
+| DeepEyesV2-7B | Counting | 1.36 | **0.155** | 44.9s |
+
+**Findings:**
+
+1. **Token entropy is inversely correlated with CoT depth** — contrary to the original hypothesis. DeepEyesV2 (~0.15 bits/token) is far more internally confident per token than Qwen (~0.6 bits) or GRIT (~0.7 bits). Its stochasticity is *structural* (different reasoning paths, 2–3 turns) rather than *distributional* (token-level noise).
+
+2. **Deeper CoT improves accuracy** — DeepEyesV2 is the only model that correctly solves the hard VQA finance question (6.67% ≈ GT 6.66%); Qwen and GRIT both fail entirely. Its lower answer entropy reflects *being right consistently*, not reduced diversity.
+
+3. **The TTS hypothesis needs reframing** — token-level entropy is a poor proxy for TTS-relevant stochasticity. The metric that matters is *oracle probability* (does at least one of N runs get it right?), not per-token uncertainty.
+
+Raw data: [`results/entropy_pilot/`](results/entropy_pilot/)
+
 ---
 
 ## Models benchmarked
@@ -29,12 +55,22 @@ Investigating whether test-time scaling (TTS) — running multiple perturbed inf
 
 ## Datasets
 
-| Dataset | Tasks | Notes |
-|---|---|---|
-| VGQAV2 | VQA, OCR, Counting | 100 samples per task — primary benchmark |
-| TreeBench | VQA (hard) | Harder evaluation set |
+### hard_bench — primary benchmark
 
-Data lives under `data/`. Image directories are gitignored (large); JSONL metadata is committed.
+Three datasets were selected for their hardness (7B VLMs score 35–60%), recency (published at or after model training cutoffs), and vision-indispensability (image required to answer).
+
+| File | Task | Dataset | Size | Why |
+|---|---|---|---|---|
+| `data/hard_bench/vqa_100.jsonl` | VQA | MMMU-Pro (standard, 10-option) | 100 | 30 academic disciplines; Qwen2.5-VL-7B ~38–41% |
+| `data/hard_bench/ocr_100.jsonl` | OCR | OCRBench v2 | 100 | 30 OCR types (handwriting, artistic text, irregular layouts); NeurIPS 2024 |
+| `data/hard_bench/counting_100.jsonl` | Counting | MMStar — instance counting | **92** | Full `l2_category="instance counting"` subset; vision-indispensable by construction; NeurIPS 2024 |
+
+Samples are drawn round-robin across subjects/types for diversity (seed 42).
+Images are not committed to git — they are fetched from HuggingFace on first access and cached under `data/hard_bench/images/`.
+
+### TreeBench — harder VQA evaluation set
+
+Used for out-of-distribution evaluation. Metadata lives in `data/treebench_samples/`; images are gitignored.
 
 ---
 
@@ -69,7 +105,7 @@ TTS-VisCoT/
 │   └── experiments/        baseline.yaml, tts.yaml, comparison.yaml
 │
 ├── data/
-│   ├── VGQAV2/             counting_100.jsonl, ocr_100.jsonl, vqa_100.jsonl
+│   ├── hard_bench/         vqa_100.jsonl, ocr_100.jsonl, counting_100.jsonl
 │   └── treebench_samples/  metadata.jsonl (images gitignored)
 │
 ├── experiments/
