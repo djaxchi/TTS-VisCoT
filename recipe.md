@@ -168,3 +168,34 @@ Tally by augmentation type.
 If (1) holds but (2) does not: stochasticity exists but candidates are wrong in diverse ways —
 the model needs to be right sometimes for majority voting to work.
 Reframe around oracle@9 headroom instead of realized gain.
+
+
+Step 1 — Find the questions                                                                                                                                                                         
+                                                                                                                                                                                                      
+  python scripts/select_calibration_questions.py                                                                                                                                                      
+                                                                                                                                                                                                      
+  Two passes, one model at a time (no OOM risk):                                                                                                                                                      
+                                                                                                                                                                                                      
+  1. Pass 1 (Qwen 3B) — scans all available questions per task, keeps those where 1–3/5 samples are correct (20–60%). For OCR, additionally requires at least 1 sample to match answers_all.          
+  2. Saves intermediate results to results/calibration/calibration_pass1.jsonl (safe to resume if it crashes).
+  3. Pass 2 (Qwen 7B) — re-runs only the Pass-1 survivors, applies the same accuracy filter. Stops per task the moment 10 questions are selected.                                                     
+                                                                                                                                                                                                      
+  Output: results/calibration/selected_questions.jsonl                                                                                                                                                
+                                                                                                                                                                                                      
+  ---                                                                                                                                                                                                 
+  Step 2 — Measure the entropy delta                              
+
+  python experiments/run_study_a_entropy.py
+                                                                                                                                                                                                      
+  Reads the selected questions, runs Qwen 3B then GRIT (unloads between models), then prints:                                                                                                         
+                                                                                                                                                                                                      
+  Task         Qwen3B H     GRIT H          Δ   Δ > 0?                                                                                                                                                
+  ──────────────────────────────────────────────────────                                                                                                                                              
+    vqa           1.200       1.850      +0.650     YES ✓
+    ocr           1.800       2.300      +0.500     YES ✓                                                                                                                                             
+    counting      0.500       0.900      +0.400     YES ✓                                                                                                                                             
+                                                                                                                                                                                                      
+    Δ > 0 on 3/3 tasks                                                                                                                                                                                
+    Go criterion (Δ > 0 on ≥ 2/3): GO                                                                                                                                                                 
+                                                                                                                                                                                                      
+  Output: results/study_a/entropy_results.jsonl + results/study_a/summary.json
