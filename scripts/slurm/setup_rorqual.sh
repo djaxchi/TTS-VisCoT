@@ -16,7 +16,8 @@ echo ""
 
 # ── 1. Environment ──────────────────────────────────────────────────────────
 echo "[1/5] Loading modules and activating virtualenv..."
-module load python/3.11 cuda/12.2
+# arrow must be loaded BEFORE activating the venv so pip can find pyarrow
+module load python/3.11 cuda/12.2 gcc arrow
 source $HOME/envs/viscot/bin/activate
 
 export HF_HOME=$SCRATCH/hf_cache
