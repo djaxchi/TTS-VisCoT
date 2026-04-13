@@ -24,6 +24,7 @@ mkdir -p $HF_HOME
 
 # ── 2. Install/update the repo ──────────────────────────────────────────────
 echo "[2/5] Installing repo in editable mode..."
+pip install datasets --quiet
 pip install -e . --quiet
 
 # ── 3. Download model weights to $SCRATCH/hf_cache ─────────────────────────
