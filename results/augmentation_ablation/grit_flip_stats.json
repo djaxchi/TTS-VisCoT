@@ -1,0 +1,32 @@
+{
+  "edge_enhance": {
+    "total": 87,
+    "flips": 42,
+    "flip_to_correct": 6,
+    "flip_from_correct": 8
+  },
+  "grayscale": {
+    "total": 87,
+    "flips": 22,
+    "flip_to_correct": 5,
+    "flip_from_correct": 5
+  },
+  "jpeg_recompress": {
+    "total": 86,
+    "flips": 34,
+    "flip_to_correct": 5,
+    "flip_from_correct": 6
+  },
+  "brightness_contrast": {
+    "total": 87,
+    "flips": 34,
+    "flip_to_correct": 5,
+    "flip_from_correct": 6
+  },
+  "rotation_90": {
+    "total": 83,
+    "flips": 37,
+    "flip_to_correct": 4,
+    "flip_from_correct": 4
+  }
+}

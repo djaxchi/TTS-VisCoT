@@ -1,0 +1,192 @@
+{
+  "all": {
+    "greedy": {
+      "correct": 17,
+      "total": 90,
+      "accuracy": 18.88888888888889
+    },
+    "plurality": {
+      "correct": 18,
+      "total": 90,
+      "accuracy": 20.0
+    },
+    "greedy_tiebreak": {
+      "correct": 16,
+      "total": 90,
+      "accuracy": 17.77777777777778
+    },
+    "supermajority_3": {
+      "correct": 17,
+      "total": 90,
+      "accuracy": 18.88888888888889
+    },
+    "supermajority_4": {
+      "correct": 14,
+      "total": 90,
+      "accuracy": 15.555555555555555
+    },
+    "supermajority_5": {
+      "correct": 16,
+      "total": 90,
+      "accuracy": 17.77777777777778
+    },
+    "consistency_2": {
+      "correct": 18,
+      "total": 90,
+      "accuracy": 20.0
+    },
+    "consistency_3": {
+      "correct": 18,
+      "total": 90,
+      "accuracy": 20.0
+    },
+    "oracle": {
+      "correct": 47,
+      "total": 90,
+      "accuracy": 52.22222222222223
+    }
+  },
+  "per_task": {
+    "counting": {
+      "greedy": {
+        "correct": 10,
+        "total": 30,
+        "accuracy": 33.33333333333333
+      },
+      "plurality": {
+        "correct": 9,
+        "total": 30,
+        "accuracy": 30.0
+      },
+      "greedy_tiebreak": {
+        "correct": 9,
+        "total": 30,
+        "accuracy": 30.0
+      },
+      "supermajority_3": {
+        "correct": 8,
+        "total": 30,
+        "accuracy": 26.666666666666668
+      },
+      "supermajority_4": {
+        "correct": 8,
+        "total": 30,
+        "accuracy": 26.666666666666668
+      },
+      "supermajority_5": {
+        "correct": 9,
+        "total": 30,
+        "accuracy": 30.0
+      },
+      "consistency_2": {
+        "correct": 9,
+        "total": 30,
+        "accuracy": 30.0
+      },
+      "consistency_3": {
+        "correct": 9,
+        "total": 30,
+        "accuracy": 30.0
+      },
+      "oracle": {
+        "correct": 22,
+        "total": 30,
+        "accuracy": 73.33333333333333
+      }
+    },
+    "ocr": {
+      "greedy": {
+        "correct": 4,
+        "total": 30,
+        "accuracy": 13.333333333333334
+      },
+      "plurality": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "greedy_tiebreak": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "supermajority_3": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "supermajority_4": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "supermajority_5": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "consistency_2": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "consistency_3": {
+        "correct": 5,
+        "total": 30,
+        "accuracy": 16.666666666666664
+      },
+      "oracle": {
+        "correct": 6,
+        "total": 30,
+        "accuracy": 20.0
+      }
+    },
+    "vqa": {
+      "greedy": {
+        "correct": 3,
+        "total": 30,
+        "accuracy": 10.0
+      },
+      "plurality": {
+        "correct": 4,
+        "total": 30,
+        "accuracy": 13.333333333333334
+      },
+      "greedy_tiebreak": {
+        "correct": 2,
+        "total": 30,
+        "accuracy": 6.666666666666667
+      },
+      "supermajority_3": {
+        "correct": 4,
+        "total": 30,
+        "accuracy": 13.333333333333334
+      },
+      "supermajority_4": {
+        "correct": 1,
+        "total": 30,
+        "accuracy": 3.3333333333333335
+      },
+      "supermajority_5": {
+        "correct": 2,
+        "total": 30,
+        "accuracy": 6.666666666666667
+      },
+      "consistency_2": {
+        "correct": 4,
+        "total": 30,
+        "accuracy": 13.333333333333334
+      },
+      "consistency_3": {
+        "correct": 4,
+        "total": 30,
+        "accuracy": 13.333333333333334
+      },
+      "oracle": {
+        "correct": 19,
+        "total": 30,
+        "accuracy": 63.33333333333333
+      }
+    }
+  }
+}
