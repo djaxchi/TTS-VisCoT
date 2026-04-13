@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=def-azouaq
+#SBATCH --account=def-azouaq_gpu
 #SBATCH --job-name=tts_grit_t0
 #SBATCH --gres=gpu:h100:1
 #SBATCH --mem=40G
