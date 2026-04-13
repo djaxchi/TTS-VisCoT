@@ -169,6 +169,92 @@ If (1) holds but (2) does not: stochasticity exists but candidates are wrong in 
 the model needs to be right sometimes for majority voting to work.
 Reframe around oracle@9 headroom instead of realized gain.
 
+---
+
+## Actual execution log
+
+### Study A — Calibrated Entropy Comparison (COMPLETED: 2026-04-12)
+
+**Result: NO-GO.** GRIT is *more deterministic* than Qwen3B across all 3 tasks
+(Δ < 0 on 0/3 tasks). The visual CoT anchors answers rather than diversifying them.
+
+| Task | Qwen3B H | GRIT H | Δ |
+|---|---|---|---|
+| VQA | 1.210 | 0.951 | −0.259 |
+| OCR | 1.881 | 1.410 | −0.472 |
+| Counting | 1.023 | 0.791 | −0.232 |
+
+Interpretation: unclear whether GRIT's lower entropy reflects good calibration (correct
+and confident) or overconfidence (wrong and confident). Needs accuracy data to distinguish.
+
+**Pivot:** Run Study B (accuracy baseline) embedded inside the TTS run as candidate 2
+(greedy T=0.0). If GRIT accuracy > Qwen3B → CoT helps. If ≈ same → TTS with augmentation
+may still help Qwen3B. If GRIT < Qwen3B → CoT hurts, overconfident.
+
+---
+
+### Run 1 — Study B + TTS, Standard Recipe (COMPLETED: 2026-04-13)
+
+**Script:** `experiments/run_tts_hard_bench.py --recipe standard`
+
+**Candidate recipe:**
+
+| # | Image | Text | Temperature | Purpose |
+|---|---|---|---|---|
+| 0 | original | original | 0.7 | stochastic baseline |
+| 1 | original | hardcoded_paraphrase | 0.7 | text diversity |
+| 2 | original | original | **0.0** | **Study B greedy baseline** |
+| 3 | edge_enhance | original | 0.7 | image diversity |
+| 4 | grayscale | original | 0.7 | image diversity |
+| 5 | jpeg_recompress | original | 0.7 | image diversity |
+| 6 | brightness_contrast | original | 0.7 | image diversity |
+| 7 | rotation_90¹ | original | 0.7 | image diversity |
+| 8 | edge_enhance | hardcoded_paraphrase | 0.7 | combined diversity |
+
+¹ rotation_90 at T=0.7 triggers a CUDA device-side assert (`torch.multinomial` with NaN
+logits) on OCR images. Substituted with `jpeg_recompress` for the OCR task only.
+
+**Models:** Qwen2.5-VL-3B (no CoT) and GRIT-3B (visual CoT)
+**Questions:** 30 per task (VQA, OCR, Counting) = 90 per model
+**Output:** `results/tts_hard_bench/{model}_results.jsonl`
+**Status:** COMPLETE — see report.md § "Study B + TTS Run 1"
+
+---
+
+### Run 2 — T=0 Ablation: Image-Only Diversity (PLANNED)
+
+**Script:** `experiments/run_tts_hard_bench.py --recipe t0`
+
+**Question:** Does image-augmentation diversity alone (without temperature stochasticity)
+drive TTS gains? In Run 1, 8/9 candidates use T=0.7. This run flips all temperatures:
+8 candidates use T=0.0 (deterministic), keeping only one stochastic draw (candidate 2, T=0.7).
+
+**Candidate recipe:**
+
+| # | Image | Text | Temperature | Purpose |
+|---|---|---|---|---|
+| 0 | original | original | **0.0** | **Study B greedy baseline** |
+| 1 | original | hardcoded_paraphrase | 0.0 | text variant, deterministic |
+| 2 | original | original | 0.7 | single stochastic draw |
+| 3 | edge_enhance | original | 0.0 | image diversity, deterministic |
+| 4 | grayscale | original | 0.0 | image diversity, deterministic |
+| 5 | jpeg_recompress | original | 0.0 | image diversity, deterministic |
+| 6 | brightness_contrast | original | 0.0 | image diversity, deterministic |
+| 7 | rotation_90 | original | 0.0 | image diversity, deterministic (safe at T=0) |
+| 8 | edge_enhance | hardcoded_paraphrase | 0.0 | combined diversity, deterministic |
+
+**Key differences from Run 1:**
+- All T=0.7 → T=0.0; candidate 2 (was greedy) → T=0.7 (stochastic)
+- Greedy baseline is now candidate 0 (original/original/T=0)
+- rotation_90 is safe at T=0 (argmax, no `torch.multinomial` call) → no OCR substitution needed
+- Output written to `results/tts_hard_bench_t0/` (Run 1 data untouched)
+
+**Models:** Qwen2.5-VL-3B and GRIT-3B (same as Run 1)
+**Questions:** 30 per task (VQA, OCR, Counting) = 90 per model
+**Output:** `results/tts_hard_bench_t0/{model}_results.jsonl`
+**Status:** COMPLETE — see report.md § "Run 2 — T=0 Ablation"
+
+---
 
 Step 1 — Find the questions                                                                                                                                                                         
                                                                                                                                                                                                       

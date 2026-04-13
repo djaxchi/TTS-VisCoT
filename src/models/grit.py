@@ -74,11 +74,13 @@ class GRITModel(BaseVisualCoTModel):
             return
         from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
 
-        quant_config = BitsAndBytesConfig(load_in_8bit=True) if self.load_in_8bit else None
-        logger.info("Loading GRITModel from '{}' (8-bit={})…", self.model_id, self.load_in_8bit)
+        # RTX 5060 Ti silently crashes with bitsandbytes 8-bit — use float16.
+        import torch as _torch
+        quant_config = None
+        logger.info("Loading GRITModel from '{}' (float16, no quantisation)…", self.model_id)
         self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             self.model_id,
-            torch_dtype="auto",
+            torch_dtype=_torch.float16,
             device_map="auto",
             quantization_config=quant_config,
         )

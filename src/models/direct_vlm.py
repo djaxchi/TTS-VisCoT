@@ -44,18 +44,20 @@ class DirectVLMModel(BaseVisualCoTModel):
             return
         from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
 
-        quant_config = BitsAndBytesConfig(load_in_8bit=True) if self.load_in_8bit else None
-        logger.info("Loading DirectVLM from '{}' (8-bit={})…", self.model_id, self.load_in_8bit)
+        # RTX 5060 Ti (Ada Lovelace) has issues with bitsandbytes 8-bit — use
+        # float16 directly.  ~6 GB VRAM vs ~3 GB for 8-bit, but stable.
+        quant_config = None
+        logger.info("Loading DirectVLM from '{}' (float16, no quantisation)…", self.model_id)
         self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             self.model_id,
-            torch_dtype="auto",
+            torch_dtype=torch.float16,
             device_map="auto",
             quantization_config=quant_config,
         )
         self._processor = AutoProcessor.from_pretrained(
             self.model_id,
             min_pixels=256 * 28 * 28,
-            max_pixels=1280 * 28 * 28,
+            max_pixels=512 * 28 * 28,   # reduced from 1280 to limit visual tokens / VRAM
         )
         logger.info("DirectVLM loaded.")
 
@@ -127,7 +129,9 @@ class DirectVLMModel(BaseVisualCoTModel):
             clean_up_tokenization_spaces=False,
         )[0].strip()
 
+        import gc
         del inputs, out_ids
+        gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 

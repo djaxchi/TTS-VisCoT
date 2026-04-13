@@ -33,6 +33,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from tqdm import tqdm
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.data.datasets.viscot_benchmark import load_task
@@ -53,10 +55,46 @@ ACC_LOW = 0.20         # inclusive lower bound
 ACC_HIGH = 0.70        # inclusive upper bound
 
 MODEL_3B = "Qwen/Qwen2.5-VL-3B-Instruct"
-MODEL_7B = "Qwen/Qwen2.5-VL-7B-Instruct"
 
 OUT_DIR = Path(__file__).resolve().parents[1] / "results" / "calibration"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+CACHE_PATH = OUT_DIR / "inference_cache.jsonl"
+
+# ---------------------------------------------------------------------------
+# Inference cache  (keyed by model × task × question_id)
+# ---------------------------------------------------------------------------
+
+InferenceCache = Dict[Tuple[str, str, str], Dict[str, Any]]
+
+
+def load_cache() -> InferenceCache:
+    """Load all previously computed inference results from CACHE_PATH.
+
+    Returns a dict keyed by (model_key, task, str(question_id)).
+    Each value is the full row dict (answers, acc, question, gt, …).
+    """
+    cache: InferenceCache = {}
+    if not CACHE_PATH.exists():
+        return cache
+    with CACHE_PATH.open(encoding="utf-8") as f:
+        for line in f:
+            row = json.loads(line)
+            key = (row["model"], row["task"], str(row["question_id"]))
+            cache[key] = row
+    print(f"  [cache] loaded {len(cache)} cached inference results from {CACHE_PATH}", flush=True)
+    return cache
+
+
+def _cache_key(model_key: str, task: str, question_id: Any) -> Tuple[str, str, str]:
+    return (model_key, task, str(question_id))
+
+
+def _append_cache(row: Dict[str, Any]) -> None:
+    """Append one result row to the cache file (one JSON line)."""
+    with CACHE_PATH.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
 
 # ---------------------------------------------------------------------------
 # Answer correctness helpers
@@ -125,6 +163,43 @@ def _run_question(
     return answers, acc
 
 
+def _run_question_cached(
+    model: Any,
+    model_key: str,
+    example: Dict[str, Any],
+    task: str,
+    cache: InferenceCache,
+) -> Tuple[List[str], float, bool]:
+    """Return (answers, accuracy, cache_hit).
+
+    Checks the cache first; on a miss runs inference and appends the result
+    to CACHE_PATH immediately so partial runs are recoverable.
+    Stored fields: model, task, question_id, question, gt, answers_all, answers, acc.
+    """
+    key = _cache_key(model_key, task, example["question_id"])
+    if key in cache:
+        cached = cache[key]
+        return cached["answers"], cached["acc"], True
+
+    answers, acc = _run_question(model, example, task)
+
+    row: Dict[str, Any] = {
+        "model": model_key,
+        "task": task,
+        "question_id": example["question_id"],
+        "question": example["question"],
+        "gt": example["answer"],
+        "answers_all": example.get("answers_all"),
+        "image_id": example["image_id"],
+        "image_source": example["image_source"],
+        "answers": answers,
+        "acc": acc,
+    }
+    cache[key] = row
+    _append_cache(row)
+    return answers, acc, False
+
+
 # ---------------------------------------------------------------------------
 # OCR extra filter
 # ---------------------------------------------------------------------------
@@ -144,17 +219,30 @@ def _ocr_has_any_match(answers: List[str], answers_all: List[str]) -> bool:
 
 def _pass_one(
     model: Any,
+    model_key: str,
     task: str,
     examples: List[Dict[str, Any]],
+    cache: InferenceCache,
+    max_survivors: int = TARGET_PER_TASK * 2,
 ) -> List[Dict[str, Any]]:
-    """Run Qwen-3B on all examples; return those that pass the accuracy filter."""
-    survivors: List[Dict[str, Any]] = []
-    print(f"\n  [Pass 1 / {task.upper()}] scanning {len(examples)} questions with 3B…")
+    """Run Qwen-3B on examples until max_survivors found; return those that pass the filter.
 
-    for ex in examples:
+    Results are served from cache when available and written to cache on miss.
+    """
+    survivors: List[Dict[str, Any]] = []
+    print(f"\n  [Pass 1 / {task.upper()}] scanning (stop at {max_survivors} survivors)…", flush=True)
+
+    pbar = tqdm(examples, desc=f"Pass1/{task}", unit="q", dynamic_ncols=True)
+    for ex in pbar:
+        if len(survivors) >= max_survivors:
+            pbar.set_postfix_str(f"reached {max_survivors} survivors — stopping early")
+            pbar.close()
+            break
+
         qid = ex["question_id"]
-        answers, acc = _run_question(model, ex, task)
+        answers, acc, hit = _run_question_cached(model, model_key, ex, task, cache)
         n_correct = round(acc * N_CALIB)
+        hit_flag = " [cache]" if hit else ""
 
         # OCR extra filter
         if task == "ocr":
@@ -167,35 +255,45 @@ def _pass_one(
 
         passed = _in_range(acc) and has_match
         status = "PASS" if passed else "skip"
-        print(f"    qid={qid}  acc_3b={n_correct}/{N_CALIB}={acc:.2f}{ocr_flag}  → {status}")
+        pbar.set_postfix_str(f"qid={qid} acc={n_correct}/{N_CALIB} {status}{hit_flag}")
+        print(f"    qid={qid}  acc_3b={n_correct}/{N_CALIB}={acc:.2f}{ocr_flag}{hit_flag}  -> {status}", flush=True)
 
         if passed:
             survivors.append({**ex, "_acc_3b": acc, "_answers_3b": answers})
 
-    print(f"  [Pass 1 / {task.upper()}] {len(survivors)} survivors → Pass 2")
+    print(f"  [Pass 1 / {task.upper()}] {len(survivors)} survivors -> Pass 2", flush=True)
     return survivors
 
 
 def _pass_two(
     model: Any,
+    model_key: str,
     task: str,
     survivors: List[Dict[str, Any]],
+    cache: InferenceCache,
 ) -> List[Dict[str, Any]]:
-    """Run Qwen-7B on Pass-1 survivors; return the intersection, capped at TARGET."""
-    selected: List[Dict[str, Any]] = []
-    print(f"\n  [Pass 2 / {task.upper()}] checking {len(survivors)} survivors with 7B…")
+    """Run Qwen-7B on Pass-1 survivors; return the intersection, capped at TARGET.
 
-    for ex in survivors:
+    Results are served from cache when available and written to cache on miss.
+    """
+    selected: List[Dict[str, Any]] = []
+    print(f"\n  [Pass 2 / {task.upper()}] checking {len(survivors)} survivors with 7B…", flush=True)
+
+    pbar = tqdm(survivors, desc=f"Pass2/{task}", unit="q", dynamic_ncols=True)
+    for ex in pbar:
         if len(selected) >= TARGET_PER_TASK:
-            print(f"  [Pass 2 / {task.upper()}] reached {TARGET_PER_TASK} — stopping.")
+            pbar.set_postfix_str(f"reached {TARGET_PER_TASK} — stopping")
+            pbar.close()
             break
 
         qid = ex["question_id"]
-        answers, acc = _run_question(model, ex, task)
+        answers, acc, hit = _run_question_cached(model, model_key, ex, task, cache)
         n_correct = round(acc * N_CALIB)
+        hit_flag = " [cache]" if hit else ""
         passed = _in_range(acc)
         status = "SELECT" if passed else "skip"
-        print(f"    qid={qid}  acc_3b={ex['_acc_3b']:.2f}  acc_7b={n_correct}/{N_CALIB}={acc:.2f}  → {status}")
+        pbar.set_postfix_str(f"qid={qid} acc={n_correct}/{N_CALIB} {status}{hit_flag}")
+        print(f"    qid={qid}  acc_3b={ex['_acc_3b']:.2f}  acc_7b={n_correct}/{N_CALIB}={acc:.2f}{hit_flag}  -> {status}", flush=True)
 
         if passed:
             selected.append({
@@ -212,7 +310,7 @@ def _pass_two(
                 "calib_answers_7b": answers,
             })
 
-    print(f"  [Pass 2 / {task.upper()}] selected {len(selected)} questions.")
+    print(f"  [Pass 2 / {task.upper()}] selected {len(selected)} questions.", flush=True)
     return selected
 
 
@@ -228,90 +326,68 @@ def main(tasks_to_run: List[str], dry_run: bool = False) -> None:
     import torch
     from src.models.direct_vlm import DirectVLMModel
 
-    all_selected: List[Dict[str, Any]] = []
+    # ── Load inference cache ──────────────────────────────────────────────
+    cache = load_cache()
 
     # ── Load questions once (no GPU needed) ──────────────────────────────
     task_examples: Dict[str, List[Dict[str, Any]]] = {}
     for task in tasks_to_run:
-        print(f"\nLoading {task} examples…")
+        print(f"\nLoading {task} examples…", flush=True)
         task_examples[task] = load_task(task)  # all available rows
-        print(f"  {len(task_examples[task])} examples loaded.")
+        print(f"  {len(task_examples[task])} examples loaded.", flush=True)
 
     # ── Pass 1: Qwen-3B ──────────────────────────────────────────────────
-    print(f"\n{'='*60}")
-    print(f"PASS 1 — Qwen2.5-VL-3B ({MODEL_3B})")
-    print(f"  n={N_CALIB} samples, T={TEMPERATURE}")
-    print(f"  accuracy range: [{ACC_LOW:.0%}, {ACC_HIGH:.0%}]")
-    print(f"  = {_min_correct()}–{_max_correct()} correct out of {N_CALIB}")
-    print(f"{'='*60}")
+    print(f"\n{'='*60}", flush=True)
+    print(f"PASS 1 — Qwen2.5-VL-3B ({MODEL_3B})", flush=True)
+    print(f"  n={N_CALIB} samples, T={TEMPERATURE}", flush=True)
+    print(f"  accuracy range: [{ACC_LOW:.0%}, {ACC_HIGH:.0%}]", flush=True)
+    print(f"  = {_min_correct()}-{_max_correct()} correct out of {N_CALIB}", flush=True)
+    print(f"{'='*60}", flush=True)
 
     model_3b = DirectVLMModel(model_id=MODEL_3B)
     model_3b._load()
 
     task_survivors: Dict[str, List[Dict[str, Any]]] = {}
     for task in tasks_to_run:
-        task_survivors[task] = _pass_one(model_3b, task, task_examples[task])
+        task_survivors[task] = _pass_one(model_3b, "qwen3b", task, task_examples[task], cache)
 
     del model_3b
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-    # Save Pass-1 intermediate results (allows resuming)
-    p1_path = OUT_DIR / "calibration_pass1.jsonl"
-    with p1_path.open("w", encoding="utf-8") as f:
+    # ── Save survivors as final output ───────────────────────────────────
+    out_path = OUT_DIR / "selected_questions.jsonl"
+    all_selected = []
+    with out_path.open("w", encoding="utf-8") as f:
         for task, rows in task_survivors.items():
             for row in rows:
-                # strip PIL image before serialising
-                serialisable = {k: v for k, v in row.items()
-                                if k != "image" and not k.startswith("_acc")}
-                serialisable["_acc_3b"] = row["_acc_3b"]
-                serialisable["_answers_3b"] = row["_answers_3b"]
-                f.write(json.dumps(serialisable, ensure_ascii=False) + "\n")
-    print(f"\nPass-1 intermediate results saved → {p1_path}")
-
-    # ── Pass 2: Qwen-7B ──────────────────────────────────────────────────
-    print(f"\n{'='*60}")
-    print(f"PASS 2 — Qwen2.5-VL-7B ({MODEL_7B})")
-    print(f"{'='*60}")
-
-    model_7b = DirectVLMModel(model_id=MODEL_7B)
-    model_7b._load()
-
-    for task in tasks_to_run:
-        selected = _pass_two(model_7b, task, task_survivors[task])
-        all_selected.extend(selected)
-        if len(selected) < TARGET_PER_TASK:
-            print(f"\n  WARNING: only {len(selected)}/{TARGET_PER_TASK} questions "
-                  f"found for {task}. Consider loosening ACC_HIGH or using more questions.")
-
-    del model_7b
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-
-    # ── Save final selection ──────────────────────────────────────────────
-    out_path = OUT_DIR / "selected_questions.jsonl"
-    with out_path.open("w", encoding="utf-8") as f:
-        for row in all_selected:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+                record = {
+                    "task": task,
+                    "question_id": row["question_id"],
+                    "question": row["question"],
+                    "answer": row["answer"],
+                    "answers_all": row.get("answers_all"),
+                    "image_id": row["image_id"],
+                    "image_source": row["image_source"],
+                    "acc_3b": row["_acc_3b"],
+                    "calib_answers_3b": row["_answers_3b"],
+                }
+                all_selected.append(record)
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     # Summary
-    print(f"\n{'='*60}")
-    print("CALIBRATION SUMMARY")
-    print(f"{'='*60}")
-    by_task: Dict[str, List] = {}
-    for row in all_selected:
-        by_task.setdefault(row["task"], []).append(row)
+    print(f"\n{'='*60}", flush=True)
+    print("CALIBRATION SUMMARY", flush=True)
+    print(f"{'='*60}", flush=True)
     for task in tasks_to_run:
-        rows = by_task.get(task, [])
+        rows = task_survivors.get(task, [])
         if rows:
-            mean_3b = sum(r["acc_3b"] for r in rows) / len(rows)
-            mean_7b = sum(r["acc_7b"] for r in rows) / len(rows)
-            print(f"  {task:<10}  {len(rows):2d} questions  "
-                  f"mean_acc_3b={mean_3b:.2f}  mean_acc_7b={mean_7b:.2f}")
+            mean_3b = sum(r["_acc_3b"] for r in rows) / len(rows)
+            print(f"  {task:<10}  {len(rows):2d} survivors  mean_acc_3b={mean_3b:.2f}", flush=True)
         else:
-            print(f"  {task:<10}   0 questions — consider loosening thresholds")
+            print(f"  {task:<10}   0 survivors — consider loosening thresholds", flush=True)
 
-    print(f"\nSaved {len(all_selected)} selected questions → {out_path}")
+    print(f"\nSaved {len(all_selected)} selected questions -> {out_path}", flush=True)
 
 
 def _dry_run_demo(tasks_to_run: List[str]) -> None:

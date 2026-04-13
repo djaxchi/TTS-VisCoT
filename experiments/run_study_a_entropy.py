@@ -1,22 +1,26 @@
-"""Study A — entropy delta: GRIT (3B, visual CoT) vs Qwen2.5-VL-3B (no CoT).
+"""Study A -- entropy delta: GRIT (3B, visual CoT) vs Qwen2.5-VL-3B (no CoT).
 
 Both models share Qwen2.5-VL-3B base weights.  The only variable is the
 visual CoT fine-tuning applied to GRIT.
 
-For each selected question × model:
+For each selected question x model:
   - n=10 independent samples at temperature=0.7
   - Final answer extracted via the model's generate() (GRIT uses <answer> tags,
     Qwen returns the direct output)
   - Shannon entropy computed over normalised answers
 
 Delta:
-    Δ_entropy = entropy(GRIT) − entropy(Qwen3B)
+    delta_entropy = entropy(GRIT) - entropy(Qwen3B)
 
-A positive Δ on ≥ 2/3 tasks is the go criterion for the full TTS run.
+A positive delta on >= 2/3 tasks is the go criterion for the full TTS run.
 
 Reads:  results/calibration/selected_questions.jsonl
 Writes: results/study_a/entropy_results.jsonl
         results/study_a/summary.json
+
+Crash recovery: results/study_a/inference_cache.jsonl
+  All completed (model, task, question_id) triples are written here immediately
+  after inference.  Re-running the script will skip already-computed questions.
 
 Usage:
     python experiments/run_study_a_entropy.py
@@ -31,7 +35,7 @@ import json
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -48,6 +52,7 @@ logger = get_logger(__name__)
 TASKS = ["vqa", "ocr", "counting"]
 N_SAMPLES = 10
 TEMPERATURE = 0.7
+MAX_NEW_TOKENS = 256  # MCQ answers are one letter; 256 is plenty for OCR
 
 MODELS = {
     "qwen3b": ("src.models.direct_vlm", "DirectVLMModel",
@@ -61,8 +66,45 @@ CALIB_PATH = (
 OUT_DIR = Path(__file__).resolve().parents[1] / "results" / "study_a"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+CACHE_PATH = OUT_DIR / "inference_cache.jsonl"
+
 # ---------------------------------------------------------------------------
-# Answer normalisation — consistent across both models
+# Inference cache  (keyed by model x task x question_id)
+# ---------------------------------------------------------------------------
+
+InferenceCache = Dict[Tuple[str, str, str], Dict[str, Any]]
+
+
+def load_cache() -> InferenceCache:
+    """Load all previously computed inference results from CACHE_PATH."""
+    cache: InferenceCache = {}
+    if not CACHE_PATH.exists():
+        return cache
+    with CACHE_PATH.open(encoding="utf-8") as f:
+        for line in f:
+            row = json.loads(line)
+            key = (row["model"], row["task"], str(row["question_id"]))
+            cache[key] = row
+    print(f"  [cache] loaded {len(cache)} cached results from {CACHE_PATH}", flush=True)
+    return cache
+
+
+def _append_cache(row: Dict[str, Any], cache: "InferenceCache | None" = None) -> None:
+    """Append one result row to the cache file immediately.
+
+    If ``cache`` is provided, skip the write when the key is already present
+    (defensive guard against duplicate writes on restart).
+    """
+    if cache is not None:
+        key = (row["model"], row["task"], str(row["question_id"]))
+        if key in cache:
+            return  # already saved — skip to avoid duplicate lines
+    with CACHE_PATH.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+# ---------------------------------------------------------------------------
+# Answer normalisation -- consistent across both models
 # ---------------------------------------------------------------------------
 
 def _normalise(raw: str, task: str) -> Optional[str]:
@@ -115,7 +157,7 @@ def _load_image(row: Dict[str, Any]):
     task = row["task"]
     target_qid = str(row["question_id"])
 
-    # Use offset=0 scan — images are cached on disk so this is fast.
+    # Use offset=0 scan -- images are cached on disk so this is fast.
     examples = load_task(task)
     for ex in examples:
         if str(ex["question_id"]) == target_qid:
@@ -124,6 +166,29 @@ def _load_image(row: Dict[str, Any]):
         f"Image not found for question_id={target_qid!r} task={task!r}. "
         "Run scripts/prepare_hard_bench.py to rebuild the dataset."
     )
+
+
+# ---------------------------------------------------------------------------
+# Preload all images before loading model (reduce memory pressure at inference)
+# ---------------------------------------------------------------------------
+
+def preload_images(by_task: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
+    """Load all question images into CPU memory before the GPU model is loaded.
+
+    Returns a dict keyed by (task, str(question_id)) -> PIL Image.
+    """
+    from src.data.datasets.viscot_benchmark import load_task
+
+    print("\nPreloading images into CPU memory...", flush=True)
+    image_store: Dict[Tuple[str, str], Any] = {}
+    for task, questions in by_task.items():
+        needed = {str(q["question_id"]) for q in questions}
+        examples = load_task(task)
+        for ex in examples:
+            if str(ex["question_id"]) in needed:
+                image_store[(task, str(ex["question_id"]))] = ex["image"]
+    print(f"  Preloaded {len(image_store)} images.", flush=True)
+    return image_store
 
 
 # ---------------------------------------------------------------------------
@@ -142,7 +207,7 @@ def _run_question(
         question,
         n=N_SAMPLES,
         temperature=TEMPERATURE,
-        max_new_tokens=512,
+        max_new_tokens=MAX_NEW_TOKENS,
     )
     raw_answers = [r["answer"] for r in results]
     return [_normalise(a, task) for a in raw_answers]
@@ -163,10 +228,25 @@ def _load_model(model_key: str) -> Any:
 
 
 def _unload_model(model: Any) -> None:
+    """Properly release model weights from VRAM.
+
+    Note: the caller must also `del model` after this call to drop its own
+    reference — otherwise the object stays alive despite this function's del.
+    """
+    import gc
     import torch
+    # Move weights to CPU first so CUDA allocator releases pages immediately
+    try:
+        model.cpu()
+    except Exception:
+        pass
     del model
+    gc.collect()
     if torch.cuda.is_available():
+        torch.cuda.synchronize()
         torch.cuda.empty_cache()
+        free, total = torch.cuda.mem_get_info(0)
+        print(f"  [VRAM after unload: {free/1e9:.1f}/{total/1e9:.1f} GB free]", flush=True)
 
 
 # ---------------------------------------------------------------------------
@@ -176,29 +256,82 @@ def _unload_model(model: Any) -> None:
 def run_model(
     model_key: str,
     by_task: Dict[str, List[Dict[str, Any]]],
+    image_store: Dict[Tuple[str, str], Any],
+    cache: InferenceCache,
 ) -> List[Dict[str, Any]]:
-    """Run model_key on all selected questions; return per-question result rows."""
-    print(f"\n{'='*60}")
-    print(f"MODEL: {model_key.upper()}")
-    print(f"  n={N_SAMPLES} samples, T={TEMPERATURE}")
-    print(f"{'='*60}")
+    """Run model_key on all selected questions; return per-question result rows.
+
+    Results are served from cache when available; new results are written to
+    cache immediately after each question so partial runs are recoverable.
+    """
+    print(f"\n{'='*60}", flush=True)
+    print(f"MODEL: {model_key.upper()}", flush=True)
+    print(f"  n={N_SAMPLES} samples, T={TEMPERATURE}", flush=True)
+    print(f"{'='*60}", flush=True)
+
+    # Count how many questions are already cached for this model
+    cached_count = sum(
+        1 for task, questions in by_task.items()
+        for q in questions
+        if (model_key, task, str(q["question_id"])) in cache
+    )
+    total = sum(len(q) for q in by_task.values())
+    print(f"  Cache hits: {cached_count}/{total} questions already computed.", flush=True)
+
+    if cached_count == total:
+        print("  All results from cache -- skipping model load.", flush=True)
+        rows = _collect_from_cache(model_key, by_task, cache)
+        return rows
 
     model = _load_model(model_key)
     rows: List[Dict[str, Any]] = []
 
     for task, questions in by_task.items():
-        print(f"\n--- Task: {task.upper()} ({len(questions)} questions) ---")
+        print(f"\n--- Task: {task.upper()} ({len(questions)} questions) ---", flush=True)
         for q in questions:
             qid = q["question_id"]
-            print(f"  qid={qid}  gt={q['answer']!r}", end="", flush=True)
+            cache_key = (model_key, task, str(qid))
 
-            image = _load_image(q)
-            norm_answers = _run_question(model, image, q["question"], task)
-            entropy = compute_entropy(norm_answers)
+            if cache_key in cache:
+                cached = cache[cache_key]
+                norm_answers = cached["norm_answers"]
+                entropy = cached["entropy_bits"]
+                n_valid = cached["n_valid"]
+                n_unique = cached["n_unique"]
+                print(f"  qid={qid}  unique={n_unique}/{n_valid}  H={entropy:.3f}b  [cache]", flush=True)
+            else:
+                print(f"  qid={qid}  gt={q['answer']!r}", end="", flush=True)
 
-            n_valid = sum(1 for a in norm_answers if a is not None)
-            n_unique = len(set(a for a in norm_answers if a is not None))
-            print(f"  unique={n_unique}/{n_valid}  H={entropy:.3f}b")
+                # Load image lazily (fetch once, store in image_store for reuse)
+                img_key = (task, str(qid))
+                if img_key not in image_store:
+                    image_store[img_key] = _load_image(q)
+                image = image_store[img_key]
+
+                try:
+                    norm_answers = _run_question(model, image, q["question"], task)
+                except Exception as exc:
+                    print(f"\n  ERROR on qid={qid}: {type(exc).__name__}: {exc}", flush=True)
+                    import traceback
+                    traceback.print_exc()
+                    continue
+                entropy = compute_entropy(norm_answers)
+                n_valid = sum(1 for a in norm_answers if a is not None)
+                n_unique = len(set(a for a in norm_answers if a is not None))
+                print(f"  unique={n_unique}/{n_valid}  H={entropy:.3f}b", flush=True)
+
+                # Save to cache immediately
+                cache_row: Dict[str, Any] = {
+                    "model": model_key,
+                    "task": task,
+                    "question_id": qid,
+                    "norm_answers": norm_answers,
+                    "n_valid": n_valid,
+                    "n_unique": n_unique,
+                    "entropy_bits": entropy,
+                }
+                _append_cache(cache_row, cache)  # write BEFORE updating dict so guard works
+                cache[cache_key] = cache_row
 
             rows.append({
                 "model": model_key,
@@ -213,19 +346,52 @@ def run_model(
             })
 
     _unload_model(model)
+    del model  # drop caller's reference so Python GC can collect it
+    return rows
+
+
+def _collect_from_cache(
+    model_key: str,
+    by_task: Dict[str, List[Dict[str, Any]]],
+    cache: InferenceCache,
+) -> List[Dict[str, Any]]:
+    """Reconstruct result rows entirely from cache (no model needed)."""
+    rows = []
+    for task, questions in by_task.items():
+        for q in questions:
+            key = (model_key, task, str(q["question_id"]))
+            if key in cache:
+                cached = cache[key]
+                rows.append({
+                    "model": model_key,
+                    "task": task,
+                    "question_id": q["question_id"],
+                    "question": q["question"],
+                    "gt": q["answer"],
+                    "norm_answers": cached["norm_answers"],
+                    "n_unique": cached["n_unique"],
+                    "n_valid": cached["n_valid"],
+                    "entropy_bits": cached["entropy_bits"],
+                })
     return rows
 
 
 def main(tasks: List[str], models_to_run: List[str]) -> None:
     by_task = load_selected(tasks)
     if not by_task:
-        print("No questions loaded — exiting.")
+        print("No questions loaded -- exiting.", flush=True)
         return
+
+    # Load inference cache
+    cache = load_cache()
+
+    # NOTE: images loaded lazily per-question to keep RAM free for model weights
+    image_store: Dict[Tuple[str, str], Any] = {}
 
     all_rows: List[Dict[str, Any]] = []
 
     for model_key in models_to_run:
-        rows = run_model(model_key, by_task)
+        rows = run_model(model_key, by_task, image_store, cache)
         all_rows.extend(rows)
 
         # Checkpoint after each model
@@ -233,7 +399,7 @@ def main(tasks: List[str], models_to_run: List[str]) -> None:
         with ckpt_path.open("w", encoding="utf-8") as f:
             for row in rows:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
-        print(f"\nCheckpoint saved → {ckpt_path}")
+        print(f"\nCheckpoint saved -> {ckpt_path}", flush=True)
 
     # ── Save full results ────────────────────────────────────────────────
     out_path = OUT_DIR / "entropy_results.jsonl"
@@ -247,18 +413,18 @@ def main(tasks: List[str], models_to_run: List[str]) -> None:
 
 
 def _print_summary(rows: List[Dict[str, Any]], tasks: List[str]) -> None:
-    """Compute per-task mean entropy and Δ = GRIT − Qwen3B."""
-    # Aggregate: task → model → list of per-question entropies
+    """Compute per-task mean entropy and delta = GRIT - Qwen3B."""
+    # Aggregate: task -> model -> list of per-question entropies
     entropy_by: Dict[str, Dict[str, List[float]]] = defaultdict(lambda: defaultdict(list))
     for row in rows:
         entropy_by[row["task"]][row["model"]].append(row["entropy_bits"])
 
     summary: Dict[str, Any] = {}
-    print(f"\n{'='*60}")
-    print("STUDY A — ENTROPY DELTA SUMMARY")
-    print(f"{'='*60}")
-    print(f"{'Task':<12} {'Qwen3B H':>10} {'GRIT H':>10} {'Δ':>10}  {'Δ > 0?':>8}")
-    print("-" * 56)
+    print(f"\n{'='*60}", flush=True)
+    print("STUDY A -- ENTROPY DELTA SUMMARY", flush=True)
+    print(f"{'='*60}", flush=True)
+    print(f"{'Task':<12} {'Qwen3B H':>10} {'GRIT H':>10} {'delta':>10}  {'delta > 0?':>10}", flush=True)
+    print("-" * 60, flush=True)
 
     go_count = 0
     for task in tasks:
@@ -266,7 +432,7 @@ def _print_summary(rows: List[Dict[str, Any]], tasks: List[str]) -> None:
         g_vals = entropy_by[task].get("grit", [])
 
         if not q_vals or not g_vals:
-            print(f"  {task:<10}  (incomplete — skipping)")
+            print(f"  {task:<10}  (incomplete -- skipping)", flush=True)
             continue
 
         mean_q = sum(q_vals) / len(q_vals)
@@ -276,7 +442,7 @@ def _print_summary(rows: List[Dict[str, Any]], tasks: List[str]) -> None:
         if pos:
             go_count += 1
 
-        print(f"  {task:<10}  {mean_q:>10.3f}  {mean_g:>10.3f}  {delta:>+10.3f}  {'YES ✓' if pos else 'NO  ✗':>8}")
+        print(f"  {task:<10}  {mean_q:>10.3f}  {mean_g:>10.3f}  {delta:>+10.3f}  {'YES' if pos else 'NO':>10}", flush=True)
 
         summary[task] = {
             "mean_entropy_qwen3b": mean_q,
@@ -285,17 +451,17 @@ def _print_summary(rows: List[Dict[str, Any]], tasks: List[str]) -> None:
             "n_questions": len(q_vals),
         }
 
-    print("-" * 56)
+    print("-" * 60, flush=True)
     n_tasks = len([t for t in tasks if t in entropy_by and
                    "qwen3b" in entropy_by[t] and "grit" in entropy_by[t]])
-    print(f"\n  Δ > 0 on {go_count}/{n_tasks} tasks")
+    print(f"\n  delta > 0 on {go_count}/{n_tasks} tasks", flush=True)
 
     verdict = "GO" if go_count >= 2 else "NO-GO"
-    print(f"  Go criterion (Δ > 0 on ≥ 2/3): {verdict}")
+    print(f"  Go criterion (delta > 0 on >= 2/3): {verdict}", flush=True)
     if verdict == "NO-GO":
-        print("  → Stochasticity increase not confirmed. Review hypothesis framing.")
-        print("    Check: is GRIT extracting final answers correctly?")
-        print("    Check: are questions in the right difficulty range?")
+        print("  -> Stochasticity increase not confirmed. Review hypothesis framing.", flush=True)
+        print("    Check: is GRIT extracting final answers correctly?", flush=True)
+        print("    Check: are questions in the right difficulty range?", flush=True)
 
     summary["go_count"] = go_count
     summary["verdict"] = verdict
@@ -305,8 +471,8 @@ def _print_summary(rows: List[Dict[str, Any]], tasks: List[str]) -> None:
         json.dump(summary, f, indent=2)
 
     out_path = OUT_DIR / "entropy_results.jsonl"
-    print(f"\nFull results → {out_path}")
-    print(f"Summary      → {summary_path}")
+    print(f"\nFull results -> {out_path}", flush=True)
+    print(f"Summary      -> {summary_path}", flush=True)
 
 
 if __name__ == "__main__":

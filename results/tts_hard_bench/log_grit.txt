@@ -1,0 +1,78 @@
+
+[1m══════════════════════ TTS Hard Bench — Experiment Start ═══════════════════════[0m
+  Models : ['grit']
+  Tasks  : ['vqa', 'ocr', 'counting']
+  Candidates/question : 9
+  Total inference calls: 810
+  Estimated runtime: see CLAUDE.md for GPU estimates
+  Output: C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\results\tts_hard_bench
+  Checkpoint/resume: enabled — rerun to continue after crash
+
+[1m══════════════════════════════════ GRIT (3B) ═══════════════════════════════════[0m
+
+Preloading all images into CPU memory...
+2026-04-13 01:00:20.757 | INFO     | src.data.datasets.viscot_benchmark:_fetch_mmmu_pro_images:175 - MMMU-Pro: all 100 images loaded from disk cache.
+  vqa: 30 questions loaded
+2026-04-13 01:00:21.108 | INFO     | src.data.datasets.viscot_benchmark:_fetch_ocrbench_v2_images:208 - OCRBench-v2: all 100 images loaded from disk cache.
+  ocr: 30 questions loaded
+2026-04-13 01:00:21.196 | INFO     | src.data.datasets.viscot_benchmark:_fetch_mmstar_images:242 - MMStar: all 92 images loaded from disk cache.
+  counting: 30 questions loaded
+  Total images preloaded: 90
+
+Loading GRIT (3B)...
+2026-04-13 01:00:26.508 | INFO     | src.models.grit:_load:80 - Loading GRITModel from 'yfan1997/GRIT-20-Qwen2.5-VL-3B' (float16, no quantisation)…
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files: 100%|██████████| 2/2 [00:00<00:00, 8200.01it/s]
+Loading weights:   0%|          | 0/824 [00:00<?, ?it/s]Loading weights:   0%|          | 1/824 [00:00<01:36,  8.51it/s]Loading weights:   9%|▉         | 75/824 [00:00<00:01, 406.94it/s]Loading weights:  17%|█▋        | 137/824 [00:00<00:01, 495.74it/s]Loading weights:  24%|██▎       | 195/824 [00:00<00:01, 526.06it/s]Loading weights:  32%|███▏      | 261/824 [00:00<00:00, 572.84it/s]Loading weights:  39%|███▉      | 320/824 [00:00<00:00, 574.77it/s]Loading weights:  46%|████▌     | 379/824 [00:00<00:00, 570.51it/s]Loading weights:  58%|█████▊    | 476/824 [00:00<00:00, 692.54it/s]Loading weights:  85%|████████▌ | 702/824 [00:00<00:00, 1169.89it/s]Loading weights: 100%|██████████| 824/824 [00:00<00:00, 830.26it/s] 
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-04-13 01:00:32.371 | INFO     | src.models.grit:_load:92 - GRITModel loaded.
+  Model loaded in 11s
+
+────────────────────────────────────────────────────────────────────────────────
+  [1mVQA[0m  14 done, 16 to go
+  vqa [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/16 (0%) 0min  ETA ---  qid=test_Energy_and_Power_152Passing `generation_config` together with generation-related arguments=({'use_cache'}) is deprecated and will be removed in future versions. Please pass either a `generation_config` object OR all generation parameters explicitly, but not both.
+  vqa [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/16 (6%) 6min  ETA 1.4h  qid=test_Finance_304  vqa [███░░░░░░░░░░░░░░░░░░░░░░░░░░░] 2/16 (12%) 12min  ETA 1.4h  qid=validation_Geography_5  vqa [█████░░░░░░░░░░░░░░░░░░░░░░░░░] 3/16 (19%) 17min  ETA 1.3h  qid=test_History_1  vqa [███████░░░░░░░░░░░░░░░░░░░░░░░] 4/16 (25%) 19min  ETA 1.0h  qid=test_Literature_65  vqa [█████████░░░░░░░░░░░░░░░░░░░░░] 5/16 (31%) 22min  ETA 0.8h  qid=validation_Manage_29  vqa [███████████░░░░░░░░░░░░░░░░░░░] 6/16 (38%) 25min  ETA 0.7h  qid=test_Marketing_86  vqa [█████████████░░░░░░░░░░░░░░░░░] 7/16 (44%) 27min  ETA 0.6h  qid=test_Materials_165  vqa [███████████████░░░░░░░░░░░░░░░] 8/16 (50%) 32min  ETA 0.5h  qid=validation_Math_28  vqa [████████████████░░░░░░░░░░░░░░] 9/16 (56%) 35min  ETA 0.5h  qid=validation_Mechanical_Engineering_18  vqa [██████████████████░░░░░░░░░░░░] 10/16 (62%) 41min  ETA 0.4h  qid=test_Music_53  vqa [████████████████████░░░░░░░░░░] 11/16 (69%) 45min  ETA 0.3h  qid=test_Pharmacy_287  vqa [██████████████████████░░░░░░░░] 12/16 (75%) 47min  ETA 0.3h  qid=validation_Physics_7  vqa [████████████████████████░░░░░░] 13/16 (81%) 50min  ETA 0.2h  qid=test_Psychology_35  vqa [██████████████████████████░░░░] 14/16 (88%) 53min  ETA 0.1h  qid=test_Public_Health_4  vqa [████████████████████████████░░] 15/16 (94%) 56min  ETA 0.1h  qid=test_Sociology_191
+
+  [1mVQA summary (30 questions):[0m
+    greedy(T=0)  = 10.0%   [Study B baseline]
+    @1  (T=0.7)  = 23.3%
+    @3           = 20.0%
+    @5           = 13.3%
+    @9           = 13.3%   gain = +3.3pp vs greedy
+    oracle@9     = 63.3%
+
+────────────────────────────────────────────────────────────────────────────────
+  [1mOCR[0m  0 done, 30 to go
+  ocr [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/30 (0%) 0min  ETA ---  qid=106  ocr [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/30 (3%) 1min  ETA 0.7h  qid=303  ocr [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 2/30 (7%) 2min  ETA 0.4h  qid=1646  ocr [███░░░░░░░░░░░░░░░░░░░░░░░░░░░] 3/30 (10%) 3min  ETA 0.4h  qid=2297C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\native\cuda\TensorCompare.cu:109: block: [0,0,0], thread: [0,0,0] Assertion `input[0] != 0` failed.
+  ocr [████░░░░░░░░░░░░░░░░░░░░░░░░░░] 4/30 (13%) 8min  ETA 0.8h  qid=2409  ocr [█████░░░░░░░░░░░░░░░░░░░░░░░░░] 5/30 (17%) 8min  ETA 0.7h  qid=2689  ocr [██████░░░░░░░░░░░░░░░░░░░░░░░░] 6/30 (20%) 8min  ETA 0.5h  qid=3478  ocr [███████░░░░░░░░░░░░░░░░░░░░░░░] 7/30 (23%) 8min  ETA 0.4h  qid=3712  ocr [████████░░░░░░░░░░░░░░░░░░░░░░] 8/30 (27%) 8min  ETA 0.4h  qid=3888  ocr [█████████░░░░░░░░░░░░░░░░░░░░░] 9/30 (30%) 8min  ETA 0.3h  qid=4430  ocr [██████████░░░░░░░░░░░░░░░░░░░░] 10/30 (33%) 8min  ETA 0.3h  qid=7102  ocr [███████████░░░░░░░░░░░░░░░░░░░] 11/30 (37%) 8min  ETA 0.2h  qid=4687  ocr [████████████░░░░░░░░░░░░░░░░░░] 12/30 (40%) 8min  ETA 0.2h  qid=4865  ocr [█████████████░░░░░░░░░░░░░░░░░] 13/30 (43%) 8min  ETA 0.2h  qid=5645  ocr [██████████████░░░░░░░░░░░░░░░░] 14/30 (47%) 8min  ETA 0.2h  qid=5978  ocr [███████████████░░░░░░░░░░░░░░░] 15/30 (50%) 8min  ETA 0.1h  qid=5185  ocr [████████████████░░░░░░░░░░░░░░] 16/30 (53%) 8min  ETA 0.1h  qid=659  ocr [█████████████████░░░░░░░░░░░░░] 17/30 (57%) 8min  ETA 0.1h  qid=1269  ocr [██████████████████░░░░░░░░░░░░] 18/30 (60%) 8min  ETA 0.1h  qid=1584  ocr [███████████████████░░░░░░░░░░░] 19/30 (63%) 8min  ETA 0.1h  qid=5473  ocr [████████████████████░░░░░░░░░░] 20/30 (67%) 8min  ETA 0.1h  qid=6707  ocr [█████████████████████░░░░░░░░░] 21/30 (70%) 8min  ETA 0.1h  qid=6568  ocr [██████████████████████░░░░░░░░] 22/30 (73%) 8min  ETA 0.0h  qid=7225  ocr [███████████████████████░░░░░░░] 23/30 (77%) 8min  ETA 0.0h  qid=7741  ocr [████████████████████████░░░░░░] 24/30 (80%) 8min  ETA 0.0h  qid=8012  ocr [█████████████████████████░░░░░] 25/30 (83%) 8min  ETA 0.0h  qid=8231  ocr [██████████████████████████░░░░] 26/30 (87%) 8min  ETA 0.0h  qid=8507  ocr [███████████████████████████░░░] 27/30 (90%) 8min  ETA 0.0h  qid=9260  ocr [████████████████████████████░░] 28/30 (93%) 8min  ETA 0.0h  qid=9595  ocr [█████████████████████████████░] 29/30 (97%) 8min  ETA 0.0h  qid=9890
+
+  [1mOCR summary (30 questions):[0m
+    greedy(T=0)  = 3.3%   [Study B baseline]
+    @1  (T=0.7)  = 6.7%
+    @3           = 3.3%
+    @5           = 3.3%
+    @9           = 6.7%   gain = +3.3pp vs greedy
+    oracle@9     = 10.0%
+
+────────────────────────────────────────────────────────────────────────────────
+  [1mCOUNTING[0m  0 done, 30 to go
+  counting [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/30 (0%) 0min  ETA ---  qid=425  counting [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 1/30 (3%) 0min  ETA 0.0h  qid=274  counting [██░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 2/30 (7%) 0min  ETA 0.0h  qid=352  counting [███░░░░░░░░░░░░░░░░░░░░░░░░░░░] 3/30 (10%) 0min  ETA 0.0h  qid=253  counting [████░░░░░░░░░░░░░░░░░░░░░░░░░░] 4/30 (13%) 0min  ETA 0.0h  qid=436  counting [█████░░░░░░░░░░░░░░░░░░░░░░░░░] 5/30 (17%) 0min  ETA 0.0h  qid=422  counting [██████░░░░░░░░░░░░░░░░░░░░░░░░] 6/30 (20%) 0min  ETA 0.0h  qid=293  counting [███████░░░░░░░░░░░░░░░░░░░░░░░] 7/30 (23%) 0min  ETA 0.0h  qid=309  counting [████████░░░░░░░░░░░░░░░░░░░░░░] 8/30 (27%) 0min  ETA 0.0h  qid=341  counting [█████████░░░░░░░░░░░░░░░░░░░░░] 9/30 (30%) 0min  ETA 0.0h  qid=322  counting [██████████░░░░░░░░░░░░░░░░░░░░] 10/30 (33%) 0min  ETA 0.0h  qid=367  counting [███████████░░░░░░░░░░░░░░░░░░░] 11/30 (37%) 0min  ETA 0.0h  qid=382  counting [████████████░░░░░░░░░░░░░░░░░░] 12/30 (40%) 0min  ETA 0.0h  qid=446  counting [█████████████░░░░░░░░░░░░░░░░░] 13/30 (43%) 0min  ETA 0.0h  qid=300  counting [██████████████░░░░░░░░░░░░░░░░] 14/30 (47%) 0min  ETA 0.0h  qid=428  counting [███████████████░░░░░░░░░░░░░░░] 15/30 (50%) 0min  ETA 0.0h  qid=439  counting [████████████████░░░░░░░░░░░░░░] 16/30 (53%) 0min  ETA 0.0h  qid=361  counting [█████████████████░░░░░░░░░░░░░] 17/30 (57%) 0min  ETA 0.0h  qid=455  counting [██████████████████░░░░░░░░░░░░] 18/30 (60%) 0min  ETA 0.0h  qid=450  counting [███████████████████░░░░░░░░░░░] 19/30 (63%) 0min  ETA 0.0h  qid=384  counting [████████████████████░░░░░░░░░░] 20/30 (67%) 0min  ETA 0.0h  qid=389  counting [█████████████████████░░░░░░░░░] 21/30 (70%) 0min  ETA 0.0h  qid=482  counting [██████████████████████░░░░░░░░] 22/30 (73%) 0min  ETA 0.0h  qid=463  counting [███████████████████████░░░░░░░] 23/30 (77%) 0min  ETA 0.0h  qid=458  counting [████████████████████████░░░░░░] 24/30 (80%) 0min  ETA 0.0h  qid=324  counting [█████████████████████████░░░░░] 25/30 (83%) 0min  ETA 0.0h  qid=268  counting [██████████████████████████░░░░] 26/30 (87%) 0min  ETA 0.0h  qid=334  counting [███████████████████████████░░░] 27/30 (90%) 0min  ETA 0.0h  qid=457  counting [████████████████████████████░░] 28/30 (93%) 0min  ETA 0.0h  qid=318  counting [█████████████████████████████░] 29/30 (97%) 0min  ETA 0.0h  qid=357
+
+  [1mCOUNTING summary (30 questions):[0m
+    greedy(T=0)  = 0.0%   [Study B baseline]
+    @1  (T=0.7)  = 0.0%
+    @3           = 0.0%
+    @5           = 0.0%
+    @9           = 0.0%   gain = +0.0pp vs greedy
+    oracle@9     = 0.0%
+
+Unloading GRIT (3B)...
+
+[1m══════════════════════════ FINAL SUMMARY — GRIT (3B) ═══════════════════════════[0m
+  Task           greedy       @1       @3       @5       @9   oracle@9   gain@9
+  --------------------------------------------------------------------------
+  vqa             10.0%    23.3%    20.0%    13.3%    13.3%      63.3%    +3.3pp
+  ocr              3.3%     6.7%     3.3%     3.3%     6.7%      10.0%    +3.3pp
+  counting         0.0%     0.0%     0.0%     0.0%     0.0%       0.0%    +0.0pp
+
+[1m═══════════════════════════════════ ALL DONE ═══════════════════════════════════[0m
+  Total wall time: 1.1h

@@ -1,0 +1,77 @@
+
+[1m══════════════════════ TTS Hard Bench — Experiment Start ═══════════════════════[0m
+  Models : ['grit']
+  Tasks  : ['ocr']
+  Candidates/question : 9
+  Total inference calls: 270
+  Estimated runtime: see CLAUDE.md for GPU estimates
+  Output: C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\results\tts_hard_bench
+  Checkpoint/resume: enabled — rerun to continue after crash
+
+[1m══════════════════════════════════ GRIT (3B) ═══════════════════════════════════[0m
+
+Preloading all images into CPU memory...
+2026-04-13 02:23:04.630 | INFO     | src.data.datasets.viscot_benchmark:_fetch_ocrbench_v2_images:208 - OCRBench-v2: all 100 images loaded from disk cache.
+  ocr: 30 questions loaded
+  Total images preloaded: 30
+
+Loading GRIT (3B)...
+2026-04-13 02:23:09.937 | INFO     | src.models.grit:_load:80 - Loading GRITModel from 'yfan1997/GRIT-20-Qwen2.5-VL-3B' (float16, no quantisation)…
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files: 100%|██████████| 2/2 [00:00<00:00, 5817.34it/s]
+Loading weights:   0%|          | 0/824 [00:00<?, ?it/s]Loading weights:   0%|          | 1/824 [00:00<01:36,  8.57it/s]Loading weights:   8%|▊         | 63/824 [00:00<00:02, 336.49it/s]Loading weights:  15%|█▍        | 123/824 [00:00<00:01, 430.87it/s]Loading weights:  21%|██        | 171/824 [00:00<00:01, 441.54it/s]Loading weights:  28%|██▊       | 231/824 [00:00<00:01, 488.04it/s]Loading weights:  35%|███▌      | 289/824 [00:00<00:01, 515.97it/s]Loading weights:  41%|████▏     | 341/824 [00:00<00:00, 515.94it/s]Loading weights:  49%|████▊     | 401/824 [00:00<00:00, 540.81it/s]Loading weights:  66%|██████▋   | 546/824 [00:00<00:00, 815.87it/s]Loading weights:  92%|█████████▏| 762/824 [00:01<00:00, 1210.27it/s]Loading weights: 100%|██████████| 824/824 [00:01<00:00, 760.21it/s] 
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+2026-04-13 02:23:15.813 | INFO     | src.models.grit:_load:92 - GRITModel loaded.
+  [config] reloading processor with max_pixels=1003520 (1280 tiles)
+  Model loaded in 15s
+
+────────────────────────────────────────────────────────────────────────────────
+  [1mOCR[0m  3 done, 27 to go
+  ocr [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0/27 (0%) 0min  ETA ---  qid=2297Passing `generation_config` together with generation-related arguments=({'use_cache'}) is deprecated and will be removed in future versions. Please pass either a `generation_config` object OR all generation parameters explicitly, but not both.
+C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\native\cuda\TensorCompare.cu:109: block: [0,0,0], thread: [0,0,0] Assertion `input[0] != 0` failed.
+
+Unloading GRIT (3B)...
+Traceback (most recent call last):
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\experiments\run_tts_hard_bench.py", line 273, in _run_question
+    outs = model_obj.generate(
+        img,
+    ...<3 lines>...
+        max_new_tokens=max_new_tokens,
+    )
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\src\models\grit.py", line 105, in generate
+    return [self._answer(image, query, temperature, max_new_tokens) for _ in range(n)]
+            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\src\models\grit.py", line 159, in _answer
+    out_ids = self._model.generate(**inputs, generation_config=gen_config, use_cache=True)
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\.venv\Lib\site-packages\torch\utils\_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\.venv\Lib\site-packages\transformers\generation\utils.py", line 2535, in generate
+    result = decoding_method(
+        self,
+    ...<5 lines>...
+        **model_kwargs,
+    )
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\.venv\Lib\site-packages\transformers\generation\utils.py", line 2783, in _sample
+    next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
+                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+torch.AcceleratorError: CUDA error: device-side assert triggered
+Search for `cudaErrorAssert' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\experiments\run_tts_hard_bench.py", line 604, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\experiments\run_tts_hard_bench.py", line 595, in main
+    run_model(model_key, tasks_to_run, max_per_task=max_per_task)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\experiments\run_tts_hard_bench.py", line 433, in run_model
+    candidates = _run_question(model_obj, image_variants, text_variants, task, model_key)
+  File "C:\Users\Youssef\Documents\Cours\5Poly\IFT6765\TTS-VisCoT\experiments\run_tts_hard_bench.py", line 285, in _run_question
+    raise RuntimeError(f"CUDA error on candidate {i} — aborting to preserve checkpoint: {e}") from e
+RuntimeError: CUDA error on candidate 7 — aborting to preserve checkpoint: CUDA error: device-side assert triggered
+Search for `cudaErrorAssert' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
