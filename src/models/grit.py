@@ -74,13 +74,14 @@ class GRITModel(BaseVisualCoTModel):
             return
         from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
 
-        # RTX 5060 Ti silently crashes with bitsandbytes 8-bit — use float16.
+        # Use bfloat16: more numerically stable than float16 on H100 (avoids
+        # NaN/inf in sampling). RTX 5060 Ti also supports bfloat16.
         import torch as _torch
         quant_config = None
-        logger.info("Loading GRITModel from '{}' (float16, no quantisation)…", self.model_id)
+        logger.info("Loading GRITModel from '{}' (bfloat16, no quantisation)…", self.model_id)
         self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             self.model_id,
-            torch_dtype=_torch.float16,
+            torch_dtype=_torch.bfloat16,
             device_map="auto",
             quantization_config=quant_config,
         )
