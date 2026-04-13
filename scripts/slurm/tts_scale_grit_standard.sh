@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-azouaq_gpu
 #SBATCH --job-name=tts_grit_std
+#SBATCH --partition=gpubase_bygpu_b2
 #SBATCH --gres=gpu:h100:1
 #SBATCH --mem=40G
 #SBATCH --cpus-per-task=4
