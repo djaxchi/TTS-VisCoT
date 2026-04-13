@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-azouaq
 #SBATCH --job-name=tts_grit_t0
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:h100:1
 #SBATCH --mem=40G
 #SBATCH --cpus-per-task=4
 #SBATCH --time=08:00:00
