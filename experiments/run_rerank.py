@@ -137,27 +137,36 @@ def _unique_proposals(candidates: List[Dict[str, Any]], task: str) -> List[str]:
 # ── Re-ranking prompt ─────────────────────────────────────────────────────────
 
 def _build_rerank_prompt(original_question: str, proposals: List[str], task: str) -> str:
-    """Construct the re-ranking prompt shown to the verifier model."""
-    labelled = "\n".join(f"  {chr(65+i)}. {p}" for i, p in enumerate(proposals))
+    """Construct the re-ranking prompt shown to the verifier model.
 
+    For MCQ tasks (vqa, counting) the candidates are already option letters
+    (e.g. "A", "C").  We must NOT re-label them with new A/B/C prefixes —
+    that creates a confusing double layer ("A. a", "B. c").  Instead we show
+    the original question (which already contains the option text) and list
+    only the proposed letters so the model can cross-reference.
+
+    For OCR (free-form) we assign fresh A/B/C labels since the proposals are
+    plain text strings with no existing letter identity.
+    """
     if task in ("vqa", "counting"):
-        instruction = (
-            "The following candidate answers were proposed for the question above. "
-            "Based on the image, select the single correct answer. "
-            "Reply with only the letter (A, B, C, …)."
+        # proposals are letters like ["A", "C", "D"] — list them, keep original Q
+        proposed_str = "  " + ",  ".join(p.upper() for p in proposals)
+        return (
+            f"{original_question}\n\n"
+            f"Multiple candidates were generated. They proposed these answers: "
+            f"{proposed_str.strip()}.\n"
+            f"Based on the image, which answer is correct? "
+            f"Reply with only the single letter."
         )
-    else:  # ocr
-        instruction = (
-            "The following candidate answers were proposed for the question above. "
-            "Based on the image, select the most accurate answer. "
-            "Reply with only the letter (A, B, C, …)."
+    else:  # ocr — free-form text, assign fresh labels
+        labelled = "\n".join(f"  {chr(65+i)}. {p}" for i, p in enumerate(proposals))
+        return (
+            f"{original_question}\n\n"
+            f"The following candidate answers were proposed. "
+            f"Based on the image, select the most accurate one. "
+            f"Reply with only the letter (A, B, C, …).\n\n"
+            f"Candidates:\n{labelled}"
         )
-
-    return (
-        f"{original_question}\n\n"
-        f"{instruction}\n\n"
-        f"Candidates:\n{labelled}"
-    )
 
 
 # ── Model load / unload ───────────────────────────────────────────────────────
@@ -212,23 +221,39 @@ def _rerank_one(model_obj, image, prompt: str, model_key: str) -> str:
     return parser(raw)
 
 
-def _parse_letter(raw: str, proposals: List[str]) -> Optional[str]:
-    """Map a letter reply (A, B, C…) back to the corresponding proposal."""
+def _parse_letter(raw: str, proposals: List[str], task: str) -> Optional[str]:
+    """Map the model reply back to a proposal answer.
+
+    MCQ (vqa/counting): proposals ARE letters (e.g. ["A","C"]).  The model
+    replies with a letter — return it directly if it's in the proposals.
+
+    OCR: proposals are free-form text labelled A, B, C…  Map the reply
+    letter to the proposal at that index.
+    """
     raw = raw.strip()
     if not raw:
         return None
     letter = raw[0].upper()
-    idx = ord(letter) - ord("A")
-    if 0 <= idx < len(proposals):
-        return proposals[idx]
-    # fallback: model may have echoed the answer text directly
-    return raw
+    if task in ("vqa", "counting"):
+        # model replies with the original option letter — return it directly
+        if letter in [p.upper() for p in proposals]:
+            return letter
+        # fallback: first letter of output if it's a plausible option
+        return letter if letter.isalpha() else None
+    else:
+        # OCR: map new label A/B/C back to proposal index
+        idx = ord(letter) - ord("A")
+        if 0 <= idx < len(proposals):
+            return proposals[idx]
+        return raw
 
 
 # ── Checkpoint / resume ───────────────────────────────────────────────────────
 
 def _out_path(source: Path, model_key: str) -> Path:
-    return OUT_DIR / f"{source.stem}_reranked_by_{model_key}.jsonl"
+    # Include parent dir name so tts_scale vs tts_scale_t0 don't collide
+    recipe = source.parent.name  # e.g. "tts_scale" or "tts_scale_t0"
+    return OUT_DIR / f"{recipe}_{source.stem}_reranked_by_{model_key}.jsonl"
 
 
 def _load_done(source: Path, model_key: str) -> set:
@@ -319,7 +344,7 @@ def run(source: Path, tasks_filter: Optional[List[str]], model_key: str) -> None
                 except Exception as e:
                     logger.warning("Rerank failed qid={}: {}", qid, e)
                     rerank_raw_output = ""
-                chosen_raw = _parse_letter(rerank_raw_output, proposals) or ""
+                chosen_raw = _parse_letter(rerank_raw_output, proposals, task) or ""
 
             chosen_norm = _norm(chosen_raw, task)
             correct_rerank = _is_correct(chosen_raw, row)
