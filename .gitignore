@@ -77,3 +77,7 @@ results/**/*.png
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# TTS-scale full results — too large for git; samples checked in instead
+results/tts_scale/
+results/tts_scale_t0/
