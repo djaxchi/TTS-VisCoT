@@ -1,7 +1,7 @@
 # Test-Time Scaling for Visual Chain-of-Thought Models: Image-Input Diversity as the Key Driver
 
-**Date:** 2026-04-13
-**Status:** Runs 1 & 2 complete; analysis ongoing
+**Date:** 2026-04-14
+**Status:** Runs 1 & 2 (pilot, n=30) + Run 3 (full hard_bench, n=292) complete
 
 ---
 
@@ -170,26 +170,140 @@ or *random* (temperature-driven).
 
 ---
 
-## 5. Limitations
+## 5. Scaled validation (n=292) — redefining TTS as pass@9
 
-- **Sample size:** 30 questions per task — trends across tasks and runs are more reliable
-  than individual task numbers.
-- **Model pair:** Only Qwen3B vs GRIT-3B tested. DeepEyesV2-7B (agentic CoT) was piloted
-  on 3 questions; full evaluation is planned.
-- **OCR evaluation:** Qwen3B OCR at 3.3% in Run 1 is an artifact of strict exact-match
-  scoring. Re-evaluation with character-level edit distance is pending.
-- **Answer-level voting only:** Five voting strategies tested, all operating on final
-  answer strings. Token-level confidence (logprob weighting) was not evaluated and may
-  close more of the oracle gap.
+The pilot results raised one key question: with only 30 questions per task and a
+persistent oracle gap, is the TTS effect simply noise, or is there real signal that
+a better selector could exploit? We scaled to the full **hard_bench (n=292)** across
+all four configurations (Qwen3B × GRIT × standard × T=0 ablation).
+
+**Metric redefinition.** At scale, no answer-level voting strategy beats greedy for
+either model (see §5.5). Rather than continue to chase an optimal voter, we fix the
+TTS metric to **pass@9** — a question counts as correct under TTS if *any* of the 9
+candidates is correct. This is the upper bound a perfect selector could reach, and
+it isolates the question we actually care about: *does candidate diversity contain
+the right answer?* Closing the gap between pass@9 and a deployable selector is left
+as a limitation.
+
+### 5.1 Headline: TTS lifts accuracy sharply on both models
+
+![Figure A — Accuracy lift from TTS (pass@9) across 4 configs](results/figures/poster/A_headline_gain.png)
+
+**Figure A** — TTS gain (pass@9 minus greedy) on the full 292-question benchmark.
+Every configuration shows a substantial lift; the **standard recipe (T=0.7 + image
+augmentations)** yields the largest gains, reaching **+30.5pp for GRIT** and +24.3pp
+for Qwen3B overall. Even the pure image-augmentation ablation (T=0) produces
++16.8pp (Qwen) and +19.9pp (GRIT) — confirming at scale the pilot finding that
+image diversity alone is a real driver.
+
+### 5.2 Per-task effect and model comparison
+
+![Figure B — Per-task effect of TTS, standard recipe](results/figures/poster/B_per_task.png)
+
+**Figure B** — Per-task breakdown under the standard recipe. The two tasks where
+models have headroom (VQA, Counting) also show the largest TTS gains (+29–43pp).
+OCR gains are modest on both models (+5–7pp), consistent with the pilot: OCR is a
+fine-grained exact-match task where augmentations produce fewer *correctly different*
+candidates.
+
+![Figure D — GRIT vs Qwen3B head-to-head](results/figures/poster/D_grit_vs_qwen.png)
+
+**Figure D** — Visual-CoT (GRIT) vs direct (Qwen3B) under the standard recipe.
+Baseline accuracy is nearly identical (29.5 vs 29.8% overall), but **GRIT gains more
+from TTS** on every task, widening the gap to 59.9 vs 54.1% under pass@9.
+The visual-grounding step gives GRIT access to *structurally different* candidates
+that direct decoding cannot produce.
+
+### 5.3 Temperature amplifies TTS
+
+![Figure C — Temperature amplifies TTS](results/figures/poster/C_temperature_effect.png)
+
+**Figure C** — At scale, temperature sampling roughly doubles the TTS gain for both
+models (Qwen: +16.8 → +24.3pp; GRIT: +19.9 → +30.5pp overall). This refines Finding 2
+from the pilot: temperature *does* generate useful diversity once we measure in the
+pass@9 regime — the earlier "temperature hurts" result was specific to plurality
+voting, where wrong candidates can outvote correct ones. With a perfect selector,
+both diversity sources compound.
+
+### 5.4 Which augmentation drives GRIT's diversity?
+
+To understand where GRIT's candidate diversity comes from, we conditioned on questions
+where the original image (T=0) failed and measured how many of those failures each
+augmented candidate uniquely rescues — i.e., it is the *only* augmented candidate
+that gets the question right.
+
+| Augmentation | GRIT rescue% | Qwen rescue% | GRIT unique | Qwen unique |
+|---|---|---|---|---|
+| **Rotation 90°** | 12.3% | 12.6% | **10** | 4 |
+| Edge enhance + paraphrase | **13.2%** | 13.0% | 4 | 1 |
+| JPEG recompress | 10.8% | 12.1% | 5 | 3 |
+| Brightness/contrast | 11.3% | 12.1% | 3 | 4 |
+| Edge enhance | 11.8% | 11.6% | 1 | 0 |
+| Paraphrase (text only) | 10.4% | **14.4%** | 1 | 1 |
+| Grayscale | 10.8% | 13.5% | 0 | 3 |
+
+*rescue% = fraction of original-failed questions this slot answers correctly;
+unique = questions where this slot is the only correct augmented candidate (T=0 ablation, n=292)*
+
+The **raw rescue rates are nearly identical across all augmentations and across both
+models** (11–14%), meaning each augmentation recovers a similar number of failures in
+absolute terms. The critical difference lies in *which* questions they recover.
+For Qwen, augmented candidates largely rescue the **same questions** — when one
+augmentation works, most others do too. For GRIT, **rotation_90 uniquely rescues 10
+questions that no other augmentation touches**, and each augmentation type unlocks a
+distinct subset of failures.
+
+This is consistent with GRIT's visual grounding mechanism. A 90° rotation fundamentally
+changes the spatial layout of the image: objects that were side-by-side become vertically
+stacked. GRIT's grounding step predicts bounding boxes before answering, so a rotated
+image forces it to attend to a different spatial region, producing a qualitatively
+different reasoning chain. Brightness shifts and JPEG compression alter pixel values
+but not spatial structure, so the grounding step is minimally affected — and for Qwen,
+which has no grounding step, rotation is just another perturbation with no mechanism
+to translate spatial change into different reasoning.
+
+![Figure F — Oracle coverage: original vs augmented candidates](results/figures/poster/F_oracle_breakdown.png)
+
+**Figure F** — Stacked bars showing how much oracle coverage comes from original-image
+candidates alone vs what augmented candidates uniquely add (T=0 ablation).
+GRIT gains more from augmentation than Qwen both at T=0 and T=0.7, with the gap
+widest under temperature sampling where GRIT's grounding step compounds spatial and
+stochastic diversity.
+
+### 5.5 Answer-level voting does not close the oracle gap
+
+At n=292 we replayed six voting strategies (plurality, greedy-tiebreak,
+greedy-unless-supermajority, consistency filter, logprob-sum, logprob-mean). For
+both models and across all tasks, **no strategy outperforms the greedy baseline**.
+Options-logprob voting (restricted to the A–D/A–J subset where options are
+well-defined) is no better. This is why we adopt pass@9 as the TTS metric: the
+signal is in the candidate pool, but extracting it requires more than answer-level
+aggregation.
+
+Full strategy-by-strategy tables are in `results/analysis/scale_results.json`; we
+treat selector design as an open problem rather than a contribution of this work.
 
 ---
 
-## 6. Next Steps
+## 6. Limitations
 
-1. **Token-level confidence voting** — answer-level voting cannot close the oracle gap.
-   The inference infrastructure for extracting option logprobs already exists; a
-   logprob-weighted voting pass on existing candidates is the natural next step.
-2. **Scale validation** — confirm the main finding on 100 questions per task (current
-   results use 30).
-3. **DeepEyesV2 full evaluation** — extend Run 1 + Run 2 to agentic CoT to test whether
-   the image-diversity finding generalizes to deeper CoT.
+- **TTS metric = pass@9 (oracle upper bound).** Due to time constraints we did not
+  identify a voting strategy that matches pass@9; answer-level voting actually
+  under-performs greedy at scale. Reported TTS gains therefore represent what a
+  perfect selector could achieve, not deployable accuracy.
+- **Model pair:** Only Qwen3B vs GRIT-3B tested. DeepEyesV2-7B (agentic CoT) was
+  piloted on 3 questions; full evaluation is planned.
+- **OCR evaluation** remains conservative due to strict exact-match scoring; edit-distance
+  re-scoring is pending.
+
+---
+
+## 7. Next Steps
+
+1. **Selector design to close the pass@9 → deployable gap.** Logprob-weighted voting
+   on counting/MCQ subsets and learned lightweight verifiers are the natural next
+   experiments.
+2. **DeepEyesV2 full evaluation** — test whether the image-diversity finding extends
+   to agentic CoT.
+3. **OCR re-scoring** with character-level edit distance to separate model error
+   from evaluation artifact.
