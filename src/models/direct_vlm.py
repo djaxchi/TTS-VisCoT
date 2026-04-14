@@ -44,13 +44,13 @@ class DirectVLMModel(BaseVisualCoTModel):
             return
         from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
 
-        # RTX 5060 Ti (Ada Lovelace) has issues with bitsandbytes 8-bit — use
-        # float16 directly.  ~6 GB VRAM vs ~3 GB for 8-bit, but stable.
+        # Use bfloat16: more numerically stable than float16 on H100 (avoids
+        # NaN/inf during sampling). RTX 5060 Ti also supports bfloat16.
         quant_config = None
-        logger.info("Loading DirectVLM from '{}' (float16, no quantisation)…", self.model_id)
+        logger.info("Loading DirectVLM from '{}' (bfloat16, no quantisation)…", self.model_id)
         self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             self.model_id,
-            torch_dtype=torch.float16,
+            torch_dtype=torch.bfloat16,
             device_map="auto",
             quantization_config=quant_config,
         )
