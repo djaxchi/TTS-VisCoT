@@ -9,15 +9,30 @@ import collections
 RERANK_DIR = pathlib.Path(os.environ.get("SCRATCH", ".")) / "results" / "rerank"
 
 
-def summarize(path: pathlib.Path) -> dict:
+METRICS = [
+    ("correct_greedy", "Greedy"),
+    ("correct_rerank",  "Rerank"),
+    ("correct_vote9",   "Vote@9"),
+    ("correct_oracle",  "Oracle"),
+]
+
+
+def summarize(path: pathlib.Path) -> dict[str, dict]:
     rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
-    tasks: dict[str, dict] = collections.defaultdict(lambda: {"correct": 0, "total": 0})
+    tasks: dict[str, dict] = collections.defaultdict(
+        lambda: {key: 0 for key, _ in METRICS} | {"total": 0}
+    )
     for r in rows:
         task = r.get("task", "unknown")
         tasks[task]["total"] += 1
-        if r.get("rerank_correct", False):
-            tasks[task]["correct"] += 1
+        for key, _ in METRICS:
+            if r.get(key, False):
+                tasks[task][key] += 1
     return dict(tasks)
+
+
+def acc(v: dict, key: str) -> float:
+    return v[key] / v["total"] * 100 if v["total"] else 0.0
 
 
 def main() -> None:
@@ -28,16 +43,22 @@ def main() -> None:
 
     for path in files:
         tasks = summarize(path)
-        overall_c = sum(v["correct"] for v in tasks.values())
-        overall_t = sum(v["total"] for v in tasks.values())
+        # compute totals
+        totals: dict = {key: sum(t[key] for t in tasks.values()) for key, _ in METRICS}
+        totals["total"] = sum(t["total"] for t in tasks.values())
 
+        header = f"{'Task':12s}" + "".join(f"  {label:>8s}" for _, label in METRICS)
+        sep = "-" * len(header)
         print(f"\n=== {path.name} ===")
-        for task, v in sorted(tasks.items()):
-            acc = v["correct"] / v["total"] * 100 if v["total"] else 0
-            print(f"  {task:12s}: {v['correct']:3d}/{v['total']:3d}  =  {acc:5.1f}%")
-
-        if overall_t:
-            print(f"  {'OVERALL':12s}: {overall_c:3d}/{overall_t:3d}  =  {overall_c/overall_t*100:5.1f}%")
+        print(header)
+        print(sep)
+        for task in sorted(tasks):
+            v = tasks[task]
+            row = f"{task:12s}" + "".join(f"  {acc(v, k):7.1f}%" for k, _ in METRICS)
+            print(row)
+        print(sep)
+        row = f"{'OVERALL':12s}" + "".join(f"  {acc(totals, k):7.1f}%" for k, _ in METRICS)
+        print(row)
 
 
 if __name__ == "__main__":
