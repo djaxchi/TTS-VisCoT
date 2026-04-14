@@ -8,9 +8,7 @@
 
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
-  background: #e8eaf0;
-  font-size: 12px;
-  line-height: 1.45;
+  background: #cdd0d8;
   color: #1a1a2e;
 }
 
@@ -20,463 +18,409 @@ body {
   --dark:   #1a1a2e;
   --mid:    #2d3561;
   --light:  #f2f4f8;
-  --border: #d8dce8;
+  --border: #d4d8e6;
   --green:  #27ae60;
   --accent: #f7c59f;
 }
 
+/* ── Fixed canvas: exactly 1189 × 841 ──────────────────────────────────── */
 .poster {
-  width: 900px;
+  width:  1189px;
+  height: 841px;
   margin: 20px auto;
   background: #fff;
-  box-shadow: 0 6px 40px rgba(0,0,0,0.18);
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 6px 40px rgba(0,0,0,0.22);
+  display: grid;
+  grid-template-rows: 80px 28px 1fr 58px;
+  overflow: hidden;
 }
 
 /* ── HEADER ─────────────────────────────────────────────────────────────── */
 .header {
   background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 100%);
   color: white;
-  padding: 20px 24px 16px;
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0 26px;
+  gap: 16px;
 }
 .header h1 {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 6px;
+  line-height: 1.22;
 }
 .header h1 .hl { color: var(--accent); }
-.header .sub {
-  font-size: 11px;
-  opacity: 0.7;
-  margin-bottom: 10px;
-}
-.pill-row {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
+.header .sub { font-size: 10.5px; opacity: 0.65; margin-top: 5px; }
+.pills { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
 .pill {
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 9.5px; font-weight: 700; white-space: nowrap;
 }
-.pill-q  { background: var(--qwen); color: #fff; }
-.pill-g  { background: var(--grit); color: #fff; }
-.pill-n  { background: rgba(255,255,255,0.2); color: #fff; }
+.pq { background: var(--qwen); color: #fff; }
+.pg { background: var(--grit);  color: #fff; }
+.pn { background: rgba(255,255,255,0.18); color: #fff; }
 
 /* ── QUESTION BAR ───────────────────────────────────────────────────────── */
 .qbar {
   background: var(--accent);
-  color: var(--dark);
-  text-align: center;
-  padding: 8px 20px;
-  font-size: 12px;
-  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11.5px; font-weight: 700;
   border-bottom: 3px solid var(--grit);
+  padding: 0 20px; text-align: center;
 }
 .qbar em { font-style: normal; color: var(--grit); }
 
-/* ── 3-COLUMN BODY ──────────────────────────────────────────────────────── */
-.columns {
+/* ── BODY: 3 equal columns ──────────────────────────────────────────────── */
+.body {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  border-top: 1px solid var(--border);
-  flex: 1;
+  overflow: hidden;
 }
 
 .col {
-  padding: 14px 14px;
+  padding: 10px 12px;
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
+  overflow: hidden;
 }
 .col:last-child { border-right: none; }
 
 /* ── Section heading ─────────────────────────────────────────────────────── */
 .sh {
-  font-size: 9.5px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
+  font-size: 8.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.1px;
   color: var(--mid);
   border-bottom: 2px solid var(--mid);
-  padding-bottom: 4px;
-  margin-bottom: 2px;
+  padding-bottom: 3px;
 }
 
 /* ── Model cards ─────────────────────────────────────────────────────────── */
+.mcards { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .mcard {
-  border-radius: 6px;
-  padding: 8px 10px;
-  border-left: 4px solid;
+  border-radius: 5px; padding: 6px 8px; border-left: 4px solid;
 }
 .mcard.q { border-color: var(--qwen); background: #eef1fa; }
 .mcard.g { border-color: var(--grit); background: #fdf0ec; }
-.mcard .mn { font-weight: 800; font-size: 12px; }
-.mcard .md { font-size: 10.5px; color: #555; margin-top: 2px; }
-.cot {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  margin-top: 5px;
-  flex-wrap: wrap;
-}
+.mcard .mn { font-weight: 800; font-size: 10.5px; }
+.mcard .md { font-size: 9.5px; color: #555; margin-top: 2px; }
+.cot { display: flex; align-items: center; gap: 2px; margin-top: 4px; }
 .cs {
   background: var(--mid); color: white;
-  border-radius: 3px; padding: 2px 5px;
-  font-size: 9.5px; font-weight: 600;
+  border-radius: 3px; padding: 1px 4px;
+  font-size: 8.5px; font-weight: 600;
 }
 .cs.a { background: var(--grit); }
-.ca { color: #aaa; font-size: 10px; }
+.ca { color: #aaa; font-size: 9px; }
 
-/* ── Recipe box ──────────────────────────────────────────────────────────── */
+/* ── Recipe ──────────────────────────────────────────────────────────────── */
 .rbox {
-  background: var(--light);
-  border-radius: 6px;
-  padding: 8px 10px;
+  background: var(--light); border-radius: 5px;
+  padding: 6px 8px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px;
 }
-.rbox .rt { font-weight: 700; font-size: 10.5px; margin-bottom: 5px; }
-.cr { display: flex; align-items: center; gap: 5px; font-size: 10px; padding: 1.5px 0; }
-.cd { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.cd-o { background: var(--mid); }
-.cd-a { background: var(--grit); }
+.rbox .rt { font-weight: 700; font-size: 9.5px; margin-bottom: 3px; grid-column: 1/-1; }
+.cr { display: flex; align-items: center; gap: 4px; font-size: 9.5px; padding: 1px 0; }
+.cd { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.cdo { background: var(--mid); }
+.cda { background: var(--grit); }
 
-/* ── Bench tags ──────────────────────────────────────────────────────────── */
-.btag {
-  display: inline-block;
-  background: var(--mid); color: white;
-  border-radius: 3px; padding: 2px 6px;
-  font-size: 9.5px; font-weight: 700;
-  margin: 2px 2px 0 0;
+/* ── Stat boxes ──────────────────────────────────────────────────────────── */
+.srow { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.sb {
+  background: var(--light); border-radius: 5px;
+  padding: 6px 8px; text-align: center;
 }
-
-/* ── Big stat ────────────────────────────────────────────────────────────── */
-.stat-row { display: flex; gap: 6px; }
-.stat-box {
-  flex: 1; background: var(--light);
-  border-radius: 6px; padding: 7px 8px; text-align: center;
-}
-.stat-box .big { font-size: 20px; font-weight: 900; line-height: 1; }
-.stat-box .big.gc { color: var(--grit); }
-.stat-box .big.qc { color: var(--qwen); }
-.stat-box .sm { font-size: 9.5px; color: #666; margin-top: 2px; }
+.sb .big { font-size: 18px; font-weight: 900; line-height: 1; }
+.sb .big.gc { color: var(--grit); }
+.sb .big.qc { color: var(--qwen); }
+.sb .sm { font-size: 9px; color: #666; margin-top: 1px; }
 
 /* ── Finding card ────────────────────────────────────────────────────────── */
 .fc {
-  border-radius: 6px; padding: 8px 10px;
-  border-left: 4px solid var(--mid);
-  background: var(--light);
+  border-radius: 5px; padding: 7px 9px;
+  border-left: 4px solid var(--mid); background: var(--light);
 }
 .fc.hot  { border-color: var(--grit); background: #fdf0ec; }
-.fc.good { border-color: var(--green); background: #eafaf1; }
 .fc.blue { border-color: var(--qwen); background: #eef1fa; }
-.fc .fn  { font-size: 22px; font-weight: 900; line-height: 1; color: var(--grit); }
-.fc .fn.b{ color: var(--qwen); }
-.fc .fl  { font-size: 10px; color: #666; margin-top: 1px; }
-.fc .fd  { font-size: 10.5px; margin-top: 5px; }
+.fc .fn  { font-size: 20px; font-weight: 900; line-height: 1; color: var(--grit); }
+.fc .fl  { font-size: 9px; color: #666; margin-top: 1px; }
+.fc .fd  { font-size: 10px; margin-top: 4px; line-height: 1.4; }
 
 /* ── Vote grid ───────────────────────────────────────────────────────────── */
-.vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-.vc {
-  background: var(--light); border-radius: 5px;
-  padding: 5px 7px; font-size: 10px;
-}
-.vc .vs { font-weight: 700; }
-.vc .vr { font-size: 12px; font-weight: 800; margin-top: 1px; }
+.vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.vc { background: var(--light); border-radius: 4px; padding: 4px 6px; }
+.vc .vs { font-size: 9.5px; font-weight: 700; }
+.vc .vr { font-size: 12px; font-weight: 900; }
 .vc .vr.bad { color: #e74c3c; }
-
-/* ── Table ───────────────────────────────────────────────────────────────── */
-table.rt {
-  width: 100%; border-collapse: collapse; font-size: 10px;
-}
-table.rt th {
-  padding: 3px 5px; font-weight: 700; background: var(--light);
-  text-align: left; border-bottom: 1px solid var(--border);
-}
-table.rt td { padding: 3px 5px; border-bottom: 1px solid var(--border); }
-table.rt tr:last-child td { border-bottom: none; }
-table.rt tr.hi { background: #fdf0ec; }
-.gc { color: var(--grit); font-weight: 700; }
-.qc { color: var(--qwen); font-weight: 700; }
 
 /* ── Figure ──────────────────────────────────────────────────────────────── */
 .fig img {
-  width: 100%; border-radius: 5px;
+  width: 100%; border-radius: 4px;
   border: 1px solid var(--border);
+  display: block;
 }
-.fig .fc-cap {
-  font-size: 10px; color: #555; margin-top: 4px; line-height: 1.4;
-}
-.fig .fc-cap strong { color: var(--dark); }
+.figcap { font-size: 9px; color: #666; margin-top: 3px; line-height: 1.35; }
+.figcap strong { color: var(--dark); }
 
-/* ── Insight bar ─────────────────────────────────────────────────────────── */
+/* ── Table ───────────────────────────────────────────────────────────────── */
+table.t {
+  width: 100%; border-collapse: collapse; font-size: 9.5px;
+}
+table.t th {
+  padding: 3px 5px; font-weight: 700;
+  background: var(--light); text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+table.t td { padding: 3px 5px; border-bottom: 1px solid var(--border); }
+table.t tr.hi { background: #fdf0ec; font-weight: 700; }
+.gc { color: var(--grit); font-weight: 700; }
+.qc { color: var(--qwen); font-weight: 700; }
+
+/* ── Bench tags ──────────────────────────────────────────────────────────── */
+.btag {
+  display: inline-block; background: var(--mid); color: white;
+  border-radius: 3px; padding: 1px 5px;
+  font-size: 9px; font-weight: 700; margin: 1px 2px 1px 0;
+}
+
+/* ── INSIGHT BAR ─────────────────────────────────────────────────────────── */
 .ibar {
   background: linear-gradient(90deg, var(--grit), #c0392b);
-  color: white; padding: 9px 20px;
+  color: white; padding: 0 22px;
   display: flex; align-items: center; gap: 10px;
-  font-size: 11.5px; font-weight: 600;
+  font-size: 11px; font-weight: 600;
 }
 .ibar span { font-weight: 900; text-decoration: underline; }
+.ibar .icon { font-size: 18px; flex-shrink: 0; }
 
-/* ── Footer ──────────────────────────────────────────────────────────────── */
+/* ── FOOTER ──────────────────────────────────────────────────────────────── */
 .footer {
   background: var(--dark); color: white;
-  padding: 10px 24px;
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  padding: 0 22px; gap: 20px; align-items: center;
 }
-.footer h4 {
-  font-size: 9px; text-transform: uppercase;
-  letter-spacing: 1px; opacity: 0.55; margin-bottom: 4px;
-}
+.footer h4 { font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-bottom: 3px; }
 .footer ul { list-style: none; }
-.footer ul li { font-size: 10px; opacity: 0.85; line-height: 1.6; }
-.footer ul li::before { content: "→ "; opacity: 0.4; }
+.footer li { font-size: 9.5px; opacity: 0.85; line-height: 1.6; }
+.footer li::before { content: "→ "; opacity: 0.4; }
 .ftag {
   display: inline-block; background: rgba(255,255,255,0.15);
   border-radius: 3px; padding: 1px 5px;
-  font-size: 9.5px; margin: 1px 1px 0 0;
+  font-size: 9px; margin: 1px 1px 0 0;
 }
 
-hr.d { border: none; border-top: 1px dashed var(--border); margin: 2px 0; }
+hr.d { border: none; border-top: 1px dashed var(--border); }
+p.tx { font-size: 10px; line-height: 1.45; }
 </style>
 </head>
 <body>
 <div class="poster">
 
-  <!-- HEADER -->
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
   <div class="header">
-    <h1>Test-Time Scaling for <span class="hl">Visual Chain-of-Thought</span> Models<br>
-        Image-Input Diversity as the Key Driver</h1>
-    <div class="sub">Djibril Chikhi &nbsp;·&nbsp; Polytechnique Montréal &nbsp;·&nbsp; 2026</div>
-    <div class="pill-row">
-      <span class="pill pill-n">n = 292 questions</span>
-      <span class="pill pill-n">3 vision tasks</span>
-      <span class="pill pill-q">Qwen2.5-VL-3B (direct)</span>
-      <span class="pill pill-g">GRIT-3B (visual CoT)</span>
+    <div>
+      <h1>Test-Time Scaling for <span class="hl">Visual Chain-of-Thought</span> Models<br>
+          Image-Input Diversity as the Key Driver</h1>
+      <div class="sub">Djibril Chikhi &nbsp;·&nbsp; Polytechnique Montréal &nbsp;·&nbsp; 2026</div>
+    </div>
+    <div class="pills">
+      <span class="pill pn">n = 292 questions · 3 vision tasks</span>
+      <span class="pill pq">Qwen2.5-VL-3B — direct answer</span>
+      <span class="pill pg">GRIT-3B — visual chain-of-thought</span>
     </div>
   </div>
 
-  <!-- QUESTION BAR -->
+  <!-- ── QUESTION BAR ───────────────────────────────────────────────────── -->
   <div class="qbar">
-    Can generating multiple candidates at test time improve visual reasoning —
-    and does <em>how the model reasons</em> change how much it benefits?
+    Can generating multiple visual candidates at test time improve accuracy —
+    and does <em>how the model reasons</em> (direct vs. grounded CoT) change how much it benefits?
   </div>
 
-  <!-- 3 COLUMNS -->
-  <div class="columns">
+  <!-- ── BODY ───────────────────────────────────────────────────────────── -->
+  <div class="body">
 
-    <!-- ══ COL 1 — Setup & Method ══════════════════════════════════════════ -->
+    <!-- COL 1 — Setup & Results ────────────────────────────────────────── -->
     <div class="col">
-      <div class="sh">Setup</div>
-
-      <div class="mcard q">
-        <div class="mn" style="color:var(--qwen)">Qwen2.5-VL-3B</div>
-        <div class="md">Direct answer — no chain-of-thought</div>
-      </div>
-
-      <div class="mcard g">
-        <div class="mn" style="color:var(--grit)">GRIT-3B</div>
-        <div class="md">Visual CoT with grounded bounding boxes</div>
-        <div class="cot">
-          <span class="cs">think</span><span class="ca">→</span>
-          <span class="cs">bbox</span><span class="ca">→</span>
-          <span class="cs">rethink</span><span class="ca">→</span>
-          <span class="cs a">answer</span>
+      <div class="sh">Models — Same Backbone, Different Reasoning</div>
+      <div class="mcards">
+        <div class="mcard q">
+          <div class="mn" style="color:var(--qwen)">Qwen2.5-VL-3B</div>
+          <div class="md">Direct answer, no CoT</div>
+        </div>
+        <div class="mcard g">
+          <div class="mn" style="color:var(--grit)">GRIT-3B</div>
+          <div class="md">Grounded visual CoT</div>
+          <div class="cot">
+            <span class="cs">think</span><span class="ca">→</span>
+            <span class="cs">bbox</span><span class="ca">→</span>
+            <span class="cs">rethink</span><span class="ca">→</span>
+            <span class="cs a">ans</span>
+          </div>
         </div>
       </div>
 
-      <div style="font-size:10.5px; color:#666;">
-        Same 3B backbone — only reasoning strategy differs.
-      </div>
-
-      <hr class="d">
-      <div class="sh">Benchmark</div>
       <div>
-        <span class="btag">MMMU-Pro</span>
+        <div class="sh" style="margin-bottom:4px">Benchmark — Hard, Recent, Vision-Indispensable</div>
+        <span class="btag">MMMU-Pro (VQA)</span>
         <span class="btag">OCRBench v2</span>
-        <span class="btag">MMStar</span>
-      </div>
-      <div style="font-size:10.5px; color:#555; margin-top:3px;">
-        Hard (35–60% for 7B VLMs), recent (late 2024),
-        vision-indispensable. 100 VQA · 100 OCR · 92 Counting.
+        <span class="btag">MMStar (Counting)</span>
+        <p class="tx" style="margin-top:3px; color:#555">100 + 100 + 92 = 292 questions. Current 7B VLMs score 35–60% — no ceiling.</p>
       </div>
 
-      <hr class="d">
-      <div class="sh">TTS Recipe — 9 candidates / question</div>
-      <div class="rbox">
-        <div class="cr"><span class="cd cd-o"></span> Original image, T=0 (greedy)</div>
-        <div class="cr"><span class="cd cd-o"></span> Original image, T=0.7</div>
-        <div class="cr"><span class="cd cd-o"></span> Paraphrase, T=0.7</div>
-        <div class="cr"><span class="cd cd-a"></span> Edge enhance, T=0.7</div>
-        <div class="cr"><span class="cd cd-a"></span> Grayscale, T=0.7</div>
-        <div class="cr"><span class="cd cd-a"></span> JPEG recompress, T=0.7</div>
-        <div class="cr"><span class="cd cd-a"></span> Brightness/contrast, T=0.7</div>
-        <div class="cr"><span class="cd cd-a"></span> <strong>Rotation 90°</strong>, T=0.7</div>
-        <div class="cr"><span class="cd cd-a"></span> Edge + paraphrase, T=0.7</div>
-        <div style="font-size:10px; color:#777; margin-top:5px;">
-          <strong>TTS = pass@9:</strong> correct if any candidate is correct.
+      <div>
+        <div class="sh" style="margin-bottom:4px">TTS Recipe — 9 Candidates per Question</div>
+        <div class="rbox">
+          <div class="rt">Diversity sources: temperature + image augmentation</div>
+          <div class="cr"><span class="cd cdo"></span>Original, T=0 (greedy)</div>
+          <div class="cr"><span class="cd cdo"></span>Original, T=0.7</div>
+          <div class="cr"><span class="cd cdo"></span>Paraphrase, T=0.7</div>
+          <div class="cr"><span class="cd cda"></span>Edge enhance, T=0.7</div>
+          <div class="cr"><span class="cd cda"></span>Grayscale, T=0.7</div>
+          <div class="cr"><span class="cd cda"></span>JPEG recompress, T=0.7</div>
+          <div class="cr"><span class="cd cda"></span>Brightness/contrast, T=0.7</div>
+          <div class="cr"><span class="cd cda"></span><strong>Rotation 90°</strong>, T=0.7</div>
+          <div class="cr"><span class="cd cda"></span>Edge + paraphrase, T=0.7</div>
         </div>
+        <p class="tx" style="margin-top:3px; color:#555;"><strong>TTS = pass@9:</strong> correct if any of 9 candidates is correct.</p>
       </div>
 
-      <hr class="d">
-      <div class="sh">Headline Results</div>
-      <div class="stat-row">
-        <div class="stat-box">
-          <div class="big gc">+30.5pp</div>
-          <div class="sm">GRIT with TTS<br>29.5% → 59.9%</div>
-        </div>
-        <div class="stat-box">
-          <div class="big qc">+24.3pp</div>
-          <div class="sm">Qwen with TTS<br>29.8% → 54.1%</div>
+      <div>
+        <div class="sh" style="margin-bottom:5px">Headline Accuracy Lift</div>
+        <div class="srow">
+          <div class="sb">
+            <div class="big gc">+30.5pp</div>
+            <div class="sm">GRIT · 29.5% → 59.9%</div>
+          </div>
+          <div class="sb">
+            <div class="big qc">+24.3pp</div>
+            <div class="sm">Qwen · 29.8% → 54.1%</div>
+          </div>
         </div>
       </div>
 
       <div class="fig">
         <img src="results/figures/poster/A_headline_gain.png" alt="Headline gain">
-        <div class="fc-cap"><strong>TTS gain (pass@9 – greedy)</strong> across all 4 configs.
-          Standard recipe (T=0.7 + augmentation) gives the largest gains.</div>
+        <div class="figcap"><strong>TTS gain (pass@9 – greedy)</strong> across all 4 configs.
+        Standard recipe (T=0.7 + augmentation) yields the largest lift.</div>
       </div>
     </div>
 
-    <!-- ══ COL 2 — Key Findings ════════════════════════════════════════════ -->
+    <!-- COL 2 — Findings & Voting ──────────────────────────────────────── -->
     <div class="col">
-      <div class="sh">Key Findings</div>
+      <div class="sh">Temperature × Augmentation Compound</div>
 
       <div class="fc hot">
         <div class="fn">+10.7pp</div>
-        <div class="fl">extra gain from adding T=0.7 on top of augmentation</div>
-        <div class="fd">Temperature and image diversity <strong>compound</strong> —
-          augmentation alone gives +19.9pp for GRIT, temperature pushes it to +30.5pp.</div>
+        <div class="fl">extra gain when adding T=0.7 on top of augmentation alone</div>
+        <div class="fd">Augmentation alone (T=0) gives +19.9pp for GRIT. Temperature pushes it to +30.5pp. Both diversity sources stack.</div>
       </div>
 
       <div class="fig">
         <img src="results/figures/poster/C_temperature_effect.png" alt="Temperature">
-        <div class="fc-cap"><strong>Temperature amplifies TTS.</strong>
-          T=0.7 roughly doubles the gain over augmentation alone for both models.</div>
+        <div class="figcap"><strong>T=0.7 roughly doubles the TTS gain</strong> for both models vs augmentation alone.</div>
       </div>
 
       <hr class="d">
-      <div class="sh">GRIT vs Qwen — Same Backbone, Different Benefit</div>
+      <div class="sh">GRIT Gains More on Every Task</div>
 
       <div class="fig">
         <img src="results/figures/poster/D_grit_vs_qwen.png" alt="Head to head">
-        <div class="fc-cap">Baselines identical (~29.5%). Under TTS,
-          <strong>GRIT gains more on every task</strong>. Visual CoT amplifies candidate diversity.</div>
+        <div class="figcap">Identical baselines (~29.5%). Under TTS, <strong>GRIT pulls ahead on all tasks</strong>. Visual CoT amplifies candidate diversity.</div>
       </div>
 
       <hr class="d">
       <div class="sh">Voting Cannot Close the Gap</div>
-
       <div class="vgrid">
         <div class="vc"><div class="vs">Plurality vote</div><div class="vr bad">−1.0pp</div></div>
         <div class="vc"><div class="vs">Logprob sum</div><div class="vr bad">−3.1pp</div></div>
         <div class="vc"><div class="vs">Greedy tiebreak</div><div class="vr bad">−1.7pp</div></div>
         <div class="vc"><div class="vs">Consistency filter</div><div class="vr bad">−1.0pp</div></div>
       </div>
-      <div style="font-size:10px; color:#666; margin-top:4px;">
-        Every strategy at or below greedy (n=292). Correct answer appears in
-        only ~3/9 candidates on average — and is a <em>minority</em> on 48% of solvable questions.
-      </div>
+      <p class="tx" style="color:#666; margin-top:3px;">Every strategy at or below greedy. Correct answer is a <em>minority vote</em> on 48% of solvable questions.</p>
 
-      <div class="fc blue" style="margin-top:4px;">
-        <div class="fd">The signal is in the pool — a
-          <strong>confidence-based verifier</strong>, not vote counting, is needed to exploit it.</div>
+      <div class="fc blue">
+        <div class="fd">The signal is in the pool — a <strong>confidence-based verifier</strong>, not vote counting, is needed to exploit it.</div>
       </div>
     </div>
 
-    <!-- ══ COL 3 — Why GRIT Benefits More ═════════════════════════════════ -->
+    <!-- COL 3 — Why GRIT Benefits More ─────────────────────────────────── -->
     <div class="col">
-      <div class="sh">Why GRIT Benefits More — Augmentation Diversity</div>
+      <div class="sh">Why GRIT Benefits More — Structural Diversity</div>
 
       <div class="fc hot">
         <div class="fn">10</div>
-        <div class="fl">questions uniquely rescued by Rotation 90° for GRIT</div>
-        <div class="fd">No other augmentation touches these questions.
-          GRIT's bbox-grounding step re-attends to a <strong>spatially different image</strong>,
-          creating a new reasoning chain. For Qwen: only 4 unique rescues.</div>
+        <div class="fl">questions uniquely rescued by Rotation 90° for GRIT (vs 4 for Qwen)</div>
+        <div class="fd">GRIT's bbox-grounding step re-attends to a <strong>spatially different image</strong> after rotation, creating a new reasoning chain. Qwen has no grounding step — spatial change is just noise.</div>
       </div>
 
       <div class="fig">
         <img src="results/figures/poster/E_augmentation_diversity.png" alt="Diversity">
-        <div class="fc-cap">
-          <strong>When the original fails</strong>, how many aug candidates recover it?
-          Qwen spikes at N=7 (redundant). GRIT spikes at N=1 — each augmentation rescues
-          <strong>different questions</strong>.
-        </div>
+        <div class="figcap"><strong>When the original image fails</strong>, how many augmented candidates recover it?
+        Qwen spikes at N=7 (redundant). GRIT spikes at N=1 — each augmentation rescues <strong>different questions</strong>.</div>
       </div>
 
       <hr class="d">
-      <div class="sh">Per-Augmentation Unique Rescues (T=0)</div>
+      <div class="sh">Per-Augmentation Unique Rescues (T=0 ablation)</div>
 
-      <table class="rt">
+      <table class="t">
         <thead>
           <tr>
             <th>Augmentation</th>
-            <th style="color:var(--grit); text-align:center">GRIT</th>
-            <th style="color:var(--qwen); text-align:center">Qwen</th>
+            <th style="color:var(--grit); text-align:center">GRIT unique</th>
+            <th style="color:var(--qwen); text-align:center">Qwen unique</th>
           </tr>
         </thead>
         <tbody>
           <tr class="hi">
-            <td><strong>Rotation 90°</strong></td>
+            <td>Rotation 90°</td>
             <td class="gc" style="text-align:center">10</td>
             <td class="qc" style="text-align:center">4</td>
           </tr>
           <tr><td>JPEG recompress</td>
-              <td class="gc" style="text-align:center">5</td>
-              <td class="qc" style="text-align:center">3</td></tr>
+            <td class="gc" style="text-align:center">5</td>
+            <td class="qc" style="text-align:center">3</td></tr>
           <tr><td>Edge + paraphrase</td>
-              <td class="gc" style="text-align:center">4</td>
-              <td class="qc" style="text-align:center">1</td></tr>
+            <td class="gc" style="text-align:center">4</td>
+            <td class="qc" style="text-align:center">1</td></tr>
           <tr><td>Brightness/contrast</td>
-              <td class="gc" style="text-align:center">3</td>
-              <td class="qc" style="text-align:center">4</td></tr>
+            <td class="gc" style="text-align:center">3</td>
+            <td class="qc" style="text-align:center">4</td></tr>
           <tr><td>Grayscale</td>
-              <td class="gc" style="text-align:center">0</td>
-              <td class="qc" style="text-align:center">3</td></tr>
+            <td class="gc" style="text-align:center">0</td>
+            <td class="qc" style="text-align:center">3</td></tr>
         </tbody>
       </table>
 
-      <div style="font-size:10.5px; line-height:1.5; margin-top:4px;">
-        Rotation changes <strong>spatial layout</strong> — GRIT's grounding step
-        attends to a different region. Brightness/JPEG change pixels, not structure,
-        so the bbox shifts minimally. Qwen has no grounding step: spatial change is just noise.
-      </div>
+      <p class="tx" style="margin-top:2px;">Rotation changes <strong>spatial layout</strong>; brightness/JPEG change pixels only. GRIT's grounding step amplifies the spatial change into a new reasoning path.</p>
 
       <hr class="d">
-      <div class="sh">Oracle Coverage: Original vs Augmented</div>
+      <div class="sh">Oracle Coverage — Original vs Augmented Candidates</div>
       <div class="fig">
         <img src="results/figures/poster/F_oracle_breakdown.png" alt="Oracle breakdown">
-        <div class="fc-cap">Augmentation adds <strong>more unique coverage for GRIT</strong>
-          at both temperatures. Spatial + stochastic diversity compound.</div>
+        <div class="figcap">Augmentation adds <strong>more unique coverage for GRIT</strong> at both temperatures. Spatial + stochastic diversity compound.</div>
       </div>
     </div>
 
   </div>
 
-  <!-- INSIGHT BAR -->
+  <!-- ── INSIGHT BAR ─────────────────────────────────────────────────────── -->
   <div class="ibar">
-    <span style="font-size:16px; flex-shrink:0;">💡</span>
-    <div>GRIT's augmented candidates recover <span>different failures</span> (complementary diversity).
-    Qwen's recover the <span>same failures</span> (redundant). Grounded reasoning turns
-    spatial perturbations into structurally distinct reasoning chains.</div>
+    <span class="icon">💡</span>
+    <div>GRIT's augmented candidates recover <span>different failures</span> (complementary diversity) —
+    Qwen's recover the <span>same failures</span> (redundant diversity).
+    Grounded reasoning turns spatial perturbations into structurally distinct reasoning chains.</div>
   </div>
 
-  <!-- FOOTER -->
+  <!-- ── FOOTER ──────────────────────────────────────────────────────────── -->
   <div class="footer">
     <div>
       <h4>Limitations</h4>
       <ul>
         <li>TTS = pass@9 — upper bound, no selector found</li>
-        <li>3B models only</li>
-        <li>OCR strict exact-match (~13% near-miss)</li>
+        <li>3B models only; OCR strict exact-match</li>
         <li>Voting strategy design is an open problem</li>
       </ul>
     </div>
@@ -489,15 +433,13 @@ hr.d { border: none; border-top: 1px dashed var(--border); margin: 2px 0; }
       </ul>
     </div>
     <div>
-      <h4>Datasets &amp; Models</h4>
-      <div style="margin-top:2px;">
-        <span class="ftag">MMMU-Pro</span>
-        <span class="ftag">OCRBench v2</span>
-        <span class="ftag">MMStar</span><br>
-        <span class="ftag">Qwen2.5-VL-3B-Instruct</span>
-        <span class="ftag">GRIT-20-Qwen2.5-VL-3B</span><br>
-        <span class="ftag" style="margin-top:4px; display:inline-block;">Rorqual H100 — DRAC</span>
-      </div>
+      <h4>Datasets &amp; Models &amp; Compute</h4>
+      <span class="ftag">MMMU-Pro</span>
+      <span class="ftag">OCRBench v2</span>
+      <span class="ftag">MMStar</span><br>
+      <span class="ftag">Qwen2.5-VL-3B-Instruct</span>
+      <span class="ftag">GRIT-20-Qwen2.5-VL-3B</span><br>
+      <span class="ftag" style="margin-top:3px; display:inline-block;">Rorqual H100 — DRAC Canada</span>
     </div>
   </div>
 
