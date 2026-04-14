@@ -12,7 +12,7 @@
 #SBATCH --mail-user=dchikhi@polymtl.ca
 
 # ── Environment ──────────────────────────────────────────────────────────────
-module load python/3.11 cuda/12.2
+module load python/3.11 cuda/12.2 gcc arrow
 source $HOME/envs/viscot/bin/activate
 
 # Offline mode — compute nodes have no internet
