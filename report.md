@@ -283,6 +283,30 @@ aggregation.
 Full strategy-by-strategy tables are in `results/analysis/scale_results.json`; we
 treat selector design as an open problem rather than a contribution of this work.
 
+### 5.6 Self-reranking also fails
+
+As a final attempt to close the oracle gap, we collected the unique answer proposals
+from each question's 9 candidates and re-queried the same model: *"These answers were
+proposed — which is correct?"* Each model reranked its own candidates (GRIT→GRIT,
+Qwen→Qwen), both with and without temperature diversity.
+
+| Config | Greedy | Rerank | Vote@9 | Oracle |
+|---|---|---|---|---|
+| GRIT T=0.7 | 29.5% | 28.1% | 29.5% | **59.9%** |
+| Qwen T=0.7 | 29.8% | 27.1% | 27.7% | **54.1%** |
+| GRIT T=0 | 29.5% | 29.5% | 29.1% | **49.3%** |
+| Qwen T=0 | 29.8% | 28.4% | 27.7% | **46.6%** |
+
+Re-ranking **never beats greedy** (best case: ties at 29.5% for GRIT T=0). OCR is
+the most damaged task (-5pp to -6pp at T=0.7): the model cannot judge character-level
+accuracy from a high-level selection prompt. The massive oracle gap (greedy ~29.5%,
+oracle ~50–60%) remains fully unreachable by any aggregation strategy we tested.
+
+This confirms that the bottleneck is not voting strategy but candidate quality:
+correct answers are often a minority within the 9-candidate pool, and the model is
+unable to identify which of its own answers is correct when presented with them side
+by side.
+
 ---
 
 ## 6. Limitations
@@ -300,9 +324,10 @@ treat selector design as an open problem rather than a contribution of this work
 
 ## 7. Next Steps
 
-1. **Selector design to close the pass@9 → deployable gap.** Logprob-weighted voting
-   on counting/MCQ subsets and learned lightweight verifiers are the natural next
-   experiments.
+1. **Selector design to close the pass@9 → deployable gap.** Answer-level voting,
+   logprob-based selection, and self-reranking have all been ruled out.
+   A lightweight learned verifier trained on (question, image, candidate-answer)
+   triples is the natural next direction.
 2. **DeepEyesV2 full evaluation** — test whether the image-diversity finding extends
    to agentic CoT.
 3. **OCR re-scoring** with character-level edit distance to separate model error
