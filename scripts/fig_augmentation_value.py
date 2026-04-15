@@ -150,17 +150,21 @@ def fig_slot_marginal():
     ax.set_ylabel("Number of questions  (original image failed)")
     ax.set_title("Augmentation diversity: complementary rescues vs redundant rescues\n"
                  "(T=0 ablation — pure image augmentation effect, no temperature noise)")
-    ax.legend(loc="upper center")
+    ax.legend(loc="upper left")
     ax.grid(axis="y", alpha=0.3)
-    ax.set_ylim(0, max(max(qwen_vals), max(grit_vals)) * 1.3)
+    ymax = max(max(qwen_vals), max(grit_vals))
+    ax.set_ylim(0, ymax * 1.35)
+    ax.set_xlim(0.3, 8.2)
 
-    # Annotations
+    # Annotations — placed to the right of the bars they label
     ax.annotate("Redundant\n(any aug works)", xy=(7 - w/2, qwen_dist.get(7, 0)),
-                xytext=(5.5, qwen_dist.get(7, 0) + 3),
-                arrowprops=dict(arrowstyle="->", color=COL_QWEN), color=COL_QWEN, fontsize=9)
+                xytext=(7.3, qwen_dist.get(7, 0) - 2),
+                arrowprops=dict(arrowstyle="->", color=COL_QWEN), color=COL_QWEN,
+                fontsize=9, ha="left")
     ax.annotate("Complementary\n(unique rescue)", xy=(1 + w/2, grit_dist.get(1, 0)),
-                xytext=(2.3, grit_dist.get(1, 0) + 3),
-                arrowprops=dict(arrowstyle="->", color=COL_GRIT), color=COL_GRIT, fontsize=9)
+                xytext=(2.5, grit_dist.get(1, 0) - 6),
+                arrowprops=dict(arrowstyle="->", color=COL_GRIT), color=COL_GRIT,
+                fontsize=9, ha="left")
 
     fig.tight_layout()
     path = FIG_DIR / "E_augmentation_diversity.png"
