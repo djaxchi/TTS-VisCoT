@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TTS for Visual CoT Models — Poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@page { size: 12.38542in 8.76042in; margin: 0; }
+@media print {
+  html, body { width: 1189px !important; height: 841px !important; }
+  body { background: #fff !important; }
+  .poster {
+    margin: 0 !important;
+    box-shadow: none !important;
+    grid-template-rows: 6px 62px 657px 32px 84px !important;
+  }
+  .body { height: 657px !important; }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background: #cdd0d8;
+  color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --purple:       #662E7D;
+  --purple-dark:  #4A1F5C;
+  --purple-soft:  #F4EEF8;
+  --purple-wash:  #FBF8FC;
+  --purple-line:  #D8C5E2;
+  --qwen:         #4b6cb7;
+  --qwen-soft:    #EEF1FA;
+  --grit:         #662E7D;
+  --grit-soft:    #F4EEF8;
+  --ink:          #1A1A1A;
+  --mid:          #555;
+  --light:        #F6F4F9;
+  --border:       #E0DEE6;
+  --green:        #1E7F4E;
+  --red:          #B0302A;
+}
+
+/* ── Fixed canvas: 1189 × 841 landscape ─────────────────────────────────── */
+html, body { width: 1189px; height: 841px; overflow: hidden; }
+.poster {
+  width:  1189px;
+  height: 841px;
+  margin: 0 auto;
+  background: #fff;
+  display: grid;
+  grid-template-rows: 6px 62px 1fr 32px 84px;
+  overflow: hidden;
+  position: relative;
+}
+
+.strip { background: var(--purple); }
+
+/* ── HEADER ─────────────────────────────────────────────────────────────── */
+.header {
+  display: grid;
+  grid-template-columns: 270px 1fr 210px;
+  align-items: center;
+  padding: 0 26px;
+  gap: 18px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.logos-l { display: flex; align-items: center; gap: 24px; }
+.logos-l img { display: block; }
+.logos-l img.poly { height: 48px; }
+.logos-l img.udem { height: 48px; }
+
+.title-wrap { text-align: center; }
+.title-wrap h1 {
+  font-size: 21px;
+  font-weight: 900;
+  color: var(--purple-dark);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+.title-wrap .sub {
+  font-size: 12px;
+  color: var(--mid);
+  font-style: italic;
+  margin-top: 2px;
+  font-weight: 500;
+}
+.title-wrap .authors {
+  font-size: 11px;
+  color: var(--ink);
+  margin-top: 1px;
+  font-weight: 600;
+}
+.title-wrap .authors .sep {
+  color: var(--purple);
+  margin: 0 6px;
+  font-weight: 700;
+}
+
+.logos-r { display: grid; grid-template-columns: auto auto; gap: 10px; align-items: center; justify-content: end; }
+.logos-r img.mila { height: 48px; }
+.logos-r .course {
+  display: flex; flex-direction: column;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--purple);
+  line-height: 1.1;
+}
+.logos-r .course small {
+  font-size: 8.5px;
+  color: var(--mid);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* ── QUESTION BAR ───────────────────────────────────────────────────────── */
+.qbar {
+  background: var(--purple-soft);
+  border-top: 1px solid var(--purple-line);
+  border-bottom: 2px solid var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.3;
+}
+.qbar em { font-style: normal; color: var(--purple); font-weight: 800; }
+
+/* ── BODY ───────────────────────────────────────────────────────────────── */
+.body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  overflow: hidden;
+}
+.col {
+  padding: 10px 14px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+  overflow: hidden;
+  min-width: 0;
+  justify-content: space-between;
+}
+.col:last-child { border-right: none; }
+
+/* ── Section heading ───────────────────────────────────────────────────── */
+.sh {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--purple);
+  border-bottom: 2px solid var(--purple);
+  padding-bottom: 3px;
+}
+
+/* ── Model cards ───────────────────────────────────────────────────────── */
+.mcards { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mcard {
+  border-radius: 5px;
+  padding: 7px 9px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: 3px solid;
+  display: flex; flex-direction: column;
+}
+.mcard .md { flex: 1; }
+.mcard.q { border-top-color: #888; }
+.mcard.g { border-top-color: var(--purple); }
+.mcard .mn { font-weight: 800; font-size: 11.5px; line-height: 1.1; color: var(--ink); }
+.mcard.g .mn { color: var(--purple-dark); }
+.mcard .md { font-size: 9.5px; color: #555; margin-top: 2px; line-height: 1.3; }
+.cot { display: flex; align-items: center; gap: 2px; margin-top: 6px; flex-wrap: nowrap; white-space: nowrap; }
+.cs {
+  background: var(--purple); color: white;
+  border-radius: 3px; padding: 1px 4px;
+  font-size: 7.5px; font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.cs.direct { background: #888; }
+.cs.ans { background: var(--green); }
+.ca { color: #aaa; font-size: 9px; font-weight: 800; }
+
+/* ── GRIT pipeline schematic ───────────────────────────────────────────── */
+.pipe {
+  background: var(--purple-wash);
+  border: 1px solid var(--purple-line);
+  border-radius: 5px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 6px;
+}
+.pipe .pq {
+  grid-column: 1 / -1;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 4px 7px;
+  background: #fff;
+  border-radius: 3px;
+  border-left: 2px solid var(--purple);
+  line-height: 1.3;
+}
+.pipe .pq b { color: var(--purple); font-weight: 700; }
+.pipe .pimg {
+  display: flex; flex-direction: column; gap: 2px; align-items: center;
+}
+.pipe .pimg img {
+  width: 74px; height: 74px; object-fit: cover;
+  border-radius: 3px; border: 1px solid var(--purple-line);
+  display: block;
+}
+.pipe .pimg .plbl {
+  font-size: 7.5px; color: var(--mid); font-weight: 600; text-align: center;
+  line-height: 1.1;
+}
+.pipe .pstep {
+  padding: 5px 7px;
+  font-size: 9.5px;
+  line-height: 1.4;
+  background: #fff;
+  border-radius: 3px;
+  border-left: 3px solid var(--purple);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.pipe .pstep .tk {
+  color: var(--purple);
+  font-weight: 800;
+  font-size: 8.5px;
+  margin-right: 3px;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+.pipe .pstep .num {
+  display: inline-block;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--purple); color: #fff;
+  font-size: 8px; font-weight: 800;
+  text-align: center; line-height: 12px;
+  margin-right: 5px;
+}
+.pipe .pstep .fin {
+  display: inline-block;
+  margin-top: 3px;
+  background: var(--green); color: #fff;
+  padding: 1.5px 7px; border-radius: 3px;
+  font-weight: 800; font-size: 10px;
+}
+.pipe .bbstep {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--purple);
+  color: #fff;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 9.5px;
+  line-height: 1.2;
+}
+.pipe .bbstep .bblbl {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 8.5px;
+}
+.pipe .bbstep .bbcode {
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  background: rgba(255,255,255,0.18);
+  padding: 1.5px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 9.5px;
+}
+.pipe .bbstep .bbarrow {
+  font-size: 9px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* ── Bench tags ────────────────────────────────────────────────────────── */
+.bench-sh { margin-top: -6px; }
+.bench-tags { margin-top: -4px; }
+.btag {
+  display: inline-block;
+  background: var(--purple); color: #fff;
+  border-radius: 3px; padding: 2px 7px;
+  font-size: 9.5px; font-weight: 700;
+  margin: 1px 2px 1px 0;
+}
+
+/* ── Recipe box ────────────────────────────────────────────────────────── */
+.rbox {
+  background: var(--light);
+  border-radius: 5px;
+  padding: 7px 9px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 10px;
+}
+.rbox .rt { font-weight: 700; font-size: 9px; margin-bottom: 3px; grid-column: 1/-1; color: var(--purple-dark); line-height: 1.25; }
+.cr { display: flex; align-items: center; gap: 5px; font-size: 9px; padding: 0.5px 0; }
+.cd { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.cdo { background: #666; }
+.cda { background: var(--purple); }
+
+/* ── Finding card ──────────────────────────────────────────────────────── */
+.fc {
+  border-radius: 5px;
+  padding: 8px 10px;
+  border-left: 4px solid var(--purple);
+  background: var(--grit-soft);
+}
+.fc .fn {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+.fc .fh {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--purple-dark);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+.fc .fd { font-size: 9.5px; line-height: 1.4; color: var(--ink); }
+.fc .fd strong { color: var(--purple-dark); }
+
+/* ── Voting row (single line) ──────────────────────────────────────────── */
+.vrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.vc {
+  background: var(--light);
+  border-radius: 4px;
+  padding: 5px 6px 6px;
+  border: 1px solid var(--border);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 44px;
+}
+.vc .vs { font-size: 8.5px; font-weight: 600; color: #555; line-height: 1.2; }
+.vc .vr { font-size: 12px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--red); line-height: 1; }
+
+/* ── Figures (capped height) ───────────────────────────────────────────── */
+.fig { text-align: center; }
+.fig img {
+  max-width: 100%;
+  max-height: 150px;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+.figcap {
+  font-size: 8.5px;
+  color: #555;
+  margin-top: 3px;
+  line-height: 1.3;
+  text-align: left;
+}
+.figcap strong { color: var(--ink); }
+
+/* ── Table ─────────────────────────────────────────────────────────────── */
+table.t { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+table.t th {
+  padding: 3px 5px; font-weight: 700;
+  background: var(--purple-soft); text-align: left;
+  border-bottom: 1px solid var(--purple-line);
+  color: var(--purple-dark);
+}
+table.t td { padding: 2.5px 5px; border-bottom: 1px solid var(--border); }
+table.t tr.hi td { background: var(--purple-soft); font-weight: 700; }
+.gc { color: var(--grit); font-weight: 700; }
+.qc { color: var(--qwen); font-weight: 700; }
+
+/* ── Take-home box ─────────────────────────────────────────────────────── */
+.takeaway {
+  background: var(--purple);
+  color: white;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+.takeaway .tw {
+  display: block;
+  font-size: 8.5px;
+  font-weight: 800;
+  margin-bottom: 2px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ── Insight bar ───────────────────────────────────────────────────────── */
+.ibar {
+  background: var(--purple);
+  color: white;
+  padding: 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.ibar .icon { font-size: 15px; flex-shrink: 0; }
+.ibar b { font-weight: 800; color: #fff; border-bottom: 1px dashed rgba(255,255,255,0.65); }
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+.footer {
+  background: var(--purple-dark);
+  color: white;
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr 1.3fr 70px;
+  grid-template-rows: 1fr auto;
+  padding: 8px 26px;
+  gap: 6px 20px;
+  align-items: start;
+}
+.footer .fcols { display: contents; }
+.footer .qrcell {
+  grid-column: 4;
+  grid-row: 1 / span 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  align-self: stretch;
+  border-left: 1px solid rgba(255,255,255,0.18);
+  padding-left: 10px;
+}
+.footer .qrcell img {
+  width: 48px; height: 48px;
+  background: #fff; padding: 2px; border-radius: 3px;
+  display: block;
+}
+.footer .qrcell .qrlbl {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  text-align: center;
+  line-height: 1.1;
+}
+.footer .fmeta {
+  grid-column: 1 / span 3;
+  grid-row: 2;
+  border-top: 1px solid rgba(255,255,255,0.18);
+  padding-top: 4px;
+  margin-top: 2px;
+  text-align: left;
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  opacity: 0.55;
+  font-weight: 400;
+  line-height: 1.25;
+}
+.footer .fmeta strong { font-weight: 500; opacity: 1; }
+.footer .fmeta .dot { opacity: 0.55; margin: 0 7px; }
+.footer h4 {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  opacity: 0.68;
+  margin-bottom: 2px;
+}
+.footer ul { list-style: none; margin: 0; padding: 0; }
+.footer li {
+  font-size: 8.5px;
+  opacity: 0.92;
+  line-height: 1.45;
+  margin-bottom: 3px;
+}
+.footer li::before { content: "→ "; opacity: 0.55; }
+.ftags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 4px;
+}
+.ftag {
+  display: inline-block;
+  background: rgba(255,255,255,0.16);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 8px;
+  line-height: 1.3;
+}
+
+p.tx { font-size: 9.5px; line-height: 1.4; color: var(--ink); }
+p.tx.muted { color: #555; }
+</style>
+</head>
+<body>
+
+<div class="poster">
+
+  <div class="strip"></div>
+
+  <!-- ── HEADER ───────────────────────────────────────────────────────── -->
+  <div class="header">
+    <div class="logos-l">
+      <img class="poly" src="assets/logo_poly.png" alt="Polytechnique Montréal">
+      <img class="udem" src="assets/logo_udem.png" alt="Université de Montréal">
+    </div>
+
+    <div class="title-wrap">
+      <h1>Test-Time Scaling for Visual Chain-of-Thought Models</h1>
+      <div class="authors">
+        Youssef Laatar <span class="sep">·</span> Djalil Chikhi
+      </div>
+    </div>
+
+    <div class="logos-r">
+      <img class="mila" src="assets/logo_mila.png" alt="Mila">
+      <div class="course">IFT 6765<small>Links between Computer Vision and Language</small></div>
+    </div>
+  </div>
+
+  <!-- ── BODY ─────────────────────────────────────────────────────────── -->
+  <div class="body">
+
+    <!-- ========= COL 1 — SETUP ========= -->
+    <div class="col">
+      <div class="sh">Models: Same 3B Backbone, Different Reasoning</div>
+      <div class="mcards">
+        <div class="mcard q">
+          <div class="mn">Qwen2.5-VL-3B</div>
+          <div class="md">Direct answer. No intermediate reasoning.</div>
+          <div class="cot">
+            <span class="cs direct">image + Q</span>
+            <span class="ca">→</span>
+            <span class="cs ans">ans</span>
+          </div>
+        </div>
+        <div class="mcard g">
+          <div class="mn">GRIT-3B</div>
+          <div class="md">Grounded visual chain-of-thought.</div>
+          <div class="cot">
+            <span class="cs">think</span><span class="ca">→</span>
+            <span class="cs">bbox</span><span class="ca">→</span>
+            <span class="cs">rethink</span><span class="ca">→</span>
+            <span class="cs ans">ans</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sh">How GRIT Reasons: Worked Example</div>
+      <div class="pipe">
+        <div class="pq"><b>Q:</b> "What is the position of the cat in relation to the vase?" &nbsp;(A) behind &nbsp;(B) on top &nbsp;(C) inside &nbsp;(D) in front</div>
+
+        <div class="pimg">
+          <img src="assets/cat_orig.jpg" alt="input">
+          <div class="plbl">input image</div>
+        </div>
+        <div class="pstep">
+          <span class="num">1</span><span class="tk">&lt;think&gt;</span>The cat appears to be resting inside or on top of the vase opening. I need to look more closely at the region around the cat and vase to disambiguate "on top" from "inside".<span class="tk" style="margin-left:3px;">&lt;/think&gt;</span>
+        </div>
+
+        <div class="bbstep">
+          <span class="bblbl">compute &amp; emit bbox</span>
+          <code class="bbcode">[108, 5, 236, 178]</code>
+          <span class="bbarrow">→ crop &amp; re-examine</span>
+        </div>
+
+        <div class="pimg">
+          <img src="assets/cat_bbox.png" alt="grounded">
+          <div class="plbl">grounded crop</div>
+        </div>
+        <div class="pstep">
+          <span class="num">2</span><span class="tk">&lt;rethink&gt;</span>Looking at the crop, the cat is inside the lid opening, not in front or behind.
+          <span class="fin"><span class="tk" style="color:rgba(255,255,255,0.85)">answer:</span> B ✓</span>
+        </div>
+      </div>
+
+      <div class="sh bench-sh">Benchmark: Hard, Recent, Vision-Indispensable</div>
+      <div class="bench-tags">
+        <span class="btag">MMMU-Pro · VQA</span>
+        <span class="btag">OCRBench v2 · OCR</span>
+        <span class="btag">MMStar · Counting</span>
+      </div>
+      <div class="sh">TTS Recipe: 9 Candidates per Question</div>
+      <div class="rbox">
+        <div class="rt">Two diversity axes: <span style="color:var(--ink)">temperature</span> + <span style="color:var(--purple)">image augmentation</span></div>
+        <div class="cr"><span class="cd cdo"></span>Original · T = 0 (greedy)</div>
+        <div class="cr"><span class="cd cdo"></span>Original · T = 0.7</div>
+        <div class="cr"><span class="cd cdo"></span>Paraphrase A · T = 0.7</div>
+        <div class="cr"><span class="cd cdo"></span>Paraphrase B · T = 0.7</div>
+        <div class="cr"><span class="cd cda"></span>Brightness · T = 0.7</div>
+        <div class="cr"><span class="cd cda"></span>Grayscale · T = 0.7</div>
+        <div class="cr"><span class="cd cda"></span>Edge enhance · T = 0.7</div>
+        <div class="cr"><span class="cd cda"></span>JPEG recompress · T = 0.7</div>
+        <div class="cr"><span class="cd cda"></span><strong>Rotation 90°</strong> · T = 0.7</div>
+      </div>
+      <p class="tx muted" style="margin-top:-2px;">Metric: <strong style="color:var(--purple)">pass@9</strong>. Correct if <em>any</em> of the 9 candidates is correct. Upper bound on what a perfect selector could recover.</p>
+    </div>
+
+    <!-- ========= COL 2 — HEADLINE RESULTS ========= -->
+    <div class="col">
+      <div class="sh">Headline: TTS Lifts Accuracy Sharply</div>
+      <div class="fig">
+        <img src="assets/A_headline_gain.png" alt="Headline gain">
+        <div class="figcap"><strong>Fig. A —</strong> TTS gain (pass@9 − greedy) across all 4 configurations on the full 300-question benchmark. Standard recipe (T = 0.7 + augmentation) reaches <strong style="color:var(--grit)">+30.5 pp for GRIT</strong> and <strong style="color:var(--qwen)">+24.3 pp for Qwen3B</strong>.</div>
+      </div>
+
+      <div class="fc">
+        <div class="fn">Finding 1</div>
+        <div class="fh">Visual CoT benefits from TTS via image-input diversity; direct models don't.</div>
+        <div class="fd">At T = 0, Qwen produces the <em>same</em> answer regardless of augmentation. GRIT still gains <strong>+19.9 pp</strong> from those same augmentations: its grounding step amplifies small visual perturbations into different reasoning chains.</div>
+      </div>
+
+      <div class="sh">Per-Task Breakdown: Gains Largest Where Models Have Headroom</div>
+      <div class="fig">
+        <img src="assets/B_per_task.png" alt="Per-task effect of TTS">
+        <div class="figcap"><strong>Fig. B —</strong> Per-task effect of TTS under the standard recipe. <strong>VQA and Counting</strong>, the two tasks where models have real headroom, show the largest gains (<strong>+29 to +43 pp</strong>). OCR gains stay modest (+5–7 pp) because exact-match scoring penalises augmentations that produce different-but-still-correct surface forms.</div>
+      </div>
+
+      <div class="sh">Voting Cannot Close the Oracle Gap</div>
+      <div class="vrow">
+        <div class="vc"><div class="vs">Plurality<br>vote</div><div class="vr">−1.0 pp</div></div>
+        <div class="vc"><div class="vs">Logprob<br>sum</div><div class="vr">−3.1 pp</div></div>
+        <div class="vc"><div class="vs">Greedy<br>tiebreak</div><div class="vr">−1.7 pp</div></div>
+        <div class="vc"><div class="vs">Consistency<br>filter</div><div class="vr">−1.0 pp</div></div>
+      </div>
+      <p class="tx muted" style="margin-top:-2px;">Every answer-level strategy lands at or below greedy. The pool holds the signal, but simple aggregation cannot extract it; a learned verifier is needed.</p>
+    </div>
+
+    <!-- ========= COL 3 — DIAGNOSIS ========= -->
+    <div class="col">
+      <div class="sh">Temperature &amp; Augmentation Compound</div>
+      <div class="fig">
+        <img src="assets/C_temperature_effect.png" alt="Temperature effect">
+        <div class="figcap"><strong>Fig. C —</strong> Temperature sampling roughly <strong>doubles</strong> the TTS gain for both models (Qwen +16.8 → +24.3; GRIT +19.9 → +30.5 pp). Under pass@9 both diversity sources compound.</div>
+      </div>
+
+      <div class="fc">
+        <div class="fn">Finding 2</div>
+        <div class="fh">Structural diversity beats random diversity.</div>
+        <div class="fd">A calibrated entropy study found GRIT is <em>less</em> stochastic than Qwen on all tasks (ΔH = −0.23 to −0.47 bits), yet it benefits <em>more</em> from TTS. <strong>What matters is not how much diversity a model produces, but whether it is routed through a reasoning surface.</strong></div>
+      </div>
+
+      <div class="sh">Which Augmentation Drives the Gain?</div>
+      <table class="t">
+        <thead>
+          <tr>
+            <th>Augmentation (T = 0)</th>
+            <th style="color:var(--grit); text-align:center">GRIT uniq.</th>
+            <th style="color:var(--qwen); text-align:center">Qwen uniq.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hi">
+            <td>Rotation 90°</td>
+            <td class="gc" style="text-align:center">10</td>
+            <td class="qc" style="text-align:center">4</td>
+          </tr>
+          <tr><td>JPEG recompress</td><td class="gc" style="text-align:center">5</td><td class="qc" style="text-align:center">3</td></tr>
+          <tr><td>Edge × Paraphrase</td><td class="gc" style="text-align:center">4</td><td class="qc" style="text-align:center">1</td></tr>
+          <tr><td>Brightness / contrast</td><td class="gc" style="text-align:center">3</td><td class="qc" style="text-align:center">4</td></tr>
+          <tr><td>Edge enhance</td><td class="gc" style="text-align:center">1</td><td class="qc" style="text-align:center">0</td></tr>
+          <tr><td>Paraphrase (text)</td><td class="gc" style="text-align:center">1</td><td class="qc" style="text-align:center">1</td></tr>
+          <tr><td>Grayscale</td><td class="gc" style="text-align:center">0</td><td class="qc" style="text-align:center">3</td></tr>
+        </tbody>
+      </table>
+      <p class="tx muted" style="margin-top:1px;"><em>Unique rescue</em> = questions where this augmentation is the <strong>only</strong> correct candidate. Rotation alters <em>spatial layout</em>; pixel-level augs do not. GRIT's grounding step amplifies spatial change into a new reasoning path.</p>
+
+      <div class="takeaway">
+        <span class="tw">Take-home</span>
+        TTS for visual reasoning works through <strong>image-input diversity channelled by a grounding step</strong>, not through decoding randomness. Expose an intermediate <em>visual</em> reasoning surface, and input perturbations become genuinely different reasoning trajectories.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── INSIGHT BAR ─────────────────────────────────────────────────── -->
+  <div class="ibar">
+    <span class="icon">★</span>
+    <div>GRIT's augmented candidates rescue <b>different</b> failures (complementary diversity); Qwen's rescue <b>the same</b> failures (redundant). Grounded reasoning turns spatial perturbations into structurally distinct chains; that is what makes TTS work.</div>
+  </div>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────────────── -->
+  <div class="footer">
+    <div>
+      <h4>Limitations</h4>
+      <ul>
+        <li>pass@9 is an oracle upper bound; no selector matches it yet</li>
+        <li>3B models only; OCR uses strict exact-match scoring</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Next Steps</h4>
+      <ul>
+        <li>Confidence-based / learned verifier for selector design</li>
+        <li>DeepEyesV2 (agentic CoT) full evaluation</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Datasets · Models · Compute</h4>
+      <div class="ftags">
+        <span class="ftag">MMMU-Pro</span>
+        <span class="ftag">OCRBench v2</span>
+        <span class="ftag">MMStar</span>
+        <span class="ftag">Qwen2.5-VL-3B</span>
+        <span class="ftag">GRIT-3B</span>
+        <span class="ftag">Rorqual H100 · DRAC</span>
+      </div>
+    </div>
+    <div class="qrcell">
+      <img src="assets/qr_github.png" alt="GitHub QR code">
+      <div class="qrlbl">Scan for code</div>
+    </div>
+    <div class="fmeta">
+      Course project · <strong style="font-weight:700;opacity:0.95;">IFT 6765</strong> Links between Computer Vision and Language <span class="dot">•</span> April 16, 2026 <span class="dot">•</span> github.com/djaxchi/TTS-VisCoT
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

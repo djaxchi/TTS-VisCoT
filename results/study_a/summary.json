@@ -1,0 +1,22 @@
+{
+  "vqa": {
+    "mean_entropy_qwen3b": 1.2099253503105796,
+    "mean_entropy_grit": 0.9512455507306662,
+    "delta": -0.2586797995799134,
+    "n_questions": 10
+  },
+  "ocr": {
+    "mean_entropy_qwen3b": 1.8812168460942147,
+    "mean_entropy_grit": 1.4095334999539058,
+    "delta": -0.47168334614030893,
+    "n_questions": 10
+  },
+  "counting": {
+    "mean_entropy_qwen3b": 1.023123131947649,
+    "mean_entropy_grit": 0.7911616394582799,
+    "delta": -0.23196149248936915,
+    "n_questions": 10
+  },
+  "go_count": 0,
+  "verdict": "NO-GO"
+}
