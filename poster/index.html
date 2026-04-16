@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TTS for Visual CoT Models — Poster</title>
+<title>TTS for Visual CoT Models - Poster</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 @page { size: 12.38542in 8.76042in; margin: 0; }
@@ -521,9 +521,9 @@ p.tx.muted { color: #555; }
     </div>
 
     <div class="title-wrap">
-      <h1>Test-Time Scaling for Visual Chain-of-Thought Models</h1>
+      <h1>The effect of Test-Time Scaling for Visual Thinking Models</h1>
       <div class="authors">
-        Youssef Laatar <span class="sep">·</span> Djalil Chikhi
+        Djalil Chikhi <span class="sep">·</span> Youssef Laatar
       </div>
     </div>
 
@@ -536,7 +536,7 @@ p.tx.muted { color: #555; }
   <!-- ── BODY ─────────────────────────────────────────────────────────── -->
   <div class="body">
 
-    <!-- ========= COL 1 — SETUP ========= -->
+    <!-- ========= COL 1 - SETUP ========= -->
     <div class="col">
       <div class="sh">Models: Same 3B Backbone, Different Reasoning</div>
       <div class="mcards">
@@ -553,6 +553,7 @@ p.tx.muted { color: #555; }
           <div class="mn">GRIT-3B</div>
           <div class="md">Grounded visual chain-of-thought.</div>
           <div class="cot">
+            <span class="cs direct">image + Q</span><span class="ca">→</span>
             <span class="cs">think</span><span class="ca">→</span>
             <span class="cs">bbox</span><span class="ca">→</span>
             <span class="cs">rethink</span><span class="ca">→</span>
@@ -595,6 +596,7 @@ p.tx.muted { color: #555; }
         <span class="btag">OCRBench v2 · OCR</span>
         <span class="btag">MMStar · Counting</span>
       </div>
+      <p class="tx muted" style="margin-top:-2px;">100 questions per task. All three datasets post-date model training cutoffs and require genuine visual grounding - text alone cannot answer them.</p>
       <div class="sh">TTS Recipe: 9 Candidates per Question</div>
       <div class="rbox">
         <div class="rt">Two diversity axes: <span style="color:var(--ink)">temperature</span> + <span style="color:var(--purple)">image augmentation</span></div>
@@ -611,12 +613,12 @@ p.tx.muted { color: #555; }
       <p class="tx muted" style="margin-top:-2px;">Metric: <strong style="color:var(--purple)">pass@9</strong>. Correct if <em>any</em> of the 9 candidates is correct. Upper bound on what a perfect selector could recover.</p>
     </div>
 
-    <!-- ========= COL 2 — HEADLINE RESULTS ========= -->
+    <!-- ========= COL 2 - HEADLINE RESULTS ========= -->
     <div class="col">
       <div class="sh">Headline: TTS Lifts Accuracy Sharply</div>
       <div class="fig">
         <img src="assets/A_headline_gain.png" alt="Headline gain">
-        <div class="figcap"><strong>Fig. A —</strong> TTS gain (pass@9 − greedy) across all 4 configurations on the full 300-question benchmark. Standard recipe (T = 0.7 + augmentation) reaches <strong style="color:var(--grit)">+30.5 pp for GRIT</strong> and <strong style="color:var(--qwen)">+24.3 pp for Qwen3B</strong>.</div>
+        <div class="figcap"><strong>Fig. A -</strong> TTS gain (pass@9 − greedy) across all 4 configurations on the full 300-question benchmark. Standard recipe (T = 0.7 + augmentation) reaches <strong style="color:var(--grit)">+30.5 pp for GRIT</strong> and <strong style="color:var(--qwen)">+24.3 pp for Qwen3B</strong>.</div>
       </div>
 
       <div class="fc">
@@ -628,7 +630,21 @@ p.tx.muted { color: #555; }
       <div class="sh">Per-Task Breakdown: Gains Largest Where Models Have Headroom</div>
       <div class="fig">
         <img src="assets/B_per_task.png" alt="Per-task effect of TTS">
-        <div class="figcap"><strong>Fig. B —</strong> Per-task effect of TTS under the standard recipe. <strong>VQA and Counting</strong>, the two tasks where models have real headroom, show the largest gains (<strong>+29 to +43 pp</strong>). OCR gains stay modest (+5–7 pp) because exact-match scoring penalises augmentations that produce different-but-still-correct surface forms.</div>
+        <div class="figcap"><strong>Fig. B -</strong> Per-task effect of TTS under the standard recipe. <strong>VQA and Counting</strong>, the two tasks where models have real headroom, show the largest gains (<strong>+29 to +43 pp</strong>). OCR gains stay modest (+5–7 pp) because exact-match scoring penalises augmentations that produce different-but-still-correct surface forms.</div>
+      </div>
+
+      <div class="takeaway">
+        <span class="tw">Take-home</span>
+        Our results suggest TTS could benefit visual CoT models more than traditional VLMs. Visual grounding and chain-of-thought are powerful tools for generating genuinely diverse reasoning paths from input perturbations, paths a direct model cannot produce. <strong>The open question is closing the gap between oracle and any practical candidate selection strategy.</strong>
+      </div>
+    </div>
+
+    <!-- ========= COL 3 - DIAGNOSIS ========= -->
+    <div class="col">
+      <div class="sh">GRIT's Augmented Candidates Are Complementary, Not Redundant</div>
+      <div class="fig">
+        <img src="assets/E_augmentation_diversity.png" alt="Augmentation diversity: complementary vs redundant rescues">
+        <div class="figcap"><strong>Fig. C -</strong> T = 0 ablation (no temperature noise). <strong style="color:var(--grit)">GRIT</strong> peaks at 1 unique rescue (complementary); <strong style="color:var(--qwen)">Qwen3B</strong> clusters at 7 (redundant). Grounding turns spatial perturbations into structurally distinct chains.</div>
       </div>
 
       <div class="sh">Voting Cannot Close the Oracle Gap</div>
@@ -638,21 +654,10 @@ p.tx.muted { color: #555; }
         <div class="vc"><div class="vs">Greedy<br>tiebreak</div><div class="vr">−1.7 pp</div></div>
         <div class="vc"><div class="vs">Consistency<br>filter</div><div class="vr">−1.0 pp</div></div>
       </div>
-      <p class="tx muted" style="margin-top:-2px;">Every answer-level strategy lands at or below greedy. The pool holds the signal, but simple aggregation cannot extract it; a learned verifier is needed.</p>
-    </div>
-
-    <!-- ========= COL 3 — DIAGNOSIS ========= -->
-    <div class="col">
-      <div class="sh">Temperature &amp; Augmentation Compound</div>
-      <div class="fig">
-        <img src="assets/C_temperature_effect.png" alt="Temperature effect">
-        <div class="figcap"><strong>Fig. C —</strong> Temperature sampling roughly <strong>doubles</strong> the TTS gain for both models (Qwen +16.8 → +24.3; GRIT +19.9 → +30.5 pp). Under pass@9 both diversity sources compound.</div>
-      </div>
-
       <div class="fc">
         <div class="fn">Finding 2</div>
-        <div class="fh">Structural diversity beats random diversity.</div>
-        <div class="fd">A calibrated entropy study found GRIT is <em>less</em> stochastic than Qwen on all tasks (ΔH = −0.23 to −0.47 bits), yet it benefits <em>more</em> from TTS. <strong>What matters is not how much diversity a model produces, but whether it is routed through a reasoning surface.</strong></div>
+        <div class="fh">The diversity that raises the ceiling also makes aggregation hard.</div>
+        <div class="fd">GRIT's complementary rescues push oracle@9 high - each augmentation unlocks failures the others cannot. But that same spread defeats majority voting: no single candidate dominates. <strong>The pool holds the signal; a learned verifier is needed to extract it.</strong></div>
       </div>
 
       <div class="sh">Which Augmentation Drives the Gain?</div>
@@ -678,12 +683,7 @@ p.tx.muted { color: #555; }
           <tr><td>Grayscale</td><td class="gc" style="text-align:center">0</td><td class="qc" style="text-align:center">3</td></tr>
         </tbody>
       </table>
-      <p class="tx muted" style="margin-top:1px;"><em>Unique rescue</em> = questions where this augmentation is the <strong>only</strong> correct candidate. Rotation alters <em>spatial layout</em>; pixel-level augs do not. GRIT's grounding step amplifies spatial change into a new reasoning path.</p>
-
-      <div class="takeaway">
-        <span class="tw">Take-home</span>
-        TTS for visual reasoning works through <strong>image-input diversity channelled by a grounding step</strong>, not through decoding randomness. Expose an intermediate <em>visual</em> reasoning surface, and input perturbations become genuinely different reasoning trajectories.
-      </div>
+      <p class="tx muted" style="margin-top:1px;"><em>Unique rescue</em> = questions where this augmentation is the <strong>only</strong> correct candidate. Rotation alters <em>spatial layout</em>; pixel-level augs do not.</p>
     </div>
 
   </div>
